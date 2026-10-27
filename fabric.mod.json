@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "freerun",
+  "version": "${version}",
+  "name": "Freerun",
+  "description": "First-person freerunning: wall runs, wall climbs, ledge grabs, mantles, vaults, slides and landing rolls, with animated first- and third-person arms and bodies.",
+  "authors": ["you"],
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["dev.freerun.Freerun"],
+    "client": ["dev.freerun.client.FreerunClient"]
+  },
+  "mixins": ["freerun.mixins.json"],
+  "accessWidener": "freerun.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "fabric-api": "*",
+    "minecraft": "~1.21.1",
+    "java": ">=21"
+  }
+}
