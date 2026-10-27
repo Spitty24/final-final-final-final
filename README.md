@@ -125,6 +125,13 @@ tab, or dropped by soldiers). In creative, ammo isn't needed.
 Every added mob has a spawn egg in the **Spawn Eggs** creative tab: Pursuer, US Soldier,
 French Soldier, and Grumbus.
 
+## Bigger crafting table (extra row)
+
+The vanilla crafting table now opens a **3-wide by 4-tall** crafting grid — an extra row of 3 slots
+on top of the usual 3×3. All normal recipes still work (they match wherever they fit in the taller
+grid); the extra row is just more working space. This is a client+server feature, so for multiplayer
+the server needs the mod too.
+
 ## Nuke Launcher
 
 A point-and-fire launcher (now a proper **3D handheld model** — tube, scope, grips and a glowing
