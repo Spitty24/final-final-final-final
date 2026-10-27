@@ -1,6 +1,7 @@
 package dev.freerun.world;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
@@ -26,6 +27,10 @@ public class RoadhousePiece extends StructurePiece {
         super(StructureRegistry.ROADHOUSE_PIECE, 0, new BoundingBox(
                 origin.getX(), origin.getY(), origin.getZ(),
                 origin.getX() + SIZE, origin.getY() + 6, origin.getZ() + SIZE));
+        // Give the piece a concrete orientation so placeBlock() has a non-null rotation/mirror
+        // (SOUTH maps local x/y/z straight to world with no rotation). Without this, placing a
+        // directional block like a spruce log throws an NPE and crashes world generation.
+        setOrientation(Direction.SOUTH);
     }
 
     public RoadhousePiece(StructurePieceSerializationContext ctx, CompoundTag tag) {

@@ -14,5 +14,7 @@
   "item.freerun.pursuer_spawn_egg": "Pursuer Spawn Egg",
   "item.freerun.us_soldier_spawn_egg": "US Soldier Spawn Egg",
   "item.freerun.french_soldier_spawn_egg": "French Soldier Spawn Egg",
-  "item.freerun.grumbus_spawn_egg": "Grumbus Spawn Egg"
+  "item.freerun.grumbus_spawn_egg": "Grumbus Spawn Egg",
+  "block.freerun.pointless_ore": "Stone",
+  "item.freerun.giant_shovel": "Giant Shovel"
 }

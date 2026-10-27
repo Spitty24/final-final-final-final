@@ -26,6 +26,8 @@ public final class ItemRegistry {
     // nuke
     public static Item NUKE_LAUNCHER;
     public static EntityType<NukeProjectile> NUKE_PROJECTILE;
+    // misc tools
+    public static Item GIANT_SHOVEL;
     // spawn eggs
     public static Item PURSUER_EGG;
     public static Item US_SOLDIER_EGG;
@@ -50,6 +52,8 @@ public final class ItemRegistry {
         RIFLE = item("rifle", new GunItem(GunType.RIFLE, new Item.Properties().stacksTo(1)));
         SHOTGUN = item("shotgun", new GunItem(GunType.SHOTGUN, new Item.Properties().stacksTo(1)));
 
+        GIANT_SHOVEL = item("giant_shovel", new GiantShovelItem(new Item.Properties().stacksTo(1)));
+
         NUKE_LAUNCHER = item("nuke_launcher", new NukeLauncherItem(new Item.Properties().stacksTo(1)));
         NUKE_PROJECTILE = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("nuke_projectile"),
                 EntityType.Builder.<NukeProjectile>of(NukeProjectile::new, MobCategory.MISC)
@@ -70,6 +74,8 @@ public final class ItemRegistry {
             entries.accept(SHOTGUN);
             entries.accept(NUKE_LAUNCHER);
         });
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(entries ->
+                entries.accept(GIANT_SHOVEL));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
             entries.accept(BULLET);
             entries.accept(SHOTGUN_SHELL);

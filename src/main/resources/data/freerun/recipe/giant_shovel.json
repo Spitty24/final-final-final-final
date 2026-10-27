@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "III",
+    " S ",
+    " S "
+  ],
+  "key": {
+    "I": { "item": "minecraft:dirt" },
+    "S": { "item": "minecraft:stick" }
+  },
+  "result": {
+    "id": "freerun:giant_shovel",
+    "count": 1
+  }
+}

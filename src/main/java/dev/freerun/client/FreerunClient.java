@@ -41,6 +41,9 @@ public final class FreerunClient implements ClientModInitializer {
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 
+        net.minecraft.client.gui.screens.MenuScreens.register(
+                dev.freerun.menu.MenuRegistry.BIG_CRAFTING, dev.freerun.client.menu.BigCraftingScreen::new);
+
         ClientPlayNetworking.registerGlobalReceiver(CaughtPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> CaughtEffects.handle(payload.kind())));
 
