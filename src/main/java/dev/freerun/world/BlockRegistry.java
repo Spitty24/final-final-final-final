@@ -24,6 +24,9 @@ import net.minecraft.world.level.levelgen.placement.PlacedFeature;
  */
 public final class BlockRegistry {
     public static Block POINTLESS_ORE;
+    public static Block TEXAS_ROADHOUSE_SIGN;
+    public static Block CHECKERED_TABLECLOTH;
+    public static Block GRILL;
 
     private static final ResourceKey<PlacedFeature> POINTLESS_ORE_PLACED =
             ResourceKey.create(Registries.PLACED_FEATURE, Freerun.id("pointless_ore"));
@@ -31,16 +34,30 @@ public final class BlockRegistry {
     private BlockRegistry() {}
 
     public static void register() {
-        POINTLESS_ORE = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("pointless_ore"),
-                new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)));
+        POINTLESS_ORE = block("pointless_ore",
+                new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)), CreativeModeTabs.NATURAL_BLOCKS);
 
-        Item item = Registry.register(BuiltInRegistries.ITEM, Freerun.id("pointless_ore"),
-                new BlockItem(POINTLESS_ORE, new Item.Properties()));
-
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.NATURAL_BLOCKS)
-                .register(entries -> entries.accept(item));
+        // Decorative blocks for the Texas Roadhouse.
+        TEXAS_ROADHOUSE_SIGN = block("texas_roadhouse_sign",
+                new TexasRoadhouseSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)),
+                CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        CHECKERED_TABLECLOTH = block("checkered_tablecloth",
+                new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.WHITE_WOOL)),
+                CreativeModeTabs.BUILDING_BLOCKS);
+        GRILL = block("grill",
+                new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).lightLevel(s -> 7)),
+                CreativeModeTabs.FUNCTIONAL_BLOCKS);
 
         BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(),
                 GenerationStep.Decoration.UNDERGROUND_ORES, POINTLESS_ORE_PLACED);
+    }
+
+    /** Registers a block + its item and drops the item in the given creative tab. */
+    private static Block block(String name, Block block, net.minecraft.resources.ResourceKey<net.minecraft.world.item.CreativeModeTab> tab) {
+        Block registered = Registry.register(BuiltInRegistries.BLOCK, Freerun.id(name), block);
+        Item item = Registry.register(BuiltInRegistries.ITEM, Freerun.id(name),
+                new BlockItem(registered, new Item.Properties()));
+        ItemGroupEvents.modifyEntriesEvent(tab).register(entries -> entries.accept(item));
+        return registered;
     }
 }

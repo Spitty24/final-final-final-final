@@ -98,22 +98,50 @@ public class RoadhousePiece extends StructurePiece {
             for (int z = 2; z <= SIZE - 2; z++)
                 placeBlock(level, red, x, 6, z, box);
 
-        // Sign board over the door (front wall, y==3)
-        for (int x = 4; x <= 10; x++) {
-            BlockState s = (x == 4 || x == 10) ? yellow : (x == 7 ? white : red);
-            placeBlock(level, s, x, 3, 0, box);
+        // --- Custom Texas Roadhouse sign over the door (front wall z==0, facing out = NORTH) ---
+        BlockState sign = dev.freerun.world.BlockRegistry.TEXAS_ROADHOUSE_SIGN.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+        for (int x = 6; x <= 8; x++) placeBlock(level, sign, x, 3, 0, box);
+
+        // --- Dining room (front half, low z): tables with checkered cloths + hanging lanterns ---
+        BlockState cloth = dev.freerun.world.BlockRegistry.CHECKERED_TABLECLOTH.defaultBlockState();
+        BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState();
+        int[][] diningTables = {{3, 3}, {7, 3}, {11, 3}, {3, 6}, {11, 6}};
+        for (int[] t : diningTables) {
+            placeBlock(level, fence, t[0], 1, t[1], box);
+            placeBlock(level, cloth, t[0], 2, t[1], box);
+        }
+        placeBlock(level, Blocks.BARREL.defaultBlockState(), 2, 1, 2, box);   // peanut barrel by the door
+        placeBlock(level, hangingLantern(), 4, WALL - 1, 4, box);
+        placeBlock(level, hangingLantern(), 10, WALL - 1, 4, box);
+
+        // --- Divider wall between dining and kitchen at z==9, doorway at x==7 ---
+        for (int x = 1; x < SIZE; x++) {
+            for (int y = 1; y <= WALL; y++) {
+                if (x == 7 && (y == 1 || y == 2)) continue;   // doorway
+                placeBlock(level, planks, x, y, 9, box);
+            }
         }
 
-        // Interior tables (fence + pressure plate) and peanut barrels
-        int[][] tables = {{4, 4}, {10, 4}, {4, 10}, {10, 10}, {7, 7}};
-        for (int[] t : tables) {
-            placeBlock(level, Blocks.SPRUCE_FENCE.defaultBlockState(), t[0], 1, t[1], box);
-            placeBlock(level, Blocks.OAK_PRESSURE_PLATE.defaultBlockState(), t[0], 2, t[1], box);
+        // --- Kitchen (back, z 10..12) ---
+        BlockState grill = dev.freerun.world.BlockRegistry.GRILL.defaultBlockState();
+        BlockState counter = Blocks.SMOOTH_QUARTZ.defaultBlockState();   // stainless prep counters
+        // Cooking line along the back wall (z==12): alternating grills and smokers.
+        for (int x = 2; x <= 12; x++) {
+            placeBlock(level, (x % 2 == 0) ? grill : Blocks.SMOKER.defaultBlockState(), x, 1, 12, box);
         }
-        placeBlock(level, Blocks.BARREL.defaultBlockState(), 2, 1, 2, box);
-        placeBlock(level, Blocks.BARREL.defaultBlockState(), 12, 1, 2, box);
-        placeBlock(level, Blocks.LANTERN.defaultBlockState(), 2, 1, 12, box);
-        placeBlock(level, Blocks.LANTERN.defaultBlockState(), 12, 1, 12, box);
+        // Prep island counter (z==10)
+        for (int x = 4; x <= 9; x++) placeBlock(level, counter, x, 1, 10, box);
+        // Sink + pantry barrels
+        placeBlock(level, Blocks.WATER_CAULDRON.defaultBlockState(), 2, 1, 10, box);
+        placeBlock(level, Blocks.BARREL.defaultBlockState(), 12, 1, 10, box);
+        placeBlock(level, Blocks.BARREL.defaultBlockState(), 12, 1, 11, box);
+        placeBlock(level, hangingLantern(), 7, WALL - 1, 11, box);
+    }
+
+    private static BlockState hangingLantern() {
+        return Blocks.LANTERN.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.LanternBlock.HANGING, Boolean.TRUE);
     }
 
     private static boolean y3Window(int x, int z) {

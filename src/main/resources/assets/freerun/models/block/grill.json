@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "freerun:block/grill_top",
+    "bottom": "freerun:block/grill_side",
+    "side": "freerun:block/grill_side"
+  }
+}

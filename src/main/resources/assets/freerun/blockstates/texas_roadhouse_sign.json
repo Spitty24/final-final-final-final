@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "freerun:block/texas_roadhouse_sign" },
+    "facing=east":  { "model": "freerun:block/texas_roadhouse_sign", "y": 90 },
+    "facing=south": { "model": "freerun:block/texas_roadhouse_sign", "y": 180 },
+    "facing=west":  { "model": "freerun:block/texas_roadhouse_sign", "y": 270 }
+  }
+}
