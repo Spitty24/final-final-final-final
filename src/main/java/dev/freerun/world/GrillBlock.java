@@ -30,8 +30,8 @@ public class GrillBlock extends AbstractFurnaceBlock {
     }
 
     @Override
-    protected <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
-                                                                     BlockEntityType<T> type) {
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state,
+                                                                  BlockEntityType<T> type) {
         return createFurnaceTicker(level, type, BlockRegistry.GRILL_BE);
     }
 
