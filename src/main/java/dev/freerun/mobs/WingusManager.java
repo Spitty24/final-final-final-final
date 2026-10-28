@@ -23,7 +23,8 @@ public final class WingusManager {
         }
         ticks++;
 
-        if (wingus != null && !wingus.isAlive()) {
+        // Gone, or tamed by Flavus (it's his now) -> another wild one comes 2 minutes later.
+        if (wingus != null && (!wingus.isAlive() || wingus.isTamed())) {
             wingus = null;
             nextSpawn = ticks + DELAY;
         }

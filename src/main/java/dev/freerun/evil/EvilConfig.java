@@ -73,6 +73,8 @@ public final class EvilConfig {
     public boolean grumbus = true;
     /** The Wingus: appears 2 minutes in, hunts Grumbus, eats him, flies north. */
     public boolean wingus = true;
+    /** Flavus Florbington: appears 3 minutes in, loves gold, tames and rides a Wingus. */
+    public boolean flavus = true;
 
     // --- nuke launcher (independent of evilMode) ---
     public float nukeRadius = 14.0f;         // TNT is 4; this is a big one

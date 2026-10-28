@@ -23,5 +23,7 @@
   "block.freerun.table": "Table",
   "container.freerun.grill": "Grill",
   "entity.freerun.wingus": "Wingus",
-  "item.freerun.wingus_spawn_egg": "Wingus Spawn Egg"
+  "item.freerun.wingus_spawn_egg": "Wingus Spawn Egg",
+  "entity.freerun.flavus": "Flavus Florbington",
+  "item.freerun.flavus_spawn_egg": "Flavus Florbington Spawn Egg"
 }
