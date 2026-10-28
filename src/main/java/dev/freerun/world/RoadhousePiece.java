@@ -103,14 +103,10 @@ public class RoadhousePiece extends StructurePiece {
                 .setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
         for (int x = 6; x <= 8; x++) placeBlock(level, sign, x, 3, 0, box);
 
-        // --- Dining room (front half, low z): tables with checkered cloths + hanging lanterns ---
-        BlockState cloth = dev.freerun.world.BlockRegistry.CHECKERED_TABLECLOTH.defaultBlockState();
-        BlockState fence = Blocks.SPRUCE_FENCE.defaultBlockState();
+        // --- Dining room (front half, low z): modeled tables + hanging lanterns ---
+        BlockState table = dev.freerun.world.BlockRegistry.TABLE.defaultBlockState();
         int[][] diningTables = {{3, 3}, {7, 3}, {11, 3}, {3, 6}, {11, 6}};
-        for (int[] t : diningTables) {
-            placeBlock(level, fence, t[0], 1, t[1], box);
-            placeBlock(level, cloth, t[0], 2, t[1], box);
-        }
+        for (int[] t : diningTables) placeBlock(level, table, t[0], 1, t[1], box);
         placeBlock(level, Blocks.BARREL.defaultBlockState(), 2, 1, 2, box);   // peanut barrel by the door
         placeBlock(level, hangingLantern(), 4, WALL - 1, 4, box);
         placeBlock(level, hangingLantern(), 10, WALL - 1, 4, box);
@@ -124,11 +120,14 @@ public class RoadhousePiece extends StructurePiece {
         }
 
         // --- Kitchen (back, z 10..12) ---
-        BlockState grill = dev.freerun.world.BlockRegistry.GRILL.defaultBlockState();
+        BlockState grill = dev.freerun.world.BlockRegistry.GRILL.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
+        BlockState smoker = Blocks.SMOKER.defaultBlockState()
+                .setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, Direction.NORTH);
         BlockState counter = Blocks.SMOOTH_QUARTZ.defaultBlockState();   // stainless prep counters
-        // Cooking line along the back wall (z==12): alternating grills and smokers.
+        // Cooking line along the back wall (z==12), all facing out into the kitchen (north).
         for (int x = 2; x <= 12; x++) {
-            placeBlock(level, (x % 2 == 0) ? grill : Blocks.SMOKER.defaultBlockState(), x, 1, 12, box);
+            placeBlock(level, (x % 2 == 0) ? grill : smoker, x, 1, 12, box);
         }
         // Prep island counter (z==10)
         for (int x = 4; x <= 9; x++) placeBlock(level, counter, x, 1, 10, box);

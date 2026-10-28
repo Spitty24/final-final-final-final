@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "dev.freerun.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["PlayerMixin", "CraftingTableBlockMixin"],
+  "mixins": ["PlayerMixin", "CraftingTableBlockMixin", "AbstractFurnaceBlockEntityMixin"],
   "client": [
     "client.GameRendererMixin",
     "client.ItemInHandRendererMixin",

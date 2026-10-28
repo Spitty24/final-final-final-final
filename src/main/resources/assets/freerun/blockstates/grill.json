@@ -1,1 +1,12 @@
-{ "variants": { "": { "model": "freerun:block/grill" } } }
+{
+  "variants": {
+    "facing=north,lit=false": { "model": "freerun:block/grill" },
+    "facing=south,lit=false": { "model": "freerun:block/grill" },
+    "facing=east,lit=false":  { "model": "freerun:block/grill" },
+    "facing=west,lit=false":  { "model": "freerun:block/grill" },
+    "facing=north,lit=true":  { "model": "freerun:block/grill_on" },
+    "facing=south,lit=true":  { "model": "freerun:block/grill_on" },
+    "facing=east,lit=true":   { "model": "freerun:block/grill_on" },
+    "facing=west,lit=true":   { "model": "freerun:block/grill_on" }
+  }
+}

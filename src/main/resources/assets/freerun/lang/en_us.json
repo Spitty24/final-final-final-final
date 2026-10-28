@@ -19,5 +19,7 @@
   "item.freerun.giant_shovel": "Giant Shovel",
   "block.freerun.texas_roadhouse_sign": "Texas Roadhouse Sign",
   "block.freerun.checkered_tablecloth": "Checkered Tablecloth",
-  "block.freerun.grill": "Grill"
+  "block.freerun.grill": "Grill",
+  "block.freerun.table": "Table",
+  "container.freerun.grill": "Grill"
 }
