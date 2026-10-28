@@ -21,5 +21,7 @@
   "block.freerun.checkered_tablecloth": "Checkered Tablecloth",
   "block.freerun.grill": "Grill",
   "block.freerun.table": "Table",
-  "container.freerun.grill": "Grill"
+  "container.freerun.grill": "Grill",
+  "entity.freerun.wingus": "Wingus",
+  "item.freerun.wingus_spawn_egg": "Wingus Spawn Egg"
 }

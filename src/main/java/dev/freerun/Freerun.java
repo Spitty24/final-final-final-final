@@ -42,6 +42,7 @@ public final class Freerun implements ModInitializer {
     public static final Map<UUID, ServerEntry> SERVER_STATES = new ConcurrentHashMap<>();
     private static final Map<UUID, PursuerManager> PURSUERS = new ConcurrentHashMap<>();
     private static final Map<UUID, dev.freerun.mobs.GrumbusManager> GRUMBI = new ConcurrentHashMap<>();
+    private static final Map<UUID, dev.freerun.mobs.WingusManager> WINGI = new ConcurrentHashMap<>();
 
     public static ResourceLocation id(String path) {
         return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
@@ -72,6 +73,7 @@ public final class Freerun implements ModInitializer {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 PURSUERS.computeIfAbsent(player.getUUID(), k -> new PursuerManager()).tick(player);
                 GRUMBI.computeIfAbsent(player.getUUID(), k -> new dev.freerun.mobs.GrumbusManager()).tick(player);
+                WINGI.computeIfAbsent(player.getUUID(), k -> new dev.freerun.mobs.WingusManager()).tick(player);
             }
         });
 
@@ -107,6 +109,7 @@ public final class Freerun implements ModInitializer {
             SERVER_STATES.remove(handler.player.getUUID());
             PURSUERS.remove(handler.player.getUUID());
             GRUMBI.remove(handler.player.getUUID());
+            WINGI.remove(handler.player.getUUID());
         });
     }
 }

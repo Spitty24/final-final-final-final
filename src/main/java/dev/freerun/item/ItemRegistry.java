@@ -33,6 +33,7 @@ public final class ItemRegistry {
     public static Item US_SOLDIER_EGG;
     public static Item FRENCH_SOLDIER_EGG;
     public static Item GRUMBUS_EGG;
+    public static Item WINGUS_EGG;
 
     private ItemRegistry() {}
 
@@ -67,6 +68,8 @@ public final class ItemRegistry {
                 new SpawnEggItem(SoldierRegistry.FRENCH_SOLDIER, 0x48587a, 0x8aa0cc, new Item.Properties()));
         GRUMBUS_EGG = item("grumbus_spawn_egg",
                 new SpawnEggItem(SoldierRegistry.GRUMBUS, 0x8f8f94, 0xf0f0f0, new Item.Properties()));
+        WINGUS_EGG = item("wingus_spawn_egg",
+                new SpawnEggItem(SoldierRegistry.WINGUS, 0x6fb7e8, 0xf4e9ff, new Item.Properties()));
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
             entries.accept(PISTOL);
@@ -85,6 +88,7 @@ public final class ItemRegistry {
             entries.accept(US_SOLDIER_EGG);
             entries.accept(FRENCH_SOLDIER_EGG);
             entries.accept(GRUMBUS_EGG);
+            entries.accept(WINGUS_EGG);
         });
     }
 

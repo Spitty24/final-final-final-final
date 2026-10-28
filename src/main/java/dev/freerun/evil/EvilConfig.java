@@ -71,6 +71,8 @@ public final class EvilConfig {
 
     // --- grumbus (independent of evilMode; he's harmless) ---
     public boolean grumbus = true;
+    /** The Wingus: appears 2 minutes in, hunts Grumbus, eats him, flies north. */
+    public boolean wingus = true;
 
     // --- nuke launcher (independent of evilMode) ---
     public float nukeRadius = 14.0f;         // TNT is 4; this is a big one

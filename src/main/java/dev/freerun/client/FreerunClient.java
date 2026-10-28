@@ -38,6 +38,10 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.mobs.SoldierRenderer::new);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.GRUMBUS,
                 dev.freerun.client.mobs.GrumbusRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.WingusModel.LAYER, dev.freerun.client.mobs.WingusModel::createBodyLayer);
+        EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.WINGUS,
+                dev.freerun.client.mobs.WingusRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 

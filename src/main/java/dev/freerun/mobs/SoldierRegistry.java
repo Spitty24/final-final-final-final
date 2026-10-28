@@ -19,10 +19,16 @@ public final class SoldierRegistry {
     public static EntityType<UsSoldierEntity> US_SOLDIER;
     public static EntityType<FrenchSoldierEntity> FRENCH_SOLDIER;
     public static EntityType<GrumbusEntity> GRUMBUS;
+    public static EntityType<WingusEntity> WINGUS;
 
     private SoldierRegistry() {}
 
     public static void register() {
+        WINGUS = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("wingus"),
+                EntityType.Builder.of(WingusEntity::new, MobCategory.CREATURE)
+                        .sized(0.9f, 0.7f).clientTrackingRange(10).build("wingus"));
+        FabricDefaultAttributeRegistry.register(WINGUS, WingusEntity.createAttributes());
+
         GRUMBUS = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("grumbus"),
                 EntityType.Builder.of(GrumbusEntity::new, MobCategory.CREATURE)
                         .sized(0.7f, 0.9f).clientTrackingRange(10).build("grumbus"));   // short & wide
