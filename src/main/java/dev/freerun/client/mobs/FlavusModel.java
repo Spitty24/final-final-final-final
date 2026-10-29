@@ -13,8 +13,8 @@ import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
 
 /**
- * Flavus Florbington: a broad V-shaped chest, huge arms, short legs, and a head of 3D curly hair
- * made of separate curl cubes.
+ * Flavus Florbington: an average build with short legs, and a head of 3D curly hair made of
+ * separate curl cubes.
  *
  * UVs are laid out on a 64x64 grid but the texture file is 128x128, so every model pixel gets
  * 2x2 texels — double the usual Minecraft resolution.
@@ -62,20 +62,20 @@ public class FlavusModel extends HierarchicalModel<FlavusEntity> {
                 .addBox(-0.5f, -6.8f, -3.7f, 1, 1, 1);
         head.addOrReplaceChild("hair", curls, PartPose.ZERO);
 
-        // Broad chest tapering to a narrower waist.
+        // Average torso: straight chest and waist, same width.
         r.addOrReplaceChild("body",
                 CubeListBuilder.create()
-                        .texOffs(0, 12).addBox(-4.5f, 0, -2.5f, 9, 4, 5)      // chest
+                        .texOffs(0, 12).addBox(-3.5f, 0, -2.0f, 7, 4, 4)      // chest
                         .texOffs(0, 22).addBox(-3.5f, 4, -2.0f, 7, 3, 4),     // waist
                 PartPose.offset(0, 12, 0));
 
-        // Huge arms.
+        // Normal-sized arms.
         r.addOrReplaceChild("right_arm",
-                CubeListBuilder.create().texOffs(32, 12).addBox(-2, -0.5f, -2, 4, 7, 4),
-                PartPose.offset(-6.5f, 12.5f, 0));
+                CubeListBuilder.create().texOffs(32, 12).addBox(-1.5f, -0.5f, -1.5f, 3, 7, 3),
+                PartPose.offset(-5.0f, 12.5f, 0));
         r.addOrReplaceChild("left_arm",
-                CubeListBuilder.create().texOffs(32, 12).mirror().addBox(-2, -0.5f, -2, 4, 7, 4),
-                PartPose.offset(6.5f, 12.5f, 0));
+                CubeListBuilder.create().texOffs(32, 12).mirror().addBox(-1.5f, -0.5f, -1.5f, 3, 7, 3),
+                PartPose.offset(5.0f, 12.5f, 0));
 
         // Short legs.
         r.addOrReplaceChild("right_leg",
@@ -118,9 +118,9 @@ public class FlavusModel extends HierarchicalModel<FlavusEntity> {
             rightArm.xRot = -swing * 0.9f;
             leftArm.xRot = swing * 0.9f;
         }
-        // Arms held out a little — too much muscle to hang straight.
-        rightArm.zRot = 0.18f + breathe;
-        leftArm.zRot = -0.18f - breathe;
+        // Arms hang naturally with a slight idle sway.
+        rightArm.zRot = 0.05f + breathe;
+        leftArm.zRot = -0.05f - breathe;
         rightArm.yRot = 0;
         leftArm.yRot = 0;
         body.xRot = 0;
