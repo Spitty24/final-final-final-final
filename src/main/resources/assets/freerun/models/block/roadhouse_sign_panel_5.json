@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "freerun:block/roadhouse_sign_panel_5",
+    "side": "freerun:block/texas_roadhouse_sign_side",
+    "top": "freerun:block/texas_roadhouse_sign_side"
+  }
+}

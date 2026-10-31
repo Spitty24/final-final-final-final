@@ -21,10 +21,20 @@ public final class SoldierRegistry {
     public static EntityType<GrumbusEntity> GRUMBUS;
     public static EntityType<WingusEntity> WINGUS;
     public static EntityType<FlavusEntity> FLAVUS;
+    public static EntityType<RoadhouseNpcEntity> ROADHOUSE_NPC;
+    public static EntityType<dev.freerun.world.SeatEntity> SEAT;
 
     private SoldierRegistry() {}
 
     public static void register() {
+        ROADHOUSE_NPC = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("roadhouse_npc"),
+                EntityType.Builder.of(RoadhouseNpcEntity::new, MobCategory.CREATURE)
+                        .sized(0.6f, 1.8f).ridingOffset(-0.7f).clientTrackingRange(10).build("roadhouse_npc"));
+        FabricDefaultAttributeRegistry.register(ROADHOUSE_NPC, RoadhouseNpcEntity.createAttributes());
+        SEAT = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("seat"),
+                EntityType.Builder.<dev.freerun.world.SeatEntity>of(dev.freerun.world.SeatEntity::new, MobCategory.MISC)
+                        .sized(0.5f, 0.2f).clientTrackingRange(10).noSummon().build("seat"));
+
         FLAVUS = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("flavus"),
                 EntityType.Builder.of(FlavusEntity::new, MobCategory.CREATURE)
                         .sized(0.6f, 0.95f).clientTrackingRange(10).build("flavus"));

@@ -46,6 +46,10 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.mobs.FlavusModel.LAYER, dev.freerun.client.mobs.FlavusModel::createBodyLayer);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.FLAVUS,
                 dev.freerun.client.mobs.FlavusRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.ROADHOUSE_NPC,
+                dev.freerun.client.mobs.RoadhouseNpcRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.SEAT,
+                net.minecraft.client.renderer.entity.NoopRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 

@@ -35,6 +35,7 @@ public final class ItemRegistry {
     public static Item GRUMBUS_EGG;
     public static Item WINGUS_EGG;
     public static Item FLAVUS_EGG;
+    public static Item ROADHOUSE_NPC_EGG;
 
     private ItemRegistry() {}
 
@@ -73,6 +74,8 @@ public final class ItemRegistry {
                 new SpawnEggItem(SoldierRegistry.WINGUS, 0x6fb7e8, 0xf4e9ff, new Item.Properties()));
         FLAVUS_EGG = item("flavus_spawn_egg",
                 new SpawnEggItem(SoldierRegistry.FLAVUS, 0x1b1b1e, 0xe8b830, new Item.Properties()));
+        ROADHOUSE_NPC_EGG = item("roadhouse_npc_spawn_egg",
+                new SpawnEggItem(SoldierRegistry.ROADHOUSE_NPC, 0x7a1c1c, 0xe8d7b0, new Item.Properties()));
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(entries -> {
             entries.accept(PISTOL);
@@ -93,6 +96,7 @@ public final class ItemRegistry {
             entries.accept(GRUMBUS_EGG);
             entries.accept(WINGUS_EGG);
             entries.accept(FLAVUS_EGG);
+            entries.accept(ROADHOUSE_NPC_EGG);
         });
     }
 

@@ -29,6 +29,8 @@ public final class BlockRegistry {
     public static Block TEXAS_ROADHOUSE_SIGN;
     public static Block CHECKERED_TABLECLOTH;
     public static Block TABLE;
+    public static Block CHAIR;
+    public static Block SIGN_PANEL;
     public static Block GRILL;
     public static BlockEntityType<GrillBlockEntity> GRILL_BE;
 
@@ -50,6 +52,12 @@ public final class BlockRegistry {
                 CreativeModeTabs.BUILDING_BLOCKS);
         TABLE = block("table",
                 new TableBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion()),
+                CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        CHAIR = block("chair",
+                new ChairBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.DARK_OAK_PLANKS).noOcclusion()),
+                CreativeModeTabs.FUNCTIONAL_BLOCKS);
+        SIGN_PANEL = block("roadhouse_sign_panel",
+                new SignPanelBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).lightLevel(s -> 6)),
                 CreativeModeTabs.FUNCTIONAL_BLOCKS);
         GRILL = block("grill",
                 new GrillBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)

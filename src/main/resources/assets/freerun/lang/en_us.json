@@ -17,7 +17,7 @@
   "item.freerun.grumbus_spawn_egg": "Grumbus Spawn Egg",
   "block.freerun.pointless_ore": "Stone",
   "item.freerun.giant_shovel": "Giant Shovel",
-  "block.freerun.texas_roadhouse_sign": "Texas Roadhouse Sign",
+  "block.freerun.texas_roadhouse_sign": "Steakhouse Sign",
   "block.freerun.checkered_tablecloth": "Checkered Tablecloth",
   "block.freerun.grill": "Grill",
   "block.freerun.table": "Table",
@@ -25,5 +25,10 @@
   "entity.freerun.wingus": "Wingus",
   "item.freerun.wingus_spawn_egg": "Wingus Spawn Egg",
   "entity.freerun.flavus": "Flavus Florbington",
-  "item.freerun.flavus_spawn_egg": "Flavus Florbington Spawn Egg"
+  "item.freerun.flavus_spawn_egg": "Flavus Florbington Spawn Egg",
+  "block.freerun.roadhouse_sign_panel": "Steakhouse Sign Panel",
+  "block.freerun.chair": "Chair",
+  "entity.freerun.roadhouse_npc": "Roadhouse NPC",
+  "entity.freerun.seat": "Seat",
+  "item.freerun.roadhouse_npc_spawn_egg": "Roadhouse NPC Spawn Egg"
 }
