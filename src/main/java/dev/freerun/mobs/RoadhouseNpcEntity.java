@@ -142,12 +142,22 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             partner = level().getEntitiesOfClass(RoadhouseNpcEntity.class, getBoundingBox().inflate(8),
                     n -> n.getRole() == other).stream().findFirst().orElse(null);
         }
-        if (partner != null) getLookControl().setLookAt(partner, 30.0f, 30.0f);
+        boolean onCall = role == Role.SUPERVISOR && OfficeSkit.slaterOnCall(level().getGameTime());
+        if (partner != null && !onCall) getLookControl().setLookAt(partner, 30.0f, 30.0f);
 
         int t = OfficeSkit.time(level().getGameTime());
         if (role == Role.SUPERVISOR) {
             if (t == 0) say("Nick. IT has a meeting in here. You need to leave.");
             if (t == 45) say("I am getting SICK and TIRED of you, Safety Nick.");
+            // The phone call
+            if (t == OfficeSkit.CALL_START || t == OfficeSkit.CALL_START + 8) {
+                playSound(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, 1.5f, 1.6f);   // ringtone
+            }
+            if (t == OfficeSkit.CALL_START + 20) say("*answers phone* Slater speaking.");
+            if (t == OfficeSkit.CALL_START + 45) {
+                say("§d<Slater's Boss (on the phone)> §fDid you finally get rid of that sick bastard?", true);
+            }
+            if (t == OfficeSkit.CALL_START + 90) say("Damn right I did. I hate him.");
         } else {
             if (t == OfficeSkit.DOWN_START) say("SLATER HATES ME!!");
             if (t == OfficeSkit.DOWN_START + 110) say("SLATER HATES MEEEEEE");
@@ -166,7 +176,12 @@ public class RoadhouseNpcEntity extends PathfinderMob {
 
     /** Dialogue the player overhears when they're near the office. */
     private void say(String line) {
-        Component msg = Component.literal("§7<" + title(getRole()) + "> §f" + line);
+        say("§7<" + title(getRole()) + "> §f" + line, true);
+    }
+
+    /** Sends a fully formatted line (speaker included) to nearby players. */
+    private void say(String formatted, boolean raw) {
+        Component msg = Component.literal(formatted);
         for (Player p : level().players()) {
             if (distanceToSqr(p) < 12 * 12) p.displayClientMessage(msg, false);
         }
@@ -204,7 +219,9 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                     line = "Grill's slammed, give me a minute!";
                 }
             }
-            case SUPERVISOR -> line = "Not now. I'm dealing with Nick.";
+            case SUPERVISOR -> line = OfficeSkit.slaterOnCall(now)
+                    ? "*covers phone* Hold on, I'm on with the boss."
+                    : "Not now. I'm dealing with Nick.";
             case SAFETY -> line = OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
             default -> line = pick(CUSTOMER_LINES);
         }

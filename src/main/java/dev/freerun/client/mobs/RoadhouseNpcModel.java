@@ -18,6 +18,8 @@ public class RoadhouseNpcModel extends HumanoidModel<RoadhouseNpcEntity> {
     public void setupAnim(RoadhouseNpcEntity entity, float limbSwing, float limbSwingAmount,
                           float ageInTicks, float netHeadYaw, float headPitch) {
         super.setupAnim(entity, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+        head.zRot = 0.0f;           // the model is shared by every NPC, so clear the phone tilt
+        hat.copyFrom(head);
         long time = entity.level().getGameTime();
 
         if (entity.getRole() == Role.SAFETY && OfficeSkit.nickDown(time)) {
@@ -30,6 +32,15 @@ public class RoadhouseNpcModel extends HumanoidModel<RoadhouseNpcEntity> {
             rightLeg.xRot = kick;
             leftLeg.xRot = -kick;
             head.xRot = 0.35f;
+            hat.copyFrom(head);
+        } else if (entity.getRole() == Role.SUPERVISOR && OfficeSkit.slaterOnCall(time)) {
+            // Phone held up to his ear, head tilted into it, other hand on hip.
+            rightArm.xRot = -1.9f;
+            rightArm.yRot = -0.8f;
+            rightArm.zRot = 0.0f;
+            leftArm.xRot = -0.2f;
+            leftArm.zRot = -0.7f;
+            head.zRot = 0.15f;
             hat.copyFrom(head);
         } else if (entity.getRole() == Role.SUPERVISOR && OfficeSkit.slaterLecturing(time)) {
             // Pointing right at Nick, other hand on hip.
