@@ -52,6 +52,10 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.mobs.NpcHairLayer.NICK, dev.freerun.client.mobs.NpcHairLayer::nickLayer);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.ROADHOUSE_NPC,
                 dev.freerun.client.mobs.RoadhouseNpcRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.MeowbeanModel.LAYER, dev.freerun.client.mobs.MeowbeanModel::createBodyLayer);
+        EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.MEOWBEAN,
+                dev.freerun.client.mobs.MeowbeanRenderer::new);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.SEAT,
                 net.minecraft.client.renderer.entity.NoopRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,

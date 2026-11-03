@@ -30,5 +30,7 @@
   "block.freerun.chair": "Chair",
   "entity.freerun.roadhouse_npc": "Roadhouse NPC",
   "entity.freerun.seat": "Seat",
-  "item.freerun.roadhouse_npc_spawn_egg": "Roadhouse NPC Spawn Egg"
+  "item.freerun.roadhouse_npc_spawn_egg": "Roadhouse NPC Spawn Egg",
+  "entity.freerun.meowbean": "Meowbean",
+  "item.freerun.meowbean_spawn_egg": "Meowbean Spawn Egg"
 }

@@ -22,11 +22,20 @@ public final class SoldierRegistry {
     public static EntityType<WingusEntity> WINGUS;
     public static EntityType<FlavusEntity> FLAVUS;
     public static EntityType<RoadhouseNpcEntity> ROADHOUSE_NPC;
+    public static EntityType<MeowbeanEntity> MEOWBEAN;
     public static EntityType<dev.freerun.world.SeatEntity> SEAT;
 
     private SoldierRegistry() {}
 
     public static void register() {
+        MEOWBEAN = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("meowbean"),
+                EntityType.Builder.of(MeowbeanEntity::new, MobCategory.CREATURE)
+                        .sized(0.8f, 1.0f).clientTrackingRange(10).build("meowbean"));
+        FabricDefaultAttributeRegistry.register(MEOWBEAN, MeowbeanEntity.createAttributes());
+        SpawnPlacements.register(MEOWBEAN, SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, net.minecraft.world.entity.Mob::checkMobSpawnRules);
+        BiomeModifications.addSpawn(BiomeSelectors.foundInOverworld(), MobCategory.CREATURE, MEOWBEAN, 4, 1, 1);
+
         ROADHOUSE_NPC = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("roadhouse_npc"),
                 EntityType.Builder.of(RoadhouseNpcEntity::new, MobCategory.CREATURE)
                         .sized(0.6f, 1.8f).ridingOffset(-0.7f).clientTrackingRange(10).build("roadhouse_npc"));

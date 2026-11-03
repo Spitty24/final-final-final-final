@@ -75,6 +75,8 @@ public final class EvilConfig {
     public boolean wingus = true;
     /** Flavus Florbington: appears 3 minutes in, loves gold, tames and rides a Wingus. */
     public boolean flavus = true;
+    /** Meowbean's song. Set false if it finally breaks you. */
+    public boolean meowbeanSings = true;
 
     // --- nuke launcher (independent of evilMode) ---
     public float nukeRadius = 14.0f;         // TNT is 4; this is a big one
