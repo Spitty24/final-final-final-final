@@ -46,6 +46,10 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.mobs.FlavusModel.LAYER, dev.freerun.client.mobs.FlavusModel::createBodyLayer);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.FLAVUS,
                 dev.freerun.client.mobs.FlavusRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.NpcHairLayer.SLATER, dev.freerun.client.mobs.NpcHairLayer::slaterLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.NpcHairLayer.NICK, dev.freerun.client.mobs.NpcHairLayer::nickLayer);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.ROADHOUSE_NPC,
                 dev.freerun.client.mobs.RoadhouseNpcRenderer::new);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.SEAT,

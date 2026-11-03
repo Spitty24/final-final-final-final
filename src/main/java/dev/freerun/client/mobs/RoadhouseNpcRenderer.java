@@ -1,22 +1,32 @@
 package dev.freerun.client.mobs;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.freerun.Freerun;
+import dev.freerun.mobs.OfficeSkit;
 import dev.freerun.mobs.RoadhouseNpcEntity;
-import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 
-/** Player-shaped NPCs; the skin depends on role (and variant, for customers). Sits automatically when riding a seat. */
-public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, HumanoidModel<RoadhouseNpcEntity>> {
+/**
+ * Player-shaped NPCs; the skin depends on role (and variant, for customers). Sits automatically
+ * when riding a seat. The office pair get 3D hair, and Safety Nick lies down and rolls around
+ * during his meltdown.
+ */
+public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, RoadhouseNpcModel> {
     private static final ResourceLocation HOST = tex("host");
     private static final ResourceLocation WAITER = tex("waiter");
     private static final ResourceLocation COOK = tex("cook");
+    private static final ResourceLocation SLATER = tex("slater");
+    private static final ResourceLocation NICK = tex("nick");
     private static final ResourceLocation[] CUSTOMERS = {tex("customer_0"), tex("customer_1"), tex("customer_2")};
 
     public RoadhouseNpcRenderer(EntityRendererProvider.Context ctx) {
-        super(ctx, new HumanoidModel<>(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
+        super(ctx, new RoadhouseNpcModel(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
+        addLayer(new NpcHairLayer(this, ctx.getModelSet()));
     }
 
     private static ResourceLocation tex(String name) {
@@ -29,7 +39,24 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Humano
             case HOST -> HOST;
             case WAITER -> WAITER;
             case COOK -> COOK;
+            case SUPERVISOR -> SLATER;
+            case SAFETY -> NICK;
             case CUSTOMER -> CUSTOMERS[Math.floorMod(entity.getVariant(), CUSTOMERS.length)];
         };
+    }
+
+    @Override
+    protected void setupRotations(RoadhouseNpcEntity entity, PoseStack poseStack, float bob, float yBodyRot,
+                                  float partialTick, float scale) {
+        super.setupRotations(entity, poseStack, bob, yBodyRot, partialTick, scale);
+        if (entity.getRole() == RoadhouseNpcEntity.Role.SAFETY && !entity.isPassenger()
+                && OfficeSkit.nickDown(entity.level().getGameTime())) {
+            // Flat on the floor, rolling back and forth along his own body.
+            float t = entity.level().getGameTime() + partialTick;
+            float roll = Mth.sin(t * 0.45f) * 70.0f;
+            poseStack.translate(0.0f, 0.35f, 0.0f);
+            poseStack.mulPose(Axis.ZP.rotationDegrees(90.0f));
+            poseStack.mulPose(Axis.YP.rotationDegrees(roll));
+        }
     }
 }

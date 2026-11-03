@@ -33,7 +33,10 @@ import net.minecraft.world.level.ServerLevelAccessor;
  *  - CUSTOMER makes small talk.
  */
 public class RoadhouseNpcEntity extends PathfinderMob {
-    public enum Role { HOST, WAITER, COOK, CUSTOMER }
+    /** New roles must be appended (the ordinal is saved). The office pair only appear in the office. */
+    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY }
+
+    private static final Role[] RESTAURANT_ROLES = {Role.HOST, Role.WAITER, Role.COOK, Role.CUSTOMER};
 
     public static final int CUSTOMER_VARIANTS = 3;
     private static final int GIFT_COOLDOWN = 600;   // 30 seconds
@@ -100,6 +103,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             case WAITER -> "Server";
             case COOK -> "Cook";
             case CUSTOMER -> "Customer";
+            case SUPERVISOR -> "Supervisor Slater";
+            case SAFETY -> "Safety Nick";
         };
     }
 
@@ -115,9 +120,56 @@ public class RoadhouseNpcEntity extends PathfinderMob {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
                                         MobSpawnType reason, SpawnGroupData spawnData) {
         SpawnGroupData out = super.finalizeSpawn(level, difficulty, reason, spawnData);
-        Role[] roles = Role.values();
-        setRole(roles[random.nextInt(roles.length)], random.nextInt(CUSTOMER_VARIANTS));
+        setRole(RESTAURANT_ROLES[random.nextInt(RESTAURANT_ROLES.length)], random.nextInt(CUSTOMER_VARIANTS));
         return out;
+    }
+
+    // --- the office scene ---
+
+    private RoadhouseNpcEntity partner;
+    private int partnerScan;
+
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        Role role = getRole();
+        if (role != Role.SUPERVISOR && role != Role.SAFETY) return;
+
+        // Keep facing each other.
+        if (--partnerScan <= 0 || partner == null || !partner.isAlive()) {
+            partnerScan = 20;
+            Role other = role == Role.SUPERVISOR ? Role.SAFETY : Role.SUPERVISOR;
+            partner = level().getEntitiesOfClass(RoadhouseNpcEntity.class, getBoundingBox().inflate(8),
+                    n -> n.getRole() == other).stream().findFirst().orElse(null);
+        }
+        if (partner != null) getLookControl().setLookAt(partner, 30.0f, 30.0f);
+
+        int t = OfficeSkit.time(level().getGameTime());
+        if (role == Role.SUPERVISOR) {
+            if (t == 0) say("Nick. IT has a meeting in here. You need to leave.");
+            if (t == 45) say("I am getting SICK and TIRED of you, Safety Nick.");
+        } else {
+            if (t == OfficeSkit.DOWN_START) say("SLATER HATES ME!!");
+            if (t == OfficeSkit.DOWN_START + 110) say("SLATER HATES MEEEEEE");
+            if (t == OfficeSkit.DOWN_END + 20) say("*sniff* ...he hates me, man.");
+            if (OfficeSkit.nickDown(level().getGameTime()) && level() instanceof net.minecraft.server.level.ServerLevel server) {
+                if (t % 4 == 0) {
+                    server.sendParticles(net.minecraft.core.particles.ParticleTypes.SPLASH,
+                            getX(), getY() + 0.4, getZ(), 4, 0.6, 0.15, 0.6, 0.1);   // tears everywhere
+                }
+                if (t % 25 == 0) {
+                    playSound(net.minecraft.sounds.SoundEvents.VILLAGER_HURT, 1.0f, 1.7f);
+                }
+            }
+        }
+    }
+
+    /** Dialogue the player overhears when they're near the office. */
+    private void say(String line) {
+        Component msg = Component.literal("§7<" + title(getRole()) + "> §f" + line);
+        for (Player p : level().players()) {
+            if (distanceToSqr(p) < 12 * 12) p.displayClientMessage(msg, false);
+        }
     }
 
     @Override
@@ -152,6 +204,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                     line = "Grill's slammed, give me a minute!";
                 }
             }
+            case SUPERVISOR -> line = "Not now. I'm dealing with Nick.";
+            case SAFETY -> line = OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
             default -> line = pick(CUSTOMER_LINES);
         }
         getLookControl().setLookAt(player, 30.0f, 30.0f);

@@ -39,11 +39,16 @@ public class RoadhousePiece extends StructurePiece {
     private static final int WALL = 5;            // ceiling height; interior is y 1..4
     private static final int LOBBY_WALL = 5;
     private static final int KITCHEN_WALL = 13;
+    // Office annex on the east side, sharing the main building's east wall (x = MAX_X).
+    private static final int OFFICE_MAX_X = MAX_X + 7;   // 31
+    private static final int OFFICE_MIN_Z = 6;
+    private static final int OFFICE_MAX_Z = 12;
+    private static final int OFFICE_DOOR_Z = 9;
 
     public RoadhousePiece(BlockPos origin) {
         super(StructureRegistry.ROADHOUSE_PIECE, 0, new BoundingBox(
                 origin.getX(), origin.getY(), origin.getZ(),
-                origin.getX() + MAX_X, origin.getY() + WALL + 2, origin.getZ() + MAX_Z));
+                origin.getX() + OFFICE_MAX_X, origin.getY() + WALL + 2, origin.getZ() + MAX_Z));
         // A concrete orientation so placeBlock() has a non-null rotation (SOUTH = no rotation).
         setOrientation(Direction.SOUTH);
     }
@@ -65,6 +70,61 @@ public class RoadhousePiece extends StructurePiece {
         buildLobby(level, box);
         buildDining(level, box);
         buildKitchen(level, box);
+        buildOffice(level, box);
+    }
+
+    // ------------------------------------------------------------------ office
+
+    /**
+     * Small manager's office off the east side of the dining room: desk, office chair, bookshelves,
+     * filing barrel, a yellow safety banner — and Supervisor Slater telling Safety Nick to leave.
+     */
+    private void buildOffice(WorldGenLevel level, BoundingBox box) {
+        BlockState planks = Blocks.SPRUCE_PLANKS.defaultBlockState();
+        BlockState log = Blocks.SPRUCE_LOG.defaultBlockState();
+        BlockState red = Blocks.RED_TERRACOTTA.defaultBlockState();
+        BlockState air = Blocks.AIR.defaultBlockState();
+        int minX = MAX_X;   // shared wall
+
+        for (int x = minX; x <= OFFICE_MAX_X; x++) {
+            for (int z = OFFICE_MIN_Z; z <= OFFICE_MAX_Z; z++) {
+                boolean interior = x > minX && x < OFFICE_MAX_X && z > OFFICE_MIN_Z && z < OFFICE_MAX_Z;
+                if (x > minX) placeBlock(level, Blocks.GRAY_CONCRETE.defaultBlockState(), x, 0, z, box);   // office carpet
+                if (interior) {
+                    for (int y = 1; y < WALL; y++) placeBlock(level, air, x, y, z, box);
+                    placeBlock(level, (x == 28 && z == OFFICE_DOOR_Z) ? Blocks.GLOWSTONE.defaultBlockState() : planks,
+                            x, WALL, z, box);
+                } else if (x > minX) {   // new outer walls (the shared wall already exists)
+                    boolean corner = x == OFFICE_MAX_X && (z == OFFICE_MIN_Z || z == OFFICE_MAX_Z);
+                    for (int y = 1; y <= WALL; y++) placeBlock(level, corner ? log : (y == 2 ? red : planks), x, y, z, box);
+                }
+                if (x > minX) placeBlock(level, red, x, WALL + 1, z, box);   // roof
+            }
+        }
+        // Windows on the east wall, door from the dining room
+        placeBlock(level, Blocks.GLASS_PANE.defaultBlockState(), OFFICE_MAX_X, 3, 8, box);
+        placeBlock(level, Blocks.GLASS_PANE.defaultBlockState(), OFFICE_MAX_X, 3, 10, box);
+        placeBlock(level, air, minX, 1, OFFICE_DOOR_Z, box);
+        placeBlock(level, air, minX, 2, OFFICE_DOOR_Z, box);
+
+        // Desk along the east wall with a lantern and a dark "monitor", office chair behind it
+        for (int z = 8; z <= 10; z++) placeBlock(level, Blocks.DARK_OAK_PLANKS.defaultBlockState(), 30, 1, z, box);
+        placeBlock(level, Blocks.LANTERN.defaultBlockState(), 30, 2, 8, box);
+        placeBlock(level, Blocks.TINTED_GLASS.defaultBlockState(), 30, 2, 10, box);
+        chair(level, box, 29, 9, Direction.EAST);
+
+        // Bookshelves, a filing barrel, a plant, and a yellow safety banner on the wall
+        placeBlock(level, Blocks.BOOKSHELF.defaultBlockState(), 25, 1, 7, box);
+        placeBlock(level, Blocks.BOOKSHELF.defaultBlockState(), 25, 2, 7, box);
+        placeBlock(level, Blocks.BOOKSHELF.defaultBlockState(), 25, 1, 11, box);
+        placeBlock(level, Blocks.BARREL.defaultBlockState(), 30, 1, 7, box);
+        placeBlock(level, Blocks.POTTED_FERN.defaultBlockState(), 30, 1, 11, box);
+        placeBlock(level, Blocks.YELLOW_WALL_BANNER.defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 27, 3, 11, box);
+
+        // The scene: Slater by the desk facing Nick, Nick by the door
+        spawnNpc(level, box, 28, OFFICE_DOOR_Z, Direction.WEST, Role.SUPERVISOR, 0);
+        spawnNpc(level, box, 26, OFFICE_DOOR_Z, Direction.EAST, Role.SAFETY, 0);
     }
 
     // ------------------------------------------------------------------ shell
