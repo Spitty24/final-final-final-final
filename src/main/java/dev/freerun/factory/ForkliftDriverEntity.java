@@ -111,8 +111,25 @@ public class ForkliftDriverEntity extends PathfinderMob {
         return sb.toString();
     }
 
-    private void say(Player to, String line) {
-        Component msg = Component.literal("§6<" + driverName() + "> §f" + line);
+    /** What he says next. Most drivers speak pure bayou gibberish. */
+    protected String line() {
+        return gibberish(random);
+    }
+
+    protected String speaker() {
+        return driverName();
+    }
+
+    protected boolean speaksGibberish() {
+        return true;
+    }
+
+    /** Somebody handed him boudin (after he's eaten it). */
+    protected void fedBoudin(Player player) {
+    }
+
+    protected void say(Player to, String line) {
+        Component msg = Component.literal("§6<" + speaker() + "> §f" + line);
         if (to != null) {
             to.displayClientMessage(msg, false);
         } else {
@@ -129,17 +146,19 @@ public class ForkliftDriverEntity extends PathfinderMob {
         net.minecraft.world.item.ItemStack held = player.getMainHandItem();
         if (held.is(dev.freerun.food.FoodRegistry.BOUDIN)) {
             held.consume(1, player);
-            say(player, "BOUDIN?! Mais cher, ça c'est bon! " + gibberish(random));
+            say(player, speaksGibberish() ? "BOUDIN?! Mais cher, ça c'est bon! " + gibberish(random)
+                    : "Boudin?! Oh cher, you didn't have to do that. Now I'm all warm inside.");
             if (level() instanceof net.minecraft.server.level.ServerLevel server) {
                 server.sendParticles(net.minecraft.core.particles.ParticleTypes.HEART,
                         getX(), getY() + 2.1, getZ(), 6, 0.4, 0.3, 0.4, 0.0);
             }
             playSound(SoundEvents.GENERIC_EAT, 1.0f, 0.8f);
             chatterCooldown = 200;
+            fedBoudin(player);
             return;
         }
-        say(player, gibberish(random));
-        if (random.nextInt(3) == 0) {
+        say(player, line());
+        if (speaksGibberish() && random.nextInt(3) == 0) {
             player.displayClientMessage(Component.literal("§7§o(You didn't catch a single word of that.)"), false);
         }
         chatterCooldown = 200;
@@ -147,7 +166,7 @@ public class ForkliftDriverEntity extends PathfinderMob {
 
     /** Somebody is standing in front of his forklift. */
     public void yellAtObstacle() {
-        if (random.nextInt(2) == 0) say(null, "AYEE! " + gibberish(random));
+        if (random.nextInt(2) == 0) say(null, "AYEE! " + line());
     }
 
     @Override
@@ -166,7 +185,7 @@ public class ForkliftDriverEntity extends PathfinderMob {
         } else if (random.nextInt(140) == 0) {
             Player near = level().getNearestPlayer(this, 9.0);
             if (near != null) {
-                say(null, gibberish(random));
+                say(null, line());
                 chatterCooldown = 240 + random.nextInt(200);
             }
         }

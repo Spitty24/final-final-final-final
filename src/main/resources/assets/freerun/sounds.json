@@ -1,0 +1,92 @@
+{
+  "pistol_shot": {
+    "sounds": [
+      {
+        "name": "freerun:pistol_shot",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.freerun.pistol_shot"
+  },
+  "rifle_shot": {
+    "sounds": [
+      {
+        "name": "freerun:rifle_shot",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.freerun.rifle_shot"
+  },
+  "shotgun_shot": {
+    "sounds": [
+      {
+        "name": "freerun:shotgun_shot",
+        "attenuation_distance": 48
+      }
+    ],
+    "subtitle": "subtitles.freerun.shotgun_shot"
+  },
+  "bullet_impact": {
+    "sounds": [
+      {
+        "name": "freerun:bullet_impact",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.bullet_impact"
+  },
+  "gun_reload": {
+    "sounds": [
+      {
+        "name": "freerun:gun_reload",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.gun_reload"
+  },
+  "car_engine": {
+    "sounds": [
+      {
+        "name": "freerun:car_engine",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.car_engine"
+  },
+  "car_horn": {
+    "sounds": [
+      {
+        "name": "freerun:car_horn",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.car_horn"
+  },
+  "car_crash": {
+    "sounds": [
+      {
+        "name": "freerun:car_crash",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.car_crash"
+  },
+  "cash_register": {
+    "sounds": [
+      {
+        "name": "freerun:cash_register",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.cash_register"
+  },
+  "break_buzzer": {
+    "sounds": [
+      {
+        "name": "freerun:break_buzzer",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.break_buzzer"
+  }
+}

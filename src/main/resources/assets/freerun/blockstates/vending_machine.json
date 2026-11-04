@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,stuck=false": {
+      "model": "freerun:block/vending_machine"
+    },
+    "facing=north,stuck=true": {
+      "model": "freerun:block/vending_machine_stuck"
+    },
+    "facing=east,stuck=false": {
+      "model": "freerun:block/vending_machine",
+      "y": 90
+    },
+    "facing=east,stuck=true": {
+      "model": "freerun:block/vending_machine_stuck",
+      "y": 90
+    },
+    "facing=south,stuck=false": {
+      "model": "freerun:block/vending_machine",
+      "y": 180
+    },
+    "facing=south,stuck=true": {
+      "model": "freerun:block/vending_machine_stuck",
+      "y": 180
+    },
+    "facing=west,stuck=false": {
+      "model": "freerun:block/vending_machine",
+      "y": 270
+    },
+    "facing=west,stuck=true": {
+      "model": "freerun:block/vending_machine_stuck",
+      "y": 270
+    }
+  }
+}

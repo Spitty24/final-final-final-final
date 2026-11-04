@@ -38,7 +38,7 @@ public class CounterBlockEntity extends RandomizableContainerBlockEntity {
 
     @Override
     protected Component getDefaultName() {
-        return Component.translatable("container.freerun.counter");
+        return getBlockState().getBlock().getName();
     }
 
     @Override

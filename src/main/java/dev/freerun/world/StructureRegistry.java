@@ -18,6 +18,9 @@ public final class StructureRegistry {
     public static StructurePieceType PARKING_LOT_PIECE;
     public static StructurePieceType BREAK_ROOM_PIECE;
     public static StructurePieceType PROCESSING_PIECE;
+    public static StructureType<DoubleQuickStructure> DOUBLE_QUICK;
+    public static StructurePieceType DOUBLE_QUICK_PIECE;
+    public static StructurePieceType GENERAL_STORE_PIECE;
 
     private StructureRegistry() {}
 
@@ -36,5 +39,11 @@ public final class StructureRegistry {
                 Freerun.id("factory_break_room"), BreakRoomPiece::new);
         PROCESSING_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
                 Freerun.id("factory_processing"), ProcessingPiece::new);
+        DOUBLE_QUICK = Registry.register(BuiltInRegistries.STRUCTURE_TYPE,
+                Freerun.id("double_quick"), () -> DoubleQuickStructure.CODEC);
+        DOUBLE_QUICK_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("double_quick"), DoubleQuickPiece::new);
+        GENERAL_STORE_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("general_store"), GeneralStorePiece::new);
     }
 }

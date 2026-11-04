@@ -25,6 +25,8 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
     private static final ResourceLocation WELDER = tex("welder");
     private static final ResourceLocation PRESS_OPERATOR = tex("press_operator");
     private static final ResourceLocation SAUSAGE_MAKER = tex("sausage_maker");
+    private static final ResourceLocation CLERK = tex("clerk");
+    private static final ResourceLocation SHOPKEEPER = tex("shopkeeper");
     private static final ResourceLocation[] CUSTOMERS = {tex("customer_0"), tex("customer_1"), tex("customer_2")};
 
     public RoadhouseNpcRenderer(EntityRendererProvider.Context ctx) {
@@ -48,6 +50,8 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
             case WELDER -> WELDER;
             case PRESS_OPERATOR -> PRESS_OPERATOR;
             case SAUSAGE_MAKER -> SAUSAGE_MAKER;
+            case CLERK -> CLERK;
+            case SHOPKEEPER -> SHOPKEEPER;
             case CUSTOMER -> CUSTOMERS[Math.floorMod(entity.getVariant(), CUSTOMERS.length)];
         };
     }
@@ -56,7 +60,7 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
     protected void setupRotations(RoadhouseNpcEntity entity, PoseStack poseStack, float bob, float yBodyRot,
                                   float partialTick, float scale) {
         super.setupRotations(entity, poseStack, bob, yBodyRot, partialTick, scale);
-        if (entity.getRole() == RoadhouseNpcEntity.Role.SAFETY && !entity.isPassenger()
+        if (entity.getRole() == RoadhouseNpcEntity.Role.SAFETY && !entity.isPassenger() && !entity.isVisitor()
                 && OfficeSkit.nickDown(entity.level().getGameTime())) {
             // Flat on the floor, rolling back and forth along his own body.
             float t = entity.level().getGameTime() + partialTick;

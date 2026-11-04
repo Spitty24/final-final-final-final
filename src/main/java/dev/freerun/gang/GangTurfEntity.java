@@ -33,6 +33,7 @@ public class GangTurfEntity extends Entity {
     private int shootoutLeft;
     private int respawnA = 200, respawnB = 200;
     private int tauntTimer = 300;
+    private int robberyCheck = 1200;
 
     public GangTurfEntity(EntityType<? extends GangTurfEntity> type, Level level) {
         super(type, level);
@@ -84,6 +85,12 @@ public class GangTurfEntity extends Entity {
             return;
         }
 
+        // Once a minute, a 1-in-20 chance a crew goes and hits the Double Quick.
+        if ((robberyCheck -= 10) <= 0) {
+            robberyCheck = 1200;
+            if (random.nextFloat() < 0.05f) startRobbery(server, all);
+        }
+
         nextShootout -= 10;
         if (nextShootout <= 0) {
             nextShootout = 2400 + random.nextInt(3600);   // every 2 to 5 minutes
@@ -99,6 +106,23 @@ public class GangTurfEntity extends Entity {
         if ((tauntTimer -= 10) <= 0 && !all.isEmpty()) {
             tauntTimer = 400 + random.nextInt(600);
             all.get(random.nextInt(all.size())).taunt();
+        }
+    }
+
+    private void startRobbery(ServerLevel server, List<GangsterEntity> all) {
+        net.minecraft.world.entity.Entity clerk = server.getEntitiesOfClass(dev.freerun.mobs.RoadhouseNpcEntity.class,
+                        new AABB(blockPosition()).inflate(96.0, 20.0, 96.0),
+                        n -> n.getRole() == dev.freerun.mobs.RoadhouseNpcEntity.Role.CLERK).stream()
+                .findFirst().orElse(null);
+        if (clerk == null) return;
+        Crew crew = random.nextFloat() < 0.7f ? Crew.RUST_RATS : Crew.CHROME_KINGS;   // usually on the boss's orders
+        List<GangsterEntity> crewList = all.stream().filter(g -> g.crew() == crew && !g.robbing()).toList();
+        if (crewList.isEmpty()) return;
+        boolean shooting = random.nextBoolean();
+        for (int i = 0; i < Math.min(2, crewList.size()); i++) crewList.get(i).startRobbery(clerk.blockPosition(), shooting);
+        if (crew == Crew.RUST_RATS) {
+            Component msg = Component.literal("§6<Rust Rat> §7*whispers* The boss says hit the Double Quick. Let's go.");
+            for (Player p : server.players()) if (p.distanceToSqr(this) < 40 * 40) p.displayClientMessage(msg, false);
         }
     }
 

@@ -26,6 +26,8 @@ public final class ItemRegistry {
     // nuke
     public static Item NUKE_LAUNCHER;
     public static EntityType<NukeProjectile> NUKE_PROJECTILE;
+    public static EntityType<dev.freerun.item.gun.BulletEntity> BULLET_ENTITY;
+    public static net.minecraft.core.particles.SimpleParticleType MUZZLE_FLASH;
     // misc tools
     public static Item GIANT_SHOVEL;
     // spawn eggs
@@ -50,6 +52,11 @@ public final class ItemRegistry {
 
     public static void register() {
         BULLET = item("bullet", new Item(new Item.Properties()));
+        BULLET_ENTITY = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("bullet"),
+                EntityType.Builder.<dev.freerun.item.gun.BulletEntity>of(dev.freerun.item.gun.BulletEntity::new, MobCategory.MISC)
+                        .sized(0.1f, 0.1f).clientTrackingRange(8).updateInterval(1).build("bullet"));
+        MUZZLE_FLASH = Registry.register(BuiltInRegistries.PARTICLE_TYPE, Freerun.id("muzzle_flash"),
+                net.fabricmc.fabric.api.particle.v1.FabricParticleTypes.simple(true));
         SHOTGUN_SHELL = item("shotgun_shell", new Item(new Item.Properties()));
 
         PISTOL = item("pistol", new GunItem(GunType.PISTOL, new Item.Properties().stacksTo(1)));

@@ -1,0 +1,139 @@
+{
+  "variants": {
+    "facing=north,h=0,w=0": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=1,w=0": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=2,w=0": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=0,w=1": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=1,w=1": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=2,w=1": {
+      "model": "freerun:block/press_brake_crown"
+    },
+    "facing=north,h=0,w=2": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=1,w=2": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=north,h=2,w=2": {
+      "model": "freerun:block/press_brake_frame_empty"
+    },
+    "facing=east,h=0,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=1,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=2,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=0,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=1,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=2,w=1": {
+      "model": "freerun:block/press_brake_crown",
+      "y": 90
+    },
+    "facing=east,h=0,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=1,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=east,h=2,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 90
+    },
+    "facing=south,h=0,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=1,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=2,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=0,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=1,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=2,w=1": {
+      "model": "freerun:block/press_brake_crown",
+      "y": 180
+    },
+    "facing=south,h=0,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=1,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=south,h=2,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 180
+    },
+    "facing=west,h=0,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=1,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=2,w=0": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=0,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=1,w=1": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=2,w=1": {
+      "model": "freerun:block/press_brake_crown",
+      "y": 270
+    },
+    "facing=west,h=0,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=1,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    },
+    "facing=west,h=2,w=2": {
+      "model": "freerun:block/press_brake_frame_empty",
+      "y": 270
+    }
+  }
+}

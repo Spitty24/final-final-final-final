@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "cooking=false,facing=north": {
+      "model": "freerun:block/roller_grill"
+    },
+    "cooking=true,facing=north": {
+      "model": "freerun:block/roller_grill_cooking"
+    },
+    "cooking=false,facing=east": {
+      "model": "freerun:block/roller_grill",
+      "y": 90
+    },
+    "cooking=true,facing=east": {
+      "model": "freerun:block/roller_grill_cooking",
+      "y": 90
+    },
+    "cooking=false,facing=south": {
+      "model": "freerun:block/roller_grill",
+      "y": 180
+    },
+    "cooking=true,facing=south": {
+      "model": "freerun:block/roller_grill_cooking",
+      "y": 180
+    },
+    "cooking=false,facing=west": {
+      "model": "freerun:block/roller_grill",
+      "y": 270
+    },
+    "cooking=true,facing=west": {
+      "model": "freerun:block/roller_grill_cooking",
+      "y": 270
+    }
+  }
+}

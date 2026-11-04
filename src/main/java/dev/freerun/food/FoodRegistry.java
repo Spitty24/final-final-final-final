@@ -35,7 +35,7 @@ public final class FoodRegistry {
     // coffee
     public static Item COFFEE_BEANS, COFFEE_CHERRIES, ROASTED_COFFEE_BEANS, COFFEE_GROUNDS, COFFEE_MUG, CUP_OF_COFFEE;
 
-    public static Block SAUSAGE_STUFFER, COFFEE_PLANT, COFFEE_MAKER, MICROWAVE, COUNTER;
+    public static Block SAUSAGE_STUFFER, COFFEE_PLANT, COFFEE_MAKER, MICROWAVE, COUNTER, COOLER, STORE_SHELF;
     public static BlockEntityType<SausageStufferBlockEntity> STUFFER_BE;
     public static BlockEntityType<MicrowaveBlockEntity> MICROWAVE_BE;
     public static BlockEntityType<CounterBlockEntity> COUNTER_BE;
@@ -91,6 +91,10 @@ public final class FoodRegistry {
         MICROWAVE = block("microwave", new MicrowaveBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .strength(1.5f).noOcclusion().lightLevel(s -> s.getValue(MicrowaveBlock.RUNNING) ? 7 : 0)));
         COUNTER = block("counter", new CounterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).strength(2.0f)));
+        COOLER = block("drink_cooler", new CounterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                .strength(2.0f).noOcclusion().lightLevel(st -> 10)));
+        STORE_SHELF = block("store_shelf", new CounterBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS)
+                .strength(2.0f).noOcclusion()));
 
         COFFEE_PLANT = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("coffee_plant"), new CoffeePlantBlock(
                 BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT).pushReaction(PushReaction.DESTROY)));
@@ -101,7 +105,7 @@ public final class FoodRegistry {
         MICROWAVE_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Freerun.id("microwave"),
                 BlockEntityType.Builder.of(MicrowaveBlockEntity::new, MICROWAVE).build(null));
         COUNTER_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Freerun.id("counter"),
-                BlockEntityType.Builder.of(CounterBlockEntity::new, COUNTER).build(null));
+                BlockEntityType.Builder.of(CounterBlockEntity::new, COUNTER, COOLER, STORE_SHELF).build(null));
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(e -> FOODS.forEach(e::accept));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(e -> MISC.forEach(e::accept));

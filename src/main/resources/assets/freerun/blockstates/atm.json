@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/atm"
+    },
+    "facing=east": {
+      "model": "freerun:block/atm",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "freerun:block/atm",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "freerun:block/atm",
+      "y": 270
+    }
+  }
+}

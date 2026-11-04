@@ -98,7 +98,7 @@ public abstract class SoldierEntity extends Monster implements RangedAttackMob {
         double dy = target.getEyeY() - (this.getEyeY() - 0.1);
         double dz = target.getZ() - this.getZ();
         double horiz = Math.sqrt(dx * dx + dz * dz);
-        gun.fire(level(), this, new Vec3(dx, dy + horiz * 0.12, dz));
+        gun.fire(level(), this, new Vec3(dx, dy + horiz * 0.01, dz));
     }
 
     // --- loot: drop the gun and some ammo on death ---

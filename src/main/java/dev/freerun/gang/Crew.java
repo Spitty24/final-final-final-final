@@ -9,7 +9,10 @@ public enum Crew {
             "Chrome Kings? More like Chrome Things.",
             "Hey! You parked in OUR spot!",
             "Rats run this asphalt.",
-            "Go polish your hubcaps, Kings."
+            "Go polish your hubcaps, Kings.",
+            "Our boss is smarter than all of you put together. ...What boss? We don't have a boss.",
+            "The tall guy in the factory? Never heard of him. Stop asking.",
+            "Rat King says... uh. Nobody says nothing."
     }),
     CHROME_KINGS("Chrome King", "§5", new String[]{
             "Kings run this lot!",

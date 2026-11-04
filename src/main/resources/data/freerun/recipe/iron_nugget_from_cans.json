@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:smelting",
+  "category": "misc",
+  "ingredient": {
+    "item": "freerun:empty_can"
+  },
+  "result": {
+    "id": "minecraft:iron_nugget"
+  },
+  "experience": 0.05,
+  "cookingtime": 100
+}

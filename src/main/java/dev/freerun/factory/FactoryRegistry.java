@@ -42,6 +42,7 @@ public final class FactoryRegistry {
 
     public static Block WELDER;
     public static Block PRESS_BRAKE;
+    public static Block PRESS_BRAKE_FRAME;
     public static Block CONVEYOR;
 
     private FactoryRegistry() {}
@@ -81,6 +82,8 @@ public final class FactoryRegistry {
                 .noOcclusion().lightLevel(s -> 4)));
         PRESS_BRAKE = block("press_brake", new PressBrakeBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .noOcclusion()));
+        PRESS_BRAKE_FRAME = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("press_brake_frame"),
+                new PressBrakeFrameBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK).noOcclusion().noLootTable()));
         CONVEYOR = block("conveyor", new ConveyorBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
                 .strength(2.0f).noOcclusion()));
 
@@ -115,6 +118,10 @@ public final class FactoryRegistry {
         ServerPlayNetworking.registerGlobalReceiver(ForkPayload.TYPE, (payload, context) -> {
             if (context.player().getVehicle() instanceof ForkliftEntity forklift) {
                 forklift.setForkInput(context.player(), payload.dir());
+            }
+            if (payload.dir() > 0 && context.player().getVehicle() instanceof dev.freerun.vehicle.CarEntity car
+                    && car.getControllingPassenger() == context.player()) {
+                car.honk();
             }
         });
     }

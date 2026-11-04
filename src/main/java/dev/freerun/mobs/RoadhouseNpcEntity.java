@@ -37,7 +37,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
      * New roles must be appended (the ordinal is saved). The office pair only appear in the office;
      * WELDER and PRESS_OPERATOR work in the welding factory.
      */
-    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY, WELDER, PRESS_OPERATOR, SAUSAGE_MAKER }
+    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY, WELDER, PRESS_OPERATOR, SAUSAGE_MAKER, CLERK, SHOPKEEPER }
 
     private static final Role[] RESTAURANT_ROLES = {Role.HOST, Role.WAITER, Role.COOK, Role.CUSTOMER};
 
@@ -48,6 +48,27 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_VARIANT =
             SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.INT);
+    /** Slater and Nick on a visit to the factory floor (not the office pair in the Roadhouse). */
+    private static final EntityDataAccessor<Boolean> DATA_VISITOR =
+            SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_ON_BREAK =
+            SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.BOOLEAN);
+
+    private final dev.freerun.economy.BreakTrip breakTrip = new dev.freerun.economy.BreakTrip();
+
+    private static final String[] CLERK_LINES = {
+            "Welcome to Double Quick! Roller dogs are fresh. Ish.",
+            "Pump three's acting up again, just so you know.",
+            "We got hot boudin by the register.",
+            "Bathroom key's on the hubcap. Don't ask.",
+            "You want a scratch-off with that?"
+    };
+    private static final String[] SHOPKEEPER_LINES = {
+            "Come on in, we got a little bit of everything.",
+            "If we don't have it, you don't need it.",
+            "I'll buy that steel off you if you're selling.",
+            "Car's out back if you got the money. Runs good. Mostly."
+    };
 
     private static final String[] HOST_LINES = {
             "Welcome in! Just one today? Grab any open seat.",
@@ -110,6 +131,42 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         super.defineSynchedData(builder);
         builder.define(DATA_ROLE, Role.CUSTOMER.ordinal());
         builder.define(DATA_VARIANT, 0);
+        builder.define(DATA_VISITOR, false);
+        builder.define(DATA_ON_BREAK, false);
+    }
+
+    /** Away from their station on a break (the model drops the work pose). */
+    public boolean onBreak() {
+        return entityData.get(DATA_ON_BREAK);
+    }
+
+    public boolean isVisitor() {
+        return entityData.get(DATA_VISITOR);
+    }
+
+    private int visitorIdle;
+
+    /** Called every tick by the visit script that's directing this NPC. */
+    public void keepVisiting() {
+        visitorIdle = 0;
+    }
+
+    public void setVisitor(boolean visitor) {
+        entityData.set(DATA_VISITOR, visitor);
+    }
+
+    /** The store this NPC runs the register at, if any. */
+    public dev.freerun.economy.Shops.Shop shop() {
+        return switch (getRole()) {
+            case CLERK -> dev.freerun.economy.Shops.Shop.DOUBLE_QUICK;
+            case SHOPKEEPER -> dev.freerun.economy.Shops.Shop.GENERAL_STORE;
+            default -> null;
+        };
+    }
+
+    /** Overheard lines (used by visits and robberies). */
+    public void shout(String line) {
+        say(line);
     }
 
     public Role getRole() {
@@ -138,6 +195,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             case WELDER -> "Welder";
             case PRESS_OPERATOR -> "Press Operator";
             case SAUSAGE_MAKER -> "Sausage Maker";
+            case CLERK -> "Double Quick Clerk";
+            case SHOPKEEPER -> "Shopkeeper";
         };
     }
 
@@ -271,10 +330,17 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         super.customServerAiStep();
         Role role = getRole();
         if (role == Role.WELDER || role == Role.PRESS_OPERATOR || role == Role.SAUSAGE_MAKER) {
+            boolean away = breakTrip.tick(this);
+            if (away != onBreak()) entityData.set(DATA_ON_BREAK, away);
+            if (away) return;
             doFactoryWork(role);
             return;
         }
         if (role != Role.SUPERVISOR && role != Role.SAFETY) return;
+        if (isVisitor()) {   // the factory visit scripts these two itself; leave if it's gone
+            if (++visitorIdle > 400) discard();
+            return;
+        }
 
         // Keep facing each other.
         if (--partnerScan <= 0 || partner == null || !partner.isAlive()) {
@@ -360,13 +426,23 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                     line = "Grill's slammed, give me a minute!";
                 }
             }
-            case SUPERVISOR -> line = OfficeSkit.slaterOnCall(now)
+            case SUPERVISOR -> line = isVisitor() ? "Do you work here? Then get back to work."
+                    : OfficeSkit.slaterOnCall(now)
                     ? "*covers phone* Hold on, I'm on with the boss."
                     : "Not now. I'm dealing with Nick.";
-            case SAFETY -> line = OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
+            case SAFETY -> line = isVisitor() ? "Not now, I'm writing Ethan up."
+                    : OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
             case WELDER -> line = pick(WELDER_LINES);
             case PRESS_OPERATOR -> line = pick(PRESS_LINES);
             case SAUSAGE_MAKER -> line = pick(SAUSAGE_LINES);
+            case CLERK, SHOPKEEPER -> {
+                line = pick(getRole() == Role.CLERK ? CLERK_LINES : SHOPKEEPER_LINES);
+                if (player instanceof net.minecraft.server.level.ServerPlayer sp
+                        && net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(sp, dev.freerun.net.ShopPayloads.Open.TYPE)) {
+                    net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(sp,
+                            new dev.freerun.net.ShopPayloads.Open(getId(), shop().ordinal()));
+                }
+            }
             default -> line = pick(CUSTOMER_LINES);
         }
         getLookControl().setLookAt(player, 30.0f, 30.0f);
@@ -398,6 +474,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         tag.putInt("Role", getRole().ordinal());
         tag.putInt("Variant", getVariant());
         tag.putLong("LastGift", lastGiftTime);
+        tag.putBoolean("Visitor", isVisitor());
+        breakTrip.save(tag, registryAccess());
     }
 
     @Override
@@ -406,5 +484,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         Role[] roles = Role.values();
         setRole(roles[Mth.clamp(tag.getInt("Role"), 0, roles.length - 1)], tag.getInt("Variant"));
         lastGiftTime = tag.getLong("LastGift");
+        setVisitor(tag.getBoolean("Visitor"));
+        breakTrip.load(tag, registryAccess());
     }
 }

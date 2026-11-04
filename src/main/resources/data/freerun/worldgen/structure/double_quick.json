@@ -1,0 +1,7 @@
+{
+  "type": "freerun:double_quick",
+  "biomes": "#minecraft:is_overworld",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_box",
+  "spawn_overrides": {}
+}

@@ -17,6 +17,9 @@ import java.util.Optional;
 public class FactoryStructure extends Structure {
     public static final MapCodec<FactoryStructure> CODEC = simpleCodec(FactoryStructure::new);
     private static final int MAX_SLOPE = 6;
+    /** The Double Quick sits east of the parking lot; the General Store beside the factory's east wall. */
+    static final int DQ_X = FactoryPiece.MAX_X + 3, DQ_Z = -DoubleQuickPiece.D;
+    static final int GS_X = FactoryPiece.MAX_X + 4, GS_Z = 3;
 
     public FactoryStructure(StructureSettings settings) {
         super(settings);
@@ -53,6 +56,8 @@ public class FactoryStructure extends Structure {
             builder.addPiece(new ParkingLotPiece(origin));
             builder.addPiece(new BreakRoomPiece(origin));
             builder.addPiece(new ProcessingPiece(origin));
+            builder.addPiece(new DoubleQuickPiece(origin.offset(DQ_X, 0, DQ_Z)));
+            builder.addPiece(new GeneralStorePiece(origin.offset(GS_X, 0, GS_Z)));
         }));
     }
 

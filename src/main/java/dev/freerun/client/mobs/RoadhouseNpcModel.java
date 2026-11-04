@@ -21,6 +21,19 @@ public class RoadhouseNpcModel extends HumanoidModel<RoadhouseNpcEntity> {
         head.zRot = 0.0f;           // the model is shared by every NPC, so clear the phone tilt
         hat.copyFrom(head);
         long time = entity.level().getGameTime();
+        if (entity.isVisitor()) {
+            // On the factory floor yelling up at the crane: pointing straight at Ethan.
+            if (limbSwingAmount < 0.1f) {
+                rightArm.xRot = -2.5f;
+                rightArm.yRot = -0.1f;
+                leftArm.xRot = -0.2f;
+                leftArm.zRot = -0.7f;
+                head.xRot = -0.6f;
+                hat.copyFrom(head);
+            }
+            return;
+        }
+        if (entity.onBreak()) return;   // walking to the Double Quick like a normal person
 
         if (entity.getRole() == Role.SAFETY && OfficeSkit.nickDown(time)) {
             // Hands over his face, legs kicking like a toddler.

@@ -50,6 +50,14 @@ public class GangsterEntity extends Monster implements RangedAttackMob {
     private GunType gun = GunType.PISTOL;
     private long warUntil;
     private BlockPos home;
+    // a hold-up at the Double Quick
+    private BlockPos robAt;
+    private int robT;
+    private int robArrivedAt = -1;
+    private boolean robShooting;
+    private int stolen;
+    private int stuck;
+    private net.minecraft.world.phys.Vec3 lastPos = net.minecraft.world.phys.Vec3.ZERO;
 
     public GangsterEntity(EntityType<? extends GangsterEntity> type, Level level) {
         super(type, level);
@@ -137,13 +145,14 @@ public class GangsterEntity extends Monster implements RangedAttackMob {
         double dy = target.getEyeY() - 0.3 - (getEyeY() - 0.1) + random.nextGaussian() * 0.4;
         double dz = target.getZ() - getZ() + random.nextGaussian() * 0.6;
         double horiz = Math.sqrt(dx * dx + dz * dz);
-        gun.fire(level(), this, new Vec3(dx, dy + horiz * 0.12, dz));
+        gun.fire(level(), this, new Vec3(dx, dy + horiz * 0.01, dz));
     }
 
     @Override
     public boolean hurt(DamageSource source, float amount) {
-        // No friendly fire within a crew.
+        // No friendly fire within a crew, and the Rats never take a shot at their boss (or from him).
         if (source.getEntity() instanceof GangsterEntity g && g.crew() == crew()) return false;
+        if (crew() == Crew.RUST_RATS && source.getEntity() instanceof dev.freerun.mobs.EthanEntity) return false;
         boolean hurt = super.hurt(source, amount);
         if (hurt && !level().isClientSide && source.getEntity() instanceof Player player && !player.isCreative()) {
             // Start something with one of them and the whole crew answers.
@@ -155,9 +164,105 @@ public class GangsterEntity extends Monster implements RangedAttackMob {
         return hurt;
     }
 
+    /** Sent to hold up the store whose clerk is at {@code clerkPos}. */
+    public void startRobbery(BlockPos clerkPos, boolean shooting) {
+        robAt = clerkPos.immutable();
+        robT = 0;
+        robArrivedAt = -1;
+        robShooting = shooting;
+        clearRestriction();
+    }
+
+    public boolean robbing() {
+        return robAt != null;
+    }
+
+    private void endRobbery() {
+        robAt = null;
+        if (home != null) restrictTo(home, 14);
+        getNavigation().stop();
+    }
+
+    private void tickRobbery() {
+        robT++;
+        double dx = robAt.getX() + 0.5 - getX();
+        double dz = robAt.getZ() + 0.5 - getZ();
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (robArrivedAt < 0) {
+            if (dist < 5.0) {
+                robArrivedAt = robT;
+                holdUp();
+                return;
+            }
+            if (robT > 1200) {   // never made it
+                endRobbery();
+                return;
+            }
+            if (robT % 10 == 0) {
+                if (position().distanceToSqr(lastPos) < 0.04) stuck += 10;
+                else stuck = 0;
+                lastPos = position();
+                if (stuck > 200) {
+                    moveTo(robAt.getX() + 0.5 - dx / dist * 3.0, robAt.getY(), robAt.getZ() + 0.5 - dz / dist * 3.0, getYRot(), 0.0f);
+                    stuck = 0;
+                }
+                double hx = dist > 12 ? getX() + dx / dist * 11.0 : robAt.getX() + 0.5;
+                double hz = dist > 12 ? getZ() + dz / dist * 11.0 : robAt.getZ() + 0.5;
+                getNavigation().moveTo(hx, robAt.getY(), hz, 1.2);
+            }
+            return;
+        }
+        int since = robT - robArrivedAt;
+        getNavigation().stop();
+        if (robShooting && since % (15 + random.nextInt(10)) == 0 && getTarget() == null) {
+            // Spraying the storefront.
+            double tx = robAt.getX() + 0.5 + random.nextGaussian() * 5.0;
+            double ty = robAt.getY() + 0.5 + random.nextDouble() * 2.5;
+            double tz = robAt.getZ() + 0.5 + random.nextGaussian() * 5.0;
+            getLookControl().setLookAt(tx, ty, tz);
+            gun.fire(level(), this, new Vec3(tx - getX(), ty - getEyeY(), tz - getZ()));
+        }
+        if (since > 400) {
+            Component msg = Component.literal("§7The robbers take off back toward the parking lot.");
+            for (Player p : level().players()) if (distanceToSqr(p) < 40 * 40) p.displayClientMessage(msg, false);
+            endRobbery();
+        }
+    }
+
+    /** Everybody in the store hands over their cash. */
+    private void holdUp() {
+        Crew c = crew();
+        String who = c.color + "<" + c.member + "> §f";
+        Component alarm = Component.literal("§4§l⚠ ROBBERY AT THE DOUBLE QUICK! §r" + who
+                + (robShooting ? "EVERYBODY DOWN! *BANG* *BANG*" : "Nobody move! Wallets on the counter!"));
+        for (Player p : level().players()) if (distanceToSqr(p) < 64 * 64) p.displayClientMessage(alarm, false);
+        level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.BELL_BLOCK,
+                net.minecraft.sounds.SoundSource.HOSTILE, 2.0f, 1.6f);
+        for (dev.freerun.mobs.RoadhouseNpcEntity clerk : level().getEntitiesOfClass(dev.freerun.mobs.RoadhouseNpcEntity.class,
+                getBoundingBox().inflate(8.0), n -> n.getRole() == dev.freerun.mobs.RoadhouseNpcEntity.Role.CLERK)) {
+            clerk.shout("§ePlease! Take whatever you want! The register's open!");
+        }
+        for (Player p : level().players()) {
+            if (p.isCreative() || p.isSpectator() || p.distanceToSqr(robAt.getX(), robAt.getY(), robAt.getZ()) > 12 * 12) continue;
+            int take = Math.min(25, dev.freerun.economy.Money.balance(p));
+            if (take > 0 && dev.freerun.economy.Money.pay(p, take)) {
+                stolen += take;
+                p.displayClientMessage(Component.literal(who + "Your wallet. NOW. §c(-" + dev.freerun.economy.Money.fmt(take)
+                        + ") §7Take him down to get it back."), false);
+            } else {
+                p.displayClientMessage(Component.literal(who + "You're broke?! Get outta here."), false);
+            }
+        }
+        stolen += 20 + random.nextInt(60);   // and the register
+    }
+
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
+        if (robAt != null) {
+            tickRobbery();
+            return;
+        }
         if (home != null && !hasRestriction()) restrictTo(home, 14);
         // Shootout's over: stop fighting the other crew (but keep after any player who started it).
         if (!atWar() && getTarget() instanceof GangsterEntity) setTarget(null);
@@ -176,6 +281,8 @@ public class GangsterEntity extends Monster implements RangedAttackMob {
         if (!level().isClientSide) {
             if (random.nextFloat() < 0.25f) spawnAtLocation(new ItemStack(ItemRegistry.gunItem(gun)));
             spawnAtLocation(new ItemStack(gun.ammoItem(), 1 + random.nextInt(4)));
+            int cash = stolen + 1 + random.nextInt(15);
+            for (ItemStack bill : dev.freerun.economy.Money.bills(cash)) spawnAtLocation(bill);
         }
         super.die(source);
     }

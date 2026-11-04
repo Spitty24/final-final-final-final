@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/drink_cooler"
+    },
+    "facing=east": {
+      "model": "freerun:block/drink_cooler",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "freerun:block/drink_cooler",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "freerun:block/drink_cooler",
+      "y": 270
+    }
+  }
+}

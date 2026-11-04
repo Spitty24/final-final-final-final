@@ -125,8 +125,21 @@ public class ParkingLotPiece extends StructurePiece {
         placeBlock(level, Blocks.CAMPFIRE.defaultBlockState(), fireX, 1, 7, box);
     }
 
-    /** A 3 x 5 block car facing the aisle: wheels at the corners, lights, a tinted cabin. */
+    /** A parked car: a drivable car entity, or for the burnt-out wreck, a 3 x 5 pile of charred blocks. */
     private void car(WorldGenLevel level, BoundingBox box, int x0, int z0, BlockState body, boolean burnt) {
+        if (!burnt) {
+            // A real, drivable car parked nose-in toward the aisle.
+            BlockPos at = getWorldPos(x0 + 1, 1, z0 + 2).immutable();
+            if (!box.isInside(at)) return;
+            dev.freerun.vehicle.CarEntity car = new dev.freerun.vehicle.CarEntity(dev.freerun.vehicle.VehicleRegistry.CAR, level.getLevel());
+            float yaw = z0 < 6 ? 0.0f : 180.0f;
+            car.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, yaw, 0.0f);
+            car.setYBodyRot(yaw);
+            car.setYHeadRot(yaw);
+            car.setColor(body.getMapColor(level, at).col);
+            level.addFreshEntity(car);
+            return;
+        }
         BlockState wheel = Blocks.BLACK_CONCRETE.defaultBlockState();
         BlockState head = burnt ? Blocks.COAL_BLOCK.defaultBlockState() : Blocks.WHITE_CONCRETE.defaultBlockState();
         BlockState tail = burnt ? Blocks.COAL_BLOCK.defaultBlockState() : Blocks.RED_CONCRETE.defaultBlockState();

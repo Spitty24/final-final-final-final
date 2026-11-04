@@ -52,10 +52,72 @@ public class PressBrakeBlock extends HorizontalDirectionalBlock {
         builder.add(FACING, CUT, PRESSING);
     }
 
+    /** A slab of machine across the facing axis (the bed and ram reach out past it visually). */
+    static final java.util.Map<Direction, net.minecraft.world.phys.shapes.VoxelShape> SHAPES = java.util.Map.of(
+            Direction.NORTH, Block.box(0, 0, 2, 16, 16, 14), Direction.SOUTH, Block.box(0, 0, 2, 16, 16, 14),
+            Direction.EAST, Block.box(2, 0, 0, 14, 16, 16), Direction.WEST, Block.box(2, 0, 0, 14, 16, 16));
+
+    @Override
+    protected net.minecraft.world.phys.shapes.VoxelShape getShape(BlockState state, net.minecraft.world.level.BlockGetter level,
+                                                                    BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext ctx) {
+        return SHAPES.get(state.getValue(FACING));
+    }
+
+    /** Every frame position around a press at {@code main}: across -1..+1, up 0..2, except the press itself. */
+    public static java.util.List<BlockPos> framePositions(BlockPos main, Direction facing) {
+        java.util.List<BlockPos> out = new java.util.ArrayList<>();
+        Direction across = facing.getClockWise();
+        for (int h = 0; h < 3; h++) {
+            for (int w = 0; w < 3; w++) {
+                if (w == 1 && h == 0) continue;
+                out.add(main.relative(across, w - 1).above(h));
+            }
+        }
+        return out;
+    }
+
+    public static BlockState frameState(Direction facing, BlockPos main, BlockPos at) {
+        Direction across = facing.getClockWise();
+        int w = (at.getX() - main.getX()) * across.getStepX() + (at.getZ() - main.getZ()) * across.getStepZ() + 1;
+        return FactoryRegistry.PRESS_BRAKE_FRAME.defaultBlockState().setValue(FACING, facing)
+                .setValue(PressBrakeFrameBlock.W, w).setValue(PressBrakeFrameBlock.H, at.getY() - main.getY());
+    }
+
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext ctx) {
-        // The operator side faces whoever placed it.
-        return defaultBlockState().setValue(FACING, ctx.getHorizontalDirection().getOpposite());
+        // The operator side faces whoever placed it, and the whole 3x3 frame needs room.
+        Direction facing = ctx.getHorizontalDirection().getOpposite();
+        for (BlockPos p : framePositions(ctx.getClickedPos(), facing)) {
+            if (!ctx.getLevel().getBlockState(p).canBeReplaced(ctx)) return null;
+        }
+        return defaultBlockState().setValue(FACING, facing);
+    }
+
+    @Override
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, net.minecraft.world.entity.LivingEntity placer, ItemStack stack) {
+        super.setPlacedBy(level, pos, state, placer, stack);
+        if (level.isClientSide) return;
+        Direction facing = state.getValue(FACING);
+        for (BlockPos p : framePositions(pos, facing)) level.setBlock(p, frameState(facing, pos, p), Block.UPDATE_ALL);
+    }
+
+    @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
+        if (!level.isClientSide && !newState.is(this)) {
+            for (BlockPos p : framePositions(pos, state.getValue(FACING))) {
+                if (level.getBlockState(p).getBlock() instanceof PressBrakeFrameBlock) level.setBlock(p, net.minecraft.world.level.block.Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL);
+            }
+        }
+        super.onRemove(state, level, pos, newState, moved);
+    }
+
+    public ItemInteractionResult useItemOnPress(ItemStack stack, BlockState state, Level level, BlockPos pos,
+                                                Player player, InteractionHand hand, BlockHitResult hit) {
+        return useItemOn(stack, state, level, pos, player, hand, hit);
+    }
+
+    public InteractionResult useWithoutItemOnPress(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return useWithoutItem(state, level, pos, player, hit);
     }
 
     @Override
@@ -119,8 +181,9 @@ public class PressBrakeBlock extends HorizontalDirectionalBlock {
         if (state.getValue(PRESSING)) return;
         level.setBlock(pos, state.setValue(PRESSING, true), Block.UPDATE_ALL);
         level.scheduleTick(pos, state.getBlock(), STROKE_TICKS);
-        level.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.7f, 0.55f);
-        level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.3f, 0.6f);
+        level.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.9f, 0.45f);
+        level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.45f, 0.5f);
+        level.playSound(null, pos.above(2), SoundEvents.BEACON_DEACTIVATE, SoundSource.BLOCKS, 0.25f, 0.5f);   // hydraulics
         Direction front = state.getValue(FACING);
         level.sendParticles(ParticleTypes.CRIT,
                 pos.getX() + 0.5 + front.getStepX() * 0.5, pos.getY() + 0.55, pos.getZ() + 0.5 + front.getStepZ() * 0.5,

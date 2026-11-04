@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "freerun:double_quick",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 41977,
+    "spacing": 40,
+    "separation": 16,
+    "spread_type": "linear"
+  }
+}

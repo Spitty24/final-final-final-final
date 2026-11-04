@@ -127,7 +127,9 @@ public class FactoryPiece extends StructurePiece {
         forklift.setYBodyRot(yaw);
         forklift.setYHeadRot(yaw);
         if (driverName >= 0) {
-            ForkliftDriverEntity driver = new ForkliftDriverEntity(FactoryRegistry.FORKLIFT_DRIVER, level.getLevel());
+            ForkliftDriverEntity driver = driverName == 1
+                    ? new dev.freerun.mobs.JohnnySimEntity(dev.freerun.mobs.MoreMobs.JOHNNY_SIM, level.getLevel())
+                    : new ForkliftDriverEntity(FactoryRegistry.FORKLIFT_DRIVER, level.getLevel());
             driver.setNameIndex(driverName);
             driver.moveTo(ox + lx, oy, oz + lz, yaw, 0.0f);
             driver.startRiding(forklift, true);
@@ -240,6 +242,11 @@ public class FactoryPiece extends StructurePiece {
                 }
             }
             placeBlock(level, press, 6, 1, z0, box);
+            // The rest of the 3-wide, 3-tall frame.
+            BlockPos main = new BlockPos(6, 1, z0);
+            for (BlockPos p : dev.freerun.factory.PressBrakeBlock.framePositions(main, Direction.EAST)) {
+                placeBlock(level, dev.freerun.factory.PressBrakeBlock.frameState(Direction.EAST, main, p), p.getX(), p.getY(), p.getZ(), box);
+            }
             placeBlock(level, pump, 5, 1, z0, box);        // hydraulic power pack behind the press
             placeBlock(level, pallet, 3, 1, z0, box);      // pallet of fresh sheets
             for (int i = 0; i < 3; i++) {
@@ -378,6 +385,17 @@ public class FactoryPiece extends StructurePiece {
                 .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 9, 1, 29, box);
         placeBlock(level, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), 8, 1, 29, box);
         fill(level, box, 8, 1, 29, new ItemStack(Items.PORKCHOP, 16), new ItemStack(dev.freerun.food.FoodRegistry.BOUDIN, 4));
+
+        // Three co-op interns, wandering the floor with even more questions
+        for (int i = 0; i < 3; i++) {
+            BlockPos at = getWorldPos(18 + i * 2, 1, 8 + i * 3).immutable();
+            if (!box.isInside(at)) continue;
+            dev.freerun.mobs.CoopEntity coop = new dev.freerun.mobs.CoopEntity(dev.freerun.mobs.MoreMobs.COOP, level.getLevel());
+            coop.setVariant(i);
+            coop.moveTo(at.getX() + 0.5, at.getY(), at.getZ() + 0.5, 0.0f, 0.0f);
+            coop.setHome(getWorldPos(20, 1, 15).immutable(), 14);
+            level.addFreshEntityWithPassengers(coop);
+        }
 
         // Ethan James Patrick, wandering the floor with questions
         BlockPos ethanAt = getWorldPos(20, 1, 12).immutable();
