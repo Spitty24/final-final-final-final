@@ -5,7 +5,7 @@ with animated arms in first person and full-body animation in third person (visi
 players when the server has the mod too).
 
 > **Status:** builds cleanly on GitHub Actions against Minecraft 1.21.1. Newer features
-> (most recently prestige, the break room, the sausage plant and Ethan's plasma cannon) haven't been play-tested yet, so expect
+> (most recently the economy, the Double Quick, cars and the new guns) haven't been play-tested yet, so expect
 > some tuning.
 
 ## Build the .jar
@@ -86,12 +86,16 @@ A large factory generates on flat, dry land (`/locate structure freerun:welding_
 build one with **`/factory`** (needs cheats; the parking lot starts just ahead of you and the
 building is past it). Inside:
 
-- a press department with five working press brakes and their operators, who drop each part
+- a press department with five working press brakes (big 3×3 machines with side housings,
+  hydraulic cylinders, a ram, back gauge, light curtains and a foot pedal) and their operators, who drop each part
   they form onto a **conveyor** that carries it to a bin barrel by the aisle
 - a welding department with four curtained booths and welders at work
 - a working **overhead crane** spanning the whole floor
-- two **forklifts** driven by Cajun forklift drivers on their rounds, plus a parked forklift by
+- two **forklifts** on their rounds: one driven by Boudreaux (pure bayou gibberish), the other by
+  **Johnny Sim**, a balding Cajun driver you can actually understand; plus a parked forklift by
   the door for you, with two sheets in front of it to practise on
+- three **co-op interns** (Tyler, Brayden and Kaitlyn) wandering around asking questions and
+  following Ethan because he seems like he knows things
 - **Ethan James Patrick**, enderman-tall and slow, wandering the floor asking questions
 - a **break room** off the floor: counters you can store things in, a working coffee maker and
   microwave, tables and chairs, a small coffee patch, and workers on break
@@ -99,7 +103,9 @@ building is past it). Inside:
   smoker, cold storage and recipe signs
 - steel stock racks, a public weld table, and a gear chest at the back holding a Gravity Gun,
   Welding Torch, Crane Pendant, conveyor belts, a Forklift and steel
-- a **parking lot** out front: parked cars (one burnt out and smoking), light poles, and two
+- the **Double Quick** gas station east of the parking lot and a **General Store** beside the
+  factory (see Economy below)
+- a **parking lot** out front: drivable cars (and one burnt-out wreck), light poles, and two
   made-up masked crews, the Rust Rats (orange) and the Chrome Kings (purple). They trash-talk
   each other and every 2–5 minutes start a shootout. They leave you alone unless you attack one,
   then that whole crew comes for you — but stray shots don't care who you are. Lost members are
@@ -175,6 +181,93 @@ in a U), Coffee Maker (iron, glass, redstone), Microwave (iron, glass pane, reds
 (smooth stone slabs over planks and a chest). Cranes only come with
 factories.
 
+## Economy, stores and break time
+
+Money is real: **$1, $5, $20 and $100 bills**. A **Wallet** holds your cash so it doesn't fill your
+inventory (use it to put loose bills in, sneak-use to take out $20); the first time you use an
+**ATM** it gives you one free. Paying always takes from your wallet first, then your bills, and
+gives you change. Your cash shows in the bottom-left corner.
+
+**Earning:** every break you get a paycheck by direct deposit ($10, or $15 + $3 per career level
++ $10 per career you've mastered). You can also sell things at the stores (steel parts,
+sausages, crops, ores, empty cans), win on scratch-offs, or take it off gangsters.
+
+**Break time:** every 10 minutes the buzzer goes for a 2-minute break. The factory workers and the
+co-ops walk out across the parking lot to the Double Quick, order something at the counter, eat
+it, and walk back to their stations when the break ends.
+
+**The Double Quick** (gas station): four working gas pumps under a lit canopy, a car filling up, a
+checkout with the clerk, a roller grill, slushie machine, coffee bar with coffee makers and a
+microwave, shelves, a wall of drink coolers, an ATM, a TV and vending machines out front. Talk to
+the clerk to open the shop. **The General Store**: an old country store with a porch, hardware,
+groceries, phones, ammo, store fixtures and a used car out back ($400). Talk to the shopkeeper.
+Standalone Double Quicks with a General Store also generate in the countryside, or build one with
+**`/doublequick`**.
+
+In a shop screen: click an item to buy one, shift-click to buy five; the Sell tab shows what the
+store pays.
+
+**Food and drink** (all edible, most with an effect): potato chips, cheese puffs, candy bars,
+gummy worms, beef jerky, sunflower seeds, Cajun boiled peanuts, pork cracklins, honey buns,
+donuts, frozen burritos (microwave them into hot burritos), instant ramen, roller-grill hot dogs,
+corn dogs, gas station pizza, chicken tenders, nachos, sausage biscuits, ice cream sandwiches,
+pickles in a pouch, Fizz Cola, lemon-lime soda, root beer, Voltage energy drinks, sports drinks,
+bottled water, sweet tea, chocolate milk, blue raspberry and cherry slushies, iced coffee. Cans
+leave an Empty Can (sell 4 for $1, or smelt for iron).
+
+**Modern conveniences:**
+
+| Item | What it does |
+|---|---|
+| Smartphone | Shows the time, your balance, the next break, GPS and a notification |
+| Flashlight | Use to switch on; night vision while you hold it |
+| Lucky 7s Scratch-Off | Use to scratch: $2 to $1,000 prizes |
+| Lighter | Lights fires like flint and steel |
+| Bandages / Pain Reliever | Heal 3 hearts / clear harmful effects |
+| Sunglasses | Wear them: immune to Blindness and Darkness |
+| Umbrella | Hold it while falling to float down |
+| Air Horn | Very loud; startles every mob nearby away from you |
+| Duct Tape | Repairs a quarter of the damaged item in your other hand |
+| Gas Can | Adds 40% fuel to a car; refill an empty one at a pump ($6) |
+
+| Fixture | How it works |
+|---|---|
+| ATM | Click to deposit your bills, sneak-click to withdraw $20 |
+| Vending Machine | $2 for a random snack or drink. If it gets stuck, punch the machine |
+| Slushie Machine | $2. Click the left side for blue raspberry, the right for cherry |
+| Roller Grill | Put raw pork, beef or chicken on it; 2 hot dogs come off |
+| Gas Pump | Fills the nearest car within 6 blocks ($1 per 10%) |
+| TV | Click to turn on or off |
+| Drink Cooler / Store Shelf | Storage, like a counter |
+
+## Cars
+
+Every parked car in the factory lot is drivable, and you can buy one at the General Store or craft
+one. Right-click to get in (four seats; the first one in drives). **W/S** gas and brake (hold S to
+reverse), **A/D** steer, **Space** handbrake (the back slides out), **R** horn, sneak to get out.
+The HUD shows your speed and fuel.
+
+The physics: it accelerates along an engine curve to about 70 km/h with rolling resistance and
+drag, steering eases in and recentres, the turn rate follows a bicycle model (tight at low speed,
+wide at high speed, no turning standing still), and the tyres grip unless you pull the handbrake.
+Cars climb curbs and single blocks, crash into walls (hard crashes hurt), and run over anything
+in the way. They burn fuel; refill at a gas pump or with a gas can. Sneak-punch an empty car to
+pick it up.
+
+## Guns
+
+Guns now fire real bullets with glowing tracers, a muzzle flash, smoke, ejected casings, impact
+dust and sparks, recoil, and their own gunshot sounds. Each has a magazine that reloads from the
+ammo in your inventory (sneak + use to reload early):
+
+| Gun | Magazine | Notes |
+|---|---|---|
+| Pistol | 12 | Semi-auto |
+| Rifle | 30 | Full auto: hold use |
+| Shotgun | 6 shells | 8 pellets per shot |
+
+Soldiers and gangsters use the same bullets. Bullets and shells are sold at the General Store.
+
 ## Ethan James Patrick
 
 Ethan wanders the factory asking questions. One time in ten he instead says something
@@ -183,6 +276,27 @@ crane and hangs from the girder, riding it around, before dropping back down (he
 damage). Hurt him and he pulls out a **plasma cannon** and fires it at you and any workers
 nearby for about 15 seconds, then calms down and apologises. If you kill him while he's angry,
 he drops the cannon. It's also in the creative Combat tab.
+
+**He is secretly the leader of the Rust Rats.** The Rats never shoot him, the whole crew comes
+running if anyone hurts him, and every so often he forgets the walkie-talkie is on.
+
+**Every 3–5 minutes Supervisor Slater and Safety Nick come down to the floor** (only when a player
+is within about 48 blocks). Ethan gets up on the crane, they yell at him to get the hell down before
+they fire him, he lets go and lands right on Nick, and Nick smells something: **Big Boudin**, the
+sausage plant's legend, a seven-foot walking link in a hard hat. He swats people with a giant
+spatula for a few minutes, then waddles back to the walk-in cooler. Beat him for a pile of boudin.
+
+**Johnny James Patrick:** hand Ethan a boudin, then hand Johnny Sim one. Ethan goes looking for
+Johnny, and when they meet up there's a baby: Johnny James Patrick, Ethan's tall frame with
+Johnny's bald head and half of each of their outfits. He asks Ethan's questions in Johnny's voice
+and grows up over 20 minutes. They can do it again after 5 minutes.
+
+## Robberies
+
+Once a minute there's a 1 in 20 chance that a couple of gang members (usually Rust Rats, on the
+boss's orders) walk over and hold up the Double Quick. They take up to $25 from every player in the
+store plus the register, and about half the time they also shoot up the storefront. Take a
+robber down and you get the cash back.
 
 ## The fake "Stone"
 
@@ -217,7 +331,10 @@ a chud in chat. It's harmless; kill it and you get the stone back.
   clients each tick. Forklifts are driven client-side like horses; the fork keys are sent to the
   server, which runs the forks and load.
 - Gangs: `dev.freerun.gang` — `GangTurfEntity` is an invisible marker in the lot that keeps the
-  crews topped up and schedules shootouts.
+  crews topped up and schedules shootouts and robberies.
+- Economy: `dev.freerun.economy` (money, shops and their price lists in `EconomyRegistry`, break
+  time, the break-time walk, store fixtures, snacks and amenities). Cars: `dev.freerun.vehicle`.
+  Guns: `dev.freerun.item.gun`. The gunshots, engine, horn and other new sounds are synthesized.
 - Careers: `dev.freerun.career` — the skill definitions are in `Skills`; progress is stored as a
   Fabric data attachment on the player (kept through death) and synced to the client for the
   skill tree screen and HUD.

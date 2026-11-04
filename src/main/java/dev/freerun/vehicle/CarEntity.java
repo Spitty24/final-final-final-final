@@ -69,6 +69,9 @@ public class CarEntity extends LivingEntity {
     private double renderSpeed;
     private int hornCooldown;
     private int crashCooldown;
+    // server side: the driver's client moves the car between ticks, so track movement ourselves
+    private Vec3 lastServerPos;
+    private double lastServerSpeed;
 
     public CarEntity(EntityType<? extends CarEntity> type, Level level) {
         super(type, level);
@@ -155,9 +158,26 @@ public class CarEntity extends LivingEntity {
         if (hornCooldown > 0) hornCooldown--;
         if (crashCooldown > 0) crashCooldown--;
 
+        if (lastServerPos == null) lastServerPos = position();
+        moved = position().subtract(lastServerPos);
+        lastServerPos = position();
         double horiz = Math.sqrt(moved.x * moved.x + moved.z * moved.z);
+        if (horiz > 3.0) horiz = 0.0;   // teleported, not driven
         if (horiz > 0.01 && getControllingPassenger() != null) addFuel((float) (-horiz * 0.045));
         if (horiz > 0.32) runOver(moved, horiz);
+        // Went from speed to a dead stop in one tick: that was a wall.
+        if (lastServerSpeed > 0.5 && horiz < lastServerSpeed * 0.3 && crashCooldown <= 0) {
+            crashCooldown = 20;
+            level().playSound(null, getX(), getY(), getZ(), ModSounds.CAR_CRASH, SoundSource.NEUTRAL,
+                    (float) Math.min(1.6, lastServerSpeed * 1.8), 0.9f);
+            if (level() instanceof ServerLevel server) {
+                server.sendParticles(net.minecraft.core.particles.ParticleTypes.CRIT, getX(), getY() + 0.8, getZ(), 12, 1.0, 0.3, 1.0, 0.2);
+            }
+            if (lastServerSpeed > 0.65) {
+                for (Entity p : getPassengers()) p.hurt(damageSources().flyIntoWall(), (float) ((lastServerSpeed - 0.6) * 12.0));
+            }
+        }
+        lastServerSpeed = horiz;
     }
 
     /** Anything in the way at speed gets hurt and thrown. */
@@ -241,15 +261,7 @@ public class CarEntity extends LivingEntity {
         move(MoverType.SELF, getDeltaMovement());
 
         Vec3 actual = position().subtract(before);
-        if (horizontalCollision) {
-            double lost = Math.abs(v) - Math.abs(actual.dot(f));
-            if (lost > 0.35 && crashCooldown <= 0) {
-                crashCooldown = 20;
-                playSound(ModSounds.CAR_CRASH, (float) Math.min(1.5, lost * 2.0), 0.9f);
-                if (lost > 0.6 && driver != null) driver.hurt(damageSources().flyIntoWall(), (float) ((lost - 0.6) * 10.0));
-            }
-            v = actual.dot(f) * 0.5;
-        }
+        if (horizontalCollision) v = actual.dot(f) * 0.5;   // the server plays the crash
         speed = v;
         steerTick();
     }

@@ -40,6 +40,7 @@ public final class BreakTrip {
     private int stuck;
     private Vec3 lastPos = Vec3.ZERO;
     private int bites;
+    private long searchedBreak = -1;
 
     public boolean active() {
         return stage != Stage.IDLE;
@@ -52,6 +53,9 @@ public final class BreakTrip {
         switch (stage) {
             case IDLE -> {
                 if (!onBreak || BreakTime.breakTicksLeft(level) < 900 || (mob.tickCount + mob.getId()) % 20 != 0) return false;
+                long breakNo = level.getGameTime() / BreakTime.CYCLE;
+                if (searchedBreak == breakNo) return false;   // already looked this break
+                searchedBreak = breakNo;
                 RoadhouseNpcEntity clerk = findClerk(mob);
                 if (clerk == null) return false;
                 home = mob.blockPosition();
