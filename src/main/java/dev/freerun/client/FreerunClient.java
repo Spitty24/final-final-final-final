@@ -25,11 +25,18 @@ import org.lwjgl.glfw.GLFW;
 public final class FreerunClient implements ClientModInitializer {
     public static final ParkourController CONTROLLER = new ParkourController();
     private static KeyMapping toggleKey;
+    private static KeyMapping forksUpKey;
+    private static KeyMapping forksDownKey;
+    private static int lastForkDir;
 
     @Override
     public void onInitializeClient() {
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.freerun"));
+        forksUpKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.forks_up", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.freerun"));
+        forksDownKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.forks_down", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.freerun"));
 
         EntityRendererRegistry.register(EvilRegistry.PURSUER, PursuerRenderer::new);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.US_SOLDIER,
@@ -68,6 +75,18 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.factory.SteelPartRenderer.CHANNEL, dev.freerun.client.factory.SteelPartRenderer::channelLayer);
         EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.STEEL_PART,
                 dev.freerun.client.factory.SteelPartRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.ForkliftModel.LAYER, dev.freerun.client.factory.ForkliftModel::createLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.CraneModel.LAYER, dev.freerun.client.factory.CraneModel::createLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.ForkliftDriverModel.LAYER, dev.freerun.client.factory.ForkliftDriverModel::createLayer);
+        EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.FORKLIFT,
+                dev.freerun.client.factory.ForkliftRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.CRANE,
+                dev.freerun.client.factory.CraneRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.FORKLIFT_DRIVER,
+                dev.freerun.client.factory.ForkliftDriverRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 
@@ -85,6 +104,16 @@ public final class FreerunClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.level != null && !client.isPaused()) ClientClock.tick();
+            // Forklift fork controls: tell the server whenever the held direction changes.
+            if (client.player != null && client.player.getVehicle() instanceof dev.freerun.factory.ForkliftEntity) {
+                int dir = (forksUpKey.isDown() ? 1 : 0) - (forksDownKey.isDown() ? 1 : 0);
+                if (dir != lastForkDir && ClientPlayNetworking.canSend(dev.freerun.net.ForkPayload.TYPE)) {
+                    ClientPlayNetworking.send(new dev.freerun.net.ForkPayload(dir));
+                    lastForkDir = dir;
+                }
+            } else {
+                lastForkDir = 0;
+            }
             while (toggleKey.consumeClick()) {
                 FreerunConfig cfg = FreerunConfig.get();
                 cfg.enabled = !cfg.enabled;

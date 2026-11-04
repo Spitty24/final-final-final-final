@@ -1,6 +1,9 @@
 package dev.freerun.world;
 
+import dev.freerun.factory.CraneEntity;
 import dev.freerun.factory.FactoryRegistry;
+import dev.freerun.factory.ForkliftDriverEntity;
+import dev.freerun.factory.ForkliftEntity;
 import dev.freerun.factory.PartType;
 import dev.freerun.factory.SteelPartEntity;
 import dev.freerun.mobs.RoadhouseNpcEntity;
@@ -9,7 +12,9 @@ import dev.freerun.mobs.SoldierRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -30,6 +35,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -79,6 +85,54 @@ public class FactoryPiece extends StructurePiece {
         buildWorkArea(level, box);
         buildWeldingDepartment(level, box);
         buildBack(level, box);
+        buildForklifts(level, box);
+    }
+
+    /**
+     * Two forklifts on their rounds, each with a driver, plus a parked one by the door for you
+     * (with a couple of sheets in front of it to practise on).
+     */
+    private void buildForklifts(WorldGenLevel level, BoundingBox box) {
+        // Loop: down the press-department lane, across the back, up the main aisle, across the front.
+        spawnForklift(level, box, 14.5, 4.5, List.of(new double[]{14.5, 24.0}, new double[]{21.0, 24.0},
+                new double[]{21.0, 4.5}, new double[]{14.5, 4.5}), 0);
+        // Back and forth along the welding-department lane.
+        spawnForklift(level, box, 29.5, 4.0, List.of(new double[]{29.5, 27.0}, new double[]{29.5, 4.0}), 1);
+        // Parked, free to drive.
+        spawnForklift(level, box, 12.0, 2.5, List.of(), -1);
+        spawnPart(level, box, 15.0, 1.0, 2.5, PartType.SHEET, 1);
+        spawnPart(level, box, 15.0, 1.0625, 2.5, PartType.SHEET, 1);
+    }
+
+    private void spawnForklift(WorldGenLevel level, BoundingBox box, double lx, double lz, List<double[]> route,
+                               int driverName) {
+        double ox = getWorldX(0, 0);
+        double oy = getWorldY(0) + 1.0;
+        double oz = getWorldZ(0, 0);
+        if (!box.isInside(BlockPos.containing(ox + lx, oy, oz + lz))) return;
+        ForkliftEntity forklift = new ForkliftEntity(FactoryRegistry.FORKLIFT, level.getLevel());
+        float yaw;
+        if (route.isEmpty()) {
+            yaw = Direction.EAST.toYRot();
+        } else {
+            double[] first = route.get(0);
+            yaw = (float) (Mth.atan2(first[1] - lz, first[0] - lx) * Mth.RAD_TO_DEG) - 90.0f;
+            List<Vec3> world = new ArrayList<>();
+            for (double[] p : route) world.add(new Vec3(ox + p[0], oy, oz + p[1]));
+            forklift.setRoute(world);
+            forklift.setPallet(true);
+            forklift.setLoaded(true);
+        }
+        forklift.moveTo(ox + lx, oy, oz + lz, yaw, 0.0f);
+        forklift.setYBodyRot(yaw);
+        forklift.setYHeadRot(yaw);
+        if (driverName >= 0) {
+            ForkliftDriverEntity driver = new ForkliftDriverEntity(FactoryRegistry.FORKLIFT_DRIVER, level.getLevel());
+            driver.setNameIndex(driverName);
+            driver.moveTo(ox + lx, oy, oz + lz, yaw, 0.0f);
+            driver.startRiding(forklift, true);
+        }
+        level.addFreshEntityWithPassengers(forklift);
     }
 
     // ------------------------------------------------------------------ shell
@@ -139,24 +193,25 @@ public class FactoryPiece extends StructurePiece {
                 .setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH), 34, 5, 1, box);
     }
 
-    /** Overhead gantry crane spanning the building, with a trolley, chain and hook over the aisle. */
+    /**
+     * Overhead bridge crane: runway rails along both side walls, and the crane itself (bridge,
+     * hoist and hook) as a live entity you drive with the Crane Pendant. It covers the whole floor.
+     */
     private void buildCrane(WorldGenLevel level, BoundingBox box) {
-        BlockState yellow = Blocks.YELLOW_CONCRETE.defaultBlockState();
         BlockState rail = Blocks.POLISHED_DEEPSLATE_SLAB.defaultBlockState().setValue(SlabBlock.TYPE, SlabType.TOP);
         for (int z = 1; z < MAX_Z; z++) {
             placeBlock(level, rail, 1, 7, z, box);
             placeBlock(level, rail, MAX_X - 1, 7, z, box);
         }
-        for (int x = 1; x < MAX_X; x++) placeBlock(level, yellow, x, 7, CRANE_Z, box);
-        for (int z = CRANE_Z - 1; z <= CRANE_Z + 1; z++) {   // end trucks riding the rails
-            placeBlock(level, yellow, 1, 7, z, box);
-            placeBlock(level, yellow, MAX_X - 1, 7, z, box);
+        BlockPos at = getWorldPos(20, 8, CRANE_Z).immutable();
+        if (box.isInside(at)) {
+            double ox = getWorldX(0, 0);
+            double oz = getWorldZ(0, 0);
+            CraneEntity crane = new CraneEntity(FactoryRegistry.CRANE, level.getLevel());
+            crane.setBounds(ox + 2.5, ox + MAX_X - 1.5, oz + 2.0, oz + MAX_Z - 1.0, ox + 1.0, ox + MAX_X);
+            crane.moveTo(at.getX() + 0.5, getWorldY(0) + 8.0, at.getZ() + 0.5, 0.0f, 0.0f);
+            level.addFreshEntity(crane);
         }
-        placeBlock(level, Blocks.BLACK_CONCRETE.defaultBlockState(), 20, 6, CRANE_Z, box);   // trolley
-        placeBlock(level, Blocks.CHAIN.defaultBlockState(), 20, 5, CRANE_Z, box);
-        placeBlock(level, Blocks.CHAIN.defaultBlockState(), 20, 4, CRANE_Z, box);
-        placeBlock(level, Blocks.LIGHTNING_ROD.defaultBlockState()
-                .setValue(BlockStateProperties.FACING, Direction.DOWN), 20, 3, CRANE_Z, box);   // hook
     }
 
     // ------------------------------------------------------------------ press department
@@ -193,11 +248,31 @@ public class FactoryPiece extends StructurePiece {
             spawnWorker(level, box, 7, z0, Direction.WEST, Role.PRESS_OPERATOR,
                     new ItemStack(FactoryRegistry.STEEL_SHEET));
         }
-        // A bin of finished brackets and channels at the end of the line
+        buildConveyor(level, box);
+    }
+
+    /**
+     * The finished-parts line: a belt runs behind the press operators (who drop each part they
+     * form onto it), turns at the back wall, and feeds a bin barrel by the aisle.
+     */
+    private void buildConveyor(WorldGenLevel level, BoundingBox box) {
+        for (int z = 2; z <= 26; z++) {
+            placeBlock(level, FactoryRegistry.CONVEYOR.defaultBlockState()
+                    .setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH), 9, 1, z, box);
+        }
+        for (int x = 9; x <= 15; x++) {
+            placeBlock(level, FactoryRegistry.CONVEYOR.defaultBlockState()
+                    .setValue(HorizontalDirectionalBlock.FACING, Direction.EAST), x, 1, 27, box);
+        }
         placeBlock(level, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP),
-                9, 1, 27, box);
-        fill(level, box, 9, 1, 27, new ItemStack(FactoryRegistry.STEEL_BRACKET, 6),
+                16, 1, 27, box);
+        fill(level, box, 16, 1, 27, new ItemStack(FactoryRegistry.STEEL_BRACKET, 6),
                 new ItemStack(FactoryRegistry.STEEL_CHANNEL, 6), new ItemStack(FactoryRegistry.STEEL_PLATE, 8));
+        placeBlock(level, Blocks.YELLOW_CONCRETE.defaultBlockState(), 16, 0, 26, box);
+        placeBlock(level, Blocks.YELLOW_CONCRETE.defaultBlockState(), 16, 0, 28, box);
+        // A couple of parts already riding the belt
+        spawnPart(level, box, 9.5, 1.25, 8.5, PartType.BRACKET, 0);
+        spawnPart(level, box, 9.5, 1.25, 17.5, PartType.CHANNEL, 0);
     }
 
     // ------------------------------------------------------------------ open work area
@@ -270,12 +345,15 @@ public class FactoryPiece extends StructurePiece {
                 new ItemStack(FactoryRegistry.STEEL_SHEET, 32),
                 new ItemStack(FactoryRegistry.STEEL_PLATE, 8),
                 new ItemStack(FactoryRegistry.STEEL_BRACKET, 8),
-                new ItemStack(FactoryRegistry.STEEL_CHANNEL, 8));
+                new ItemStack(FactoryRegistry.STEEL_CHANNEL, 8),
+                new ItemStack(FactoryRegistry.CRANE_PENDANT),
+                new ItemStack(FactoryRegistry.CONVEYOR, 16),
+                new ItemStack(FactoryRegistry.FORKLIFT_ITEM));
         placeBlock(level, Blocks.YELLOW_CONCRETE.defaultBlockState(), 19, 0, 28, box);
         placeBlock(level, Blocks.YELLOW_CONCRETE.defaultBlockState(), 21, 0, 28, box);
 
         // A welded demo beam on the aisle: two sheets with a bracket fin standing along the middle.
-        BlockPos demo = getWorldPos(20, 1, 24).immutable();
+        BlockPos demo = getWorldPos(27, 1, 26).immutable();
         if (box.isInside(demo)) {
             SteelPartEntity frame = SteelPartEntity.single(level.getLevel(), PartType.SHEET, 0, 0, 0, 0);
             frame.setParts(List.of(

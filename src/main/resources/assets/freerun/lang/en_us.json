@@ -41,5 +41,14 @@
   "item.freerun.welding_torch": "Welding Torch",
   "item.freerun.gravity_gun": "Gravity Gun",
   "block.freerun.welder": "Welder",
-  "block.freerun.press_brake": "Press Brake"
+  "block.freerun.press_brake": "Press Brake",
+  "entity.freerun.overhead_crane": "Overhead Crane",
+  "entity.freerun.forklift": "Forklift",
+  "entity.freerun.forklift_driver": "Forklift Driver",
+  "item.freerun.crane_pendant": "Crane Pendant",
+  "item.freerun.forklift": "Forklift",
+  "item.freerun.forklift_driver_spawn_egg": "Forklift Driver Spawn Egg",
+  "block.freerun.conveyor": "Conveyor Belt",
+  "key.freerun.forks_up": "Forklift: forks up",
+  "key.freerun.forks_down": "Forklift: forks down"
 }

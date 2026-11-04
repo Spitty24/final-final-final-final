@@ -220,8 +220,26 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             net.minecraft.world.level.block.state.BlockState st = level().getBlockState(workSpot);
             if (st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock) {
                 dev.freerun.factory.PressBrakeBlock.cycle(server, workSpot, st);
+                if (Math.floorMod(now / 100L + getId(), 2L) == 0L) dropPartOnBelt();
             }
         }
+    }
+
+    private static final dev.freerun.factory.PartType[] PRODUCTS = {
+            dev.freerun.factory.PartType.BRACKET, dev.freerun.factory.PartType.CHANNEL, dev.freerun.factory.PartType.PLATE};
+
+    /** Press operators put each part they form onto the conveyor behind them, if there's room on it. */
+    private void dropPartOnBelt() {
+        java.util.Optional<net.minecraft.core.BlockPos> found = net.minecraft.core.BlockPos.findClosestMatch(
+                blockPosition(), 3, 1, p -> level().getBlockState(p).getBlock() instanceof dev.freerun.factory.ConveyorBlock);
+        if (found.isEmpty()) return;
+        net.minecraft.core.BlockPos belt = found.get().immutable();
+        net.minecraft.world.phys.AABB near = new net.minecraft.world.phys.AABB(belt).inflate(1.5, 1.0, 1.5);
+        if (!level().getEntitiesOfClass(dev.freerun.factory.SteelPartEntity.class, near).isEmpty()) return;
+        dev.freerun.factory.SteelPartEntity part = dev.freerun.factory.SteelPartEntity.single(level(),
+                PRODUCTS[random.nextInt(PRODUCTS.length)], belt.getX() + 0.5,
+                belt.getY() + dev.freerun.factory.ConveyorBlock.TOP, belt.getZ() + 0.5, random.nextInt(4));
+        if (level().noCollision(part, part.getBoundingBox().deflate(1.0E-3))) level().addFreshEntity(part);
     }
 
     @Override
@@ -246,21 +264,21 @@ public class RoadhouseNpcEntity extends PathfinderMob {
 
         int t = OfficeSkit.time(level().getGameTime());
         if (role == Role.SUPERVISOR) {
-            if (t == 0) say("Nick. IT has a meeting in here. You need to leave.");
-            if (t == 45) say("I am getting SICK and TIRED of you, Safety Nick.");
+            if (t == OfficeSkit.LINE_IT_MEETING) say("Nick. IT has a meeting in here. You need to leave.");
+            if (t == OfficeSkit.LINE_SICK_AND_TIRED) say("I am getting SICK and TIRED of you, Safety Nick.");
             // The phone call
-            if (t == OfficeSkit.CALL_START || t == OfficeSkit.CALL_START + 8) {
+            if (t == OfficeSkit.RING_1 || t == OfficeSkit.RING_2) {
                 playSound(net.minecraft.sounds.SoundEvents.AMETHYST_BLOCK_CHIME, 1.5f, 1.6f);   // ringtone
             }
-            if (t == OfficeSkit.CALL_START + 20) say("*answers phone* Slater speaking.");
-            if (t == OfficeSkit.CALL_START + 45) {
+            if (t == OfficeSkit.LINE_ANSWER) say("*answers phone* Slater speaking.");
+            if (t == OfficeSkit.LINE_BOSS) {
                 say("§d<Slater's Boss (on the phone)> §fDid you finally get rid of that sick bastard?", true);
             }
-            if (t == OfficeSkit.CALL_START + 90) say("Damn right I did. I hate him.");
+            if (t == OfficeSkit.LINE_REPLY) say("Damn right I did. I hate him.");
         } else {
-            if (t == OfficeSkit.DOWN_START) say("SLATER HATES ME!!");
-            if (t == OfficeSkit.DOWN_START + 110) say("SLATER HATES MEEEEEE");
-            if (t == OfficeSkit.DOWN_END + 20) say("*sniff* ...he hates me, man.");
+            if (t == OfficeSkit.LINE_HATES_ME) say("SLATER HATES ME!!");
+            if (t == OfficeSkit.LINE_HATES_ME_AGAIN) say("SLATER HATES MEEEEEE");
+            if (t == OfficeSkit.LINE_SNIFF) say("*sniff* ...he hates me, man.");
             if (OfficeSkit.nickDown(level().getGameTime()) && level() instanceof net.minecraft.server.level.ServerLevel server) {
                 if (t % 4 == 0) {
                     server.sendParticles(net.minecraft.core.particles.ParticleTypes.SPLASH,
