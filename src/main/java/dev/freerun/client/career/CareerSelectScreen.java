@@ -44,10 +44,11 @@ public class CareerSelectScreen extends Screen {
             final int idx = i;
             Career c = CHOICES[i];
             boolean current = CareerClientState.career == c.ordinal();
-            buttons[i] = addRenderableWidget(Button.builder(Component.literal(current ? "Current career" : "Become " + c.title),
-                            b -> pick(idx))
+            boolean mastered = (CareerClientState.completed & (1 << c.ordinal())) != 0;
+            buttons[i] = addRenderableWidget(Button.builder(Component.literal(
+                            mastered ? "★ Mastered" : current ? "Current career" : "Become " + c.title), b -> pick(idx))
                     .bounds(cardX(i) + 8, cardY(i) + CARD_H - 24, CARD_W - 16, 18).build());
-            buttons[i].active = !current;
+            buttons[i].active = !current && !mastered;
         }
         if (parent != null) {
             addRenderableWidget(Button.builder(Component.literal("Back"), b -> onClose())
@@ -61,7 +62,7 @@ public class CareerSelectScreen extends Screen {
             confirming = i;
             for (int k = 0; k < buttons.length; k++) {
                 if (buttons[k].active) buttons[k].setMessage(Component.literal(
-                        k == i ? "§eClick again: skills reset" : "Become " + CHOICES[k].title));
+                        k == i ? "§eClick again: unfinished skills reset" : "Become " + CHOICES[k].title));
             }
             return;
         }
@@ -73,7 +74,7 @@ public class CareerSelectScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         g.drawCenteredString(font, title.copy().withStyle(s -> s.withBold(true)), width / 2, cardY(0) - 34, 0xFFFFFF);
-        g.drawCenteredString(font, Component.literal("You can switch later from the skill tree (P), but your skills reset."),
+        g.drawCenteredString(font, Component.literal("Finish a tree to get promoted to the next career and keep every skill."),
                 width / 2, cardY(0) - 20, 0xAAAAAA);
         for (int i = 0; i < CHOICES.length; i++) {
             Career c = CHOICES[i];

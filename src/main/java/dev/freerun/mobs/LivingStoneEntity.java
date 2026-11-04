@@ -36,6 +36,11 @@ public class LivingStoneEntity extends PathfinderMob {
             "You call that a staircase, chud?", "Chud.", "Absolute chud."
     };
 
+    private static final String[] CHUD_MAXING_LINES = {
+            "Now THAT is chud-maxing.", "Look at you. Peak chud.", "I've never been prouder, chud.",
+            "You ate the sausage. You absolute chud.", "Chud-maxing achieved. I'm literally crying."
+    };
+
     private UUID owner;
     private int talkCooldown = 60;
 
@@ -123,7 +128,12 @@ public class LivingStoneEntity extends PathfinderMob {
         if (--talkCooldown > 0) return;
         talkCooldown = 300 + random.nextInt(400);   // every 15-35 seconds
         Player p = owner();
-        if (p != null && distanceToSqr(p) < 16 * 16) say(p, LINES[random.nextInt(LINES.length)]);
+        if (p == null || distanceToSqr(p) >= 16 * 16) return;
+        if (p.hasEffect(dev.freerun.food.FoodRegistry.CHUD_MAXING)) {
+            say(p, CHUD_MAXING_LINES[random.nextInt(CHUD_MAXING_LINES.length)]);
+        } else {
+            say(p, LINES[random.nextInt(LINES.length)]);
+        }
     }
 
     @Override

@@ -61,6 +61,8 @@ public final class Careers {
                 (payload, ctx) -> choose(ctx.player(), Career.byId(payload.career())));
         ServerPlayNetworking.registerGlobalReceiver(CareerPayloads.Unlock.TYPE,
                 (payload, ctx) -> unlock(ctx.player(), payload.skill()));
+        PayloadTypeRegistry.playC2S().register(CareerPayloads.Prestige.TYPE, CareerPayloads.Prestige.CODEC);
+        ServerPlayNetworking.registerGlobalReceiver(CareerPayloads.Prestige.TYPE, (payload, ctx) -> prestige(ctx.player()));
 
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayer p = handler.player;
@@ -136,8 +138,8 @@ public final class Careers {
     public static void sync(ServerPlayer p, int gained, String reason) {
         if (!ServerPlayNetworking.canSend(p, CareerPayloads.Sync.TYPE)) return;
         CareerData d = get(p);
-        ServerPlayNetworking.send(p, new CareerPayloads.Sync(d.career(), d.level(), d.xp(), d.skills(), gained,
-                reason == null ? "" : reason));
+        ServerPlayNetworking.send(p, new CareerPayloads.Sync(d.career() | (d.completed() << 8), d.level(), d.xp(),
+                d.skills(), gained, reason == null ? "" : reason));
     }
 
     // ------------------------------------------------------------------ progress
@@ -155,7 +157,7 @@ public final class Careers {
             leveled = true;
         }
         if (level >= CareerData.MAX_LEVEL) xp = 0;
-        set(p, new CareerData(d.career(), level, xp, d.skills()));
+        set(p, new CareerData(d.career(), level, xp, d.skills(), d.completed()));
         sync(p, gain, reason);
         if (leveled) {
             p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 0.8f, 1.2f);
@@ -168,14 +170,50 @@ public final class Careers {
         if (career == Career.NONE) return;
         CareerData d = get(p);
         if (d.careerType() == career) return;
+        if (d.isCompleted(career)) {
+            p.displayClientMessage(Component.literal("§cYou've already mastered " + career.title + "."), true);
+            return;
+        }
         boolean switching = d.careerType() != Career.NONE;
-        set(p, new CareerData(career.ordinal(), d.level(), d.xp(), List.of()));
+        // Switching sideways drops the skills of the unfinished career; mastered careers stay.
+        List<String> kept = d.skills().stream().filter(id -> {
+            Skill s = Skills.get(id);
+            return s != null && d.isCompleted(s.career());
+        }).toList();
+        set(p, new CareerData(career.ordinal(), d.level(), d.xp(), kept, d.completed()));
         apply(p);
         sync(p, 0, "");
         p.displayClientMessage(Component.literal("§6You're now in " + career.title + "."
-                + (switching ? " §7Your skills were reset; you kept your level." : "")
+                + (switching ? " §7Your unfinished skills were reset; you kept your level." : "")
                 + " §7Press §fP§7 to open your skill tree."), false);
         p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 0.5f, 1.2f);
+    }
+
+    /**
+     * Promotion: with every skill in your tree unlocked you move up to the next career at level 1,
+     * keeping every skill you own. The finished career is marked with a prestige star.
+     */
+    public static void prestige(ServerPlayer p) {
+        CareerData d = get(p);
+        if (!d.canPrestige()) {
+            p.displayClientMessage(Component.literal("§cUnlock every skill in your tree to get promoted."), true);
+            return;
+        }
+        Career from = d.careerType();
+        Career to = d.nextCareer();
+        int completed = d.completed() | (1 << from.ordinal());
+        set(p, new CareerData(to.ordinal(), 1, 0, d.skills(), completed));
+        apply(p);
+        sync(p, 0, "");
+        p.displayClientMessage(Component.literal("§6§lPROMOTED! §r§eYou're now in " + to.title
+                + " §7(prestige " + Integer.bitCount(completed) + "). §fEvery " + from.title
+                + " skill stays with you."), false);
+        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.UI_TOAST_CHALLENGE_COMPLETE, SoundSource.PLAYERS, 1.0f, 1.0f);
+        p.level().playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.FIREWORK_ROCKET_LARGE_BLAST, SoundSource.PLAYERS, 1.0f, 1.0f);
+        if (p.level() instanceof net.minecraft.server.level.ServerLevel server) {
+            server.sendParticles(net.minecraft.core.particles.ParticleTypes.TOTEM_OF_UNDYING,
+                    p.getX(), p.getY() + 1.0, p.getZ(), 60, 0.5, 0.8, 0.5, 0.4);
+        }
     }
 
     public static void unlock(ServerPlayer p, String id) {

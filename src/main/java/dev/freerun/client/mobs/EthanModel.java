@@ -59,6 +59,15 @@ public class EthanModel extends HumanoidModel<EthanEntity> {
         leftArm.setPos(4.0f, -13.0f, 0.0f);
         rightLeg.setPos(-1.2f, -2.0f, 0.0f);
         leftLeg.setPos(1.2f, -2.0f, 0.0f);
+        if (entity.isHanging()) {
+            // Both arms straight up, gripping the crane girder; legs dangling.
+            rightArm.xRot = (float) Math.PI;
+            leftArm.xRot = (float) Math.PI;
+            rightArm.zRot = -0.1f;
+            leftArm.zRot = 0.1f;
+            rightLeg.xRot = (float) Math.sin(ageInTicks * 0.15f) * 0.25f;
+            leftLeg.xRot = -rightLeg.xRot;
+        }
         // Puzzled head tilt every so often.
         head.zRot = (float) Math.sin(ageInTicks * 0.05f) * 0.12f;
         hat.copyFrom(head);

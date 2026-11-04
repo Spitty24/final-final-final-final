@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "top": "freerun:block/counter_top",
+    "front": "freerun:block/counter_front",
+    "side": "freerun:block/counter_side",
+    "bottom": "freerun:block/counter_side"
+  }
+}

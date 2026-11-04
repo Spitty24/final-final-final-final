@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "freerun:roasted_coffee_beans"
+    }
+  ],
+  "result": {
+    "id": "freerun:coffee_grounds",
+    "count": 2
+  }
+}

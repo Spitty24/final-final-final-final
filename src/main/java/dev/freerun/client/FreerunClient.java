@@ -50,6 +50,11 @@ public final class FreerunClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(
+                dev.freerun.food.FoodRegistry.COFFEE_PLANT, net.minecraft.client.renderer.RenderType.cutout());
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(
+                dev.freerun.food.FoodRegistry.COFFEE_MAKER, net.minecraft.client.renderer.RenderType.translucent());
+
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.freerun"));
         forksUpKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -183,7 +188,8 @@ public final class FreerunClient implements ClientModInitializer {
                     boolean known = dev.freerun.career.CareerClientState.owner != null;
                     dev.freerun.career.CareerClientState.owner =
                             context.client().player != null ? context.client().player.getUUID() : null;
-                    dev.freerun.career.CareerClientState.career = payload.career();
+                    dev.freerun.career.CareerClientState.career = payload.career() & 0xFF;
+                    dev.freerun.career.CareerClientState.completed = payload.career() >>> 8;
                     dev.freerun.career.CareerClientState.level = payload.level();
                     dev.freerun.career.CareerClientState.xp = payload.xp();
                     dev.freerun.career.CareerClientState.skills = java.util.List.copyOf(payload.skills());
@@ -199,10 +205,19 @@ public final class FreerunClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.CareerPayloads.OpenSelect.TYPE, (payload, context) ->
                 context.client().execute(() -> pickerPending = true));
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.career.CareerHud.render(guiGraphics));
+        // Chud-Maxing: a much bigger body drawn over affected players.
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(ChudLayer.LAYER, ChudLayer::createLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT.register(
+                (entityType, renderer, helper, context) -> {
+                    if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer playerRenderer) {
+                        helper.register(new ChudLayer(playerRenderer, context.bakeLayer(ChudLayer.LAYER)));
+                    }
+                });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             dev.freerun.career.CareerClientState.owner = null;
             dev.freerun.career.CareerClientState.career = 0;
+            dev.freerun.career.CareerClientState.completed = 0;
             dev.freerun.career.CareerClientState.level = 1;
             dev.freerun.career.CareerClientState.xp = 0;
             dev.freerun.career.CareerClientState.skills = java.util.List.of();

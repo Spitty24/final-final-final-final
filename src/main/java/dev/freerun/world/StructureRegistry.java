@@ -16,6 +16,8 @@ public final class StructureRegistry {
     public static StructureType<FactoryStructure> WELDING_FACTORY;
     public static StructurePieceType FACTORY_PIECE;
     public static StructurePieceType PARKING_LOT_PIECE;
+    public static StructurePieceType BREAK_ROOM_PIECE;
+    public static StructurePieceType PROCESSING_PIECE;
 
     private StructureRegistry() {}
 
@@ -30,5 +32,9 @@ public final class StructureRegistry {
                 Freerun.id("welding_factory"), FactoryPiece::new);
         PARKING_LOT_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
                 Freerun.id("factory_parking_lot"), ParkingLotPiece::new);
+        BREAK_ROOM_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("factory_break_room"), BreakRoomPiece::new);
+        PROCESSING_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("factory_processing"), ProcessingPiece::new);
     }
 }

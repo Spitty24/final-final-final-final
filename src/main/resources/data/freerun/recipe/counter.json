@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "PCP",
+    "PPP"
+  ],
+  "key": {
+    "S": {
+      "item": "minecraft:smooth_stone_slab"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    },
+    "C": {
+      "item": "minecraft:chest"
+    }
+  },
+  "result": {
+    "id": "freerun:counter",
+    "count": 2
+  }
+}

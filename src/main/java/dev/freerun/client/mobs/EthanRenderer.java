@@ -11,6 +11,7 @@ public class EthanRenderer extends MobRenderer<EthanEntity, EthanModel> {
 
     public EthanRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new EthanModel(ctx.bakeLayer(EthanModel.LAYER)), 0.4f);
+        addLayer(new net.minecraft.client.renderer.entity.layers.ItemInHandLayer<>(this, ctx.getItemInHandRenderer()));
     }
 
     @Override

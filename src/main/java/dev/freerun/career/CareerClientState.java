@@ -9,6 +9,7 @@ import java.util.UUID;
 public final class CareerClientState {
     public static UUID owner;
     public static int career;
+    public static int completed;
     public static int level = 1;
     public static int xp;
     public static List<String> skills = List.of();
@@ -20,7 +21,7 @@ public final class CareerClientState {
     private CareerClientState() {}
 
     public static CareerData data() {
-        return new CareerData(career, level, xp, skills);
+        return new CareerData(career, level, xp, skills, completed);
     }
 
     public static boolean has(Player p, String skill) {

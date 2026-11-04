@@ -1,0 +1,154 @@
+{
+  "variants": {
+    "brewing=false,cups=0,facing=north": {
+      "model": "freerun:block/coffee_maker_empty"
+    },
+    "brewing=false,cups=1,facing=north": {
+      "model": "freerun:block/coffee_maker_full"
+    },
+    "brewing=false,cups=2,facing=north": {
+      "model": "freerun:block/coffee_maker_full"
+    },
+    "brewing=false,cups=3,facing=north": {
+      "model": "freerun:block/coffee_maker_full"
+    },
+    "brewing=false,cups=4,facing=north": {
+      "model": "freerun:block/coffee_maker_full"
+    },
+    "brewing=true,cups=0,facing=north": {
+      "model": "freerun:block/coffee_maker_brewing"
+    },
+    "brewing=true,cups=1,facing=north": {
+      "model": "freerun:block/coffee_maker_brewing"
+    },
+    "brewing=true,cups=2,facing=north": {
+      "model": "freerun:block/coffee_maker_brewing"
+    },
+    "brewing=true,cups=3,facing=north": {
+      "model": "freerun:block/coffee_maker_brewing"
+    },
+    "brewing=true,cups=4,facing=north": {
+      "model": "freerun:block/coffee_maker_brewing"
+    },
+    "brewing=false,cups=0,facing=east": {
+      "model": "freerun:block/coffee_maker_empty",
+      "y": 90
+    },
+    "brewing=false,cups=1,facing=east": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 90
+    },
+    "brewing=false,cups=2,facing=east": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 90
+    },
+    "brewing=false,cups=3,facing=east": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 90
+    },
+    "brewing=false,cups=4,facing=east": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 90
+    },
+    "brewing=true,cups=0,facing=east": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 90
+    },
+    "brewing=true,cups=1,facing=east": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 90
+    },
+    "brewing=true,cups=2,facing=east": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 90
+    },
+    "brewing=true,cups=3,facing=east": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 90
+    },
+    "brewing=true,cups=4,facing=east": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 90
+    },
+    "brewing=false,cups=0,facing=south": {
+      "model": "freerun:block/coffee_maker_empty",
+      "y": 180
+    },
+    "brewing=false,cups=1,facing=south": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 180
+    },
+    "brewing=false,cups=2,facing=south": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 180
+    },
+    "brewing=false,cups=3,facing=south": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 180
+    },
+    "brewing=false,cups=4,facing=south": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 180
+    },
+    "brewing=true,cups=0,facing=south": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 180
+    },
+    "brewing=true,cups=1,facing=south": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 180
+    },
+    "brewing=true,cups=2,facing=south": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 180
+    },
+    "brewing=true,cups=3,facing=south": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 180
+    },
+    "brewing=true,cups=4,facing=south": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 180
+    },
+    "brewing=false,cups=0,facing=west": {
+      "model": "freerun:block/coffee_maker_empty",
+      "y": 270
+    },
+    "brewing=false,cups=1,facing=west": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 270
+    },
+    "brewing=false,cups=2,facing=west": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 270
+    },
+    "brewing=false,cups=3,facing=west": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 270
+    },
+    "brewing=false,cups=4,facing=west": {
+      "model": "freerun:block/coffee_maker_full",
+      "y": 270
+    },
+    "brewing=true,cups=0,facing=west": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 270
+    },
+    "brewing=true,cups=1,facing=west": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 270
+    },
+    "brewing=true,cups=2,facing=west": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 270
+    },
+    "brewing=true,cups=3,facing=west": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 270
+    },
+    "brewing=true,cups=4,facing=west": {
+      "model": "freerun:block/coffee_maker_brewing",
+      "y": 270
+    }
+  }
+}

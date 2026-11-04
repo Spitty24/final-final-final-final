@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,running=false": {
+      "model": "freerun:block/microwave"
+    },
+    "facing=north,running=true": {
+      "model": "freerun:block/microwave_on"
+    },
+    "facing=east,running=false": {
+      "model": "freerun:block/microwave",
+      "y": 90
+    },
+    "facing=east,running=true": {
+      "model": "freerun:block/microwave_on",
+      "y": 90
+    },
+    "facing=south,running=false": {
+      "model": "freerun:block/microwave",
+      "y": 180
+    },
+    "facing=south,running=true": {
+      "model": "freerun:block/microwave_on",
+      "y": 180
+    },
+    "facing=west,running=false": {
+      "model": "freerun:block/microwave",
+      "y": 270
+    },
+    "facing=west,running=true": {
+      "model": "freerun:block/microwave_on",
+      "y": 270
+    }
+  }
+}

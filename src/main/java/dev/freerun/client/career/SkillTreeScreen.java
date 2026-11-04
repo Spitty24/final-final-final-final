@@ -35,6 +35,10 @@ public class SkillTreeScreen extends Screen {
 
     private final List<Node> nodes = new ArrayList<>();
     private int px, py;
+    /** Which tree is shown: your current career, or one you've mastered (read-only). */
+    private Career viewing;
+    private Button promote;
+    private boolean confirmPromote;
 
     public SkillTreeScreen() {
         super(Component.literal("Skill Tree"));
@@ -47,9 +51,25 @@ public class SkillTreeScreen extends Screen {
             return;
         }
         px = (width - PANEL_W) / 2;
-        py = (height - PANEL_H) / 2;
+        py = (height - PANEL_H) / 2 + 8;
         nodes.clear();
-        Career career = Career.byId(CareerClientState.career);
+        CareerData data = CareerClientState.data();
+        if (viewing == null || (viewing != data.careerType() && !data.isCompleted(viewing))) viewing = data.careerType();
+        Career career = viewing;
+
+        // Tabs for your current career and every career you've mastered
+        int tabX = px;
+        for (Career c : Career.values()) {
+            if (c == Career.NONE || (c != data.careerType() && !data.isCompleted(c))) continue;
+            String label = (data.isCompleted(c) ? "★ " : "") + c.title;
+            int w = font.width(label) + 14;
+            Button tab = addRenderableWidget(Button.builder(Component.literal(label), b -> {
+                viewing = c;
+                rebuildWidgets();
+            }).bounds(tabX, py - 20, w, 18).build());
+            tab.active = c != viewing;
+            tabX += w + 4;
+        }
         for (int tier = 1; tier <= 4; tier++) {
             final int t = tier;
             List<Skill> inTier = Skills.forCareer(career).stream().filter(s -> s.tier() == t).toList();
@@ -62,14 +82,32 @@ public class SkillTreeScreen extends Screen {
         }
         addRenderableWidget(Button.builder(Component.literal("Change Career"),
                 b -> minecraft.setScreen(new CareerSelectScreen(this))).bounds(px + 10, py + PANEL_H - 26, 100, 18).build());
+        Career next = data.nextCareer();
+        promote = addRenderableWidget(Button.builder(Component.literal(promoteLabel(data)), b -> {
+            if (!confirmPromote) {
+                confirmPromote = true;
+                b.setMessage(Component.literal("§eClick again: start " + next.title + " at Lv 1"));
+                return;
+            }
+            ClientPlayNetworking.send(new CareerPayloads.Prestige(0));
+            onClose();
+        }).bounds(px + PANEL_W / 2 - 95, py + PANEL_H - 26, 190, 18).build());
+        promote.active = data.canPrestige();
+        promote.visible = data.careerType() == viewing;
         addRenderableWidget(Button.builder(Component.literal("Done"), b -> onClose())
                 .bounds(px + PANEL_W - 90, py + PANEL_H - 26, 80, 18).build());
+    }
+
+    private static String promoteLabel(CareerData d) {
+        if (d.nextCareer() == Career.NONE) return d.treeComplete() ? "★ Top of the ladder ★" : "Finish your tree to get promoted";
+        return d.canPrestige() ? "★ Get Promoted → " + d.nextCareer().title : "Finish your tree to get promoted";
     }
 
     private enum State { OWNED, AVAILABLE, LOCKED }
 
     private State state(Skill s, CareerData d) {
         if (d.has(s.id())) return State.OWNED;
+        if (s.career() != d.careerType()) return State.LOCKED;
         boolean prereq = s.tier() == 1 || Skills.forCareer(s.career()).stream()
                 .anyMatch(o -> o.tier() == s.tier() - 1 && d.has(o.id()));
         return prereq && d.level() >= s.requiredLevel() && d.points() > 0 ? State.AVAILABLE : State.LOCKED;
@@ -79,14 +117,21 @@ public class SkillTreeScreen extends Screen {
     public void render(GuiGraphics g, int mouseX, int mouseY, float partialTick) {
         super.render(g, mouseX, mouseY, partialTick);
         CareerData d = CareerClientState.data();
-        Career career = d.careerType();
+        Career career = viewing != null ? viewing : d.careerType();
+        boolean mastered = career != d.careerType();
 
         g.fill(px, py, px + PANEL_W, py + PANEL_H, 0xE40E0E12);
         g.renderOutline(px, py, PANEL_W, PANEL_H, 0xFF000000 | career.color);
 
-        // Header: career, level, XP bar, points
+        // Header: career, prestige stars, level, XP bar, points
         g.drawString(font, Component.literal(career.title).withStyle(s -> s.withBold(true)), px + 10, py + 9, career.color);
-        String lvl = "Level " + d.level() + (d.level() >= CareerData.MAX_LEVEL ? " (max)" : "");
+        if (d.prestigeCount() > 0) {
+            g.drawString(font, "★".repeat(d.prestigeCount()), px + 16 + font.width(career.title) + 4, py + 9, 0xFFD040);
+        }
+        if (mastered) {
+            g.drawString(font, "Mastered: all of these stay with you", px + 10, py + 23, 0xE0B030, false);
+        } else {
+        String lvl = mastered ? "" : "Level " + d.level() + (d.level() >= CareerData.MAX_LEVEL ? " (max)" : "");
         g.drawString(font, lvl, px + PANEL_W - 10 - font.width(lvl), py + 9, 0xFFFFFF);
         int barX = px + 10, barY = py + 23, barW = PANEL_W - 20;
         int need = CareerData.xpToNext(d.level());
@@ -97,6 +142,7 @@ public class SkillTreeScreen extends Screen {
         g.drawString(font, xpText, barX, barY + 8, 0xAAAAAA, false);
         String pts = d.points() + (d.points() == 1 ? " skill point" : " skill points") + " to spend";
         g.drawString(font, pts, px + PANEL_W - 10 - font.width(pts), barY + 8, d.points() > 0 ? 0x55FF55 : 0x888888, false);
+        }
 
         // Tier headings
         for (int tier = 1; tier <= 4; tier++) {
@@ -140,7 +186,7 @@ public class SkillTreeScreen extends Screen {
                 g.drawString(font, lines.get(i), n.x() + 23, ty, st == State.LOCKED ? 0x888888 : 0xFFFFFF, false);
                 ty += 10;
             }
-            String tag = st == State.OWNED ? "Unlocked" : st == State.AVAILABLE ? "Click to unlock"
+            String tag = st == State.OWNED ? (mastered ? "Mastered" : "Unlocked") : st == State.AVAILABLE ? "Click to unlock"
                     : d.level() < n.skill().requiredLevel() ? "Needs Lv " + n.skill().requiredLevel() : "Locked";
             g.drawString(font, tag, n.x() + 5, n.y() + NODE_H - 11,
                     st == State.OWNED ? 0xE0B030 : st == State.AVAILABLE ? 0x55DD66 : 0x777777, false);

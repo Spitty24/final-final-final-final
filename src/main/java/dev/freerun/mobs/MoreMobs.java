@@ -23,6 +23,7 @@ public final class MoreMobs {
     public static Item LIVING_STONE_EGG;
     public static Item ETHAN_EGG;
     public static Item GANGSTER_EGG;
+    public static Item PLASMA_CANNON;
 
     private MoreMobs() {}
 
@@ -50,6 +51,9 @@ public final class MoreMobs {
         LIVING_STONE_EGG = egg("living_stone_spawn_egg", new SpawnEggItem(LIVING_STONE, 0x7d7d7d, 0x5a5a5a, new Item.Properties()));
         ETHAN_EGG = egg("ethan_james_patrick_spawn_egg", new SpawnEggItem(ETHAN, 0x2b3a5c, 0xf08a24, new Item.Properties()));
         GANGSTER_EGG = egg("gangster_spawn_egg", new SpawnEggItem(GANGSTER, 0x2a2a2e, 0xd9731e, new Item.Properties()));
+        PLASMA_CANNON = egg("plasma_cannon", new dev.freerun.item.PlasmaCannonItem(new Item.Properties().stacksTo(1)
+                .rarity(net.minecraft.world.item.Rarity.EPIC)));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.COMBAT).register(e -> e.accept(PLASMA_CANNON));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(e -> {
             e.accept(LIVING_STONE_EGG);
             e.accept(ETHAN_EGG);

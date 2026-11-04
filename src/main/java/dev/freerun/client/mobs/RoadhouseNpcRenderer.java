@@ -24,6 +24,7 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
     private static final ResourceLocation NICK = tex("nick");
     private static final ResourceLocation WELDER = tex("welder");
     private static final ResourceLocation PRESS_OPERATOR = tex("press_operator");
+    private static final ResourceLocation SAUSAGE_MAKER = tex("sausage_maker");
     private static final ResourceLocation[] CUSTOMERS = {tex("customer_0"), tex("customer_1"), tex("customer_2")};
 
     public RoadhouseNpcRenderer(EntityRendererProvider.Context ctx) {
@@ -46,6 +47,7 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
             case SAFETY -> NICK;
             case WELDER -> WELDER;
             case PRESS_OPERATOR -> PRESS_OPERATOR;
+            case SAUSAGE_MAKER -> SAUSAGE_MAKER;
             case CUSTOMER -> CUSTOMERS[Math.floorMod(entity.getVariant(), CUSTOMERS.length)];
         };
     }

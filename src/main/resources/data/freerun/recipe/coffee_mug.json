@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "B B",
+    " B "
+  ],
+  "key": {
+    "B": {
+      "item": "minecraft:brick"
+    }
+  },
+  "result": {
+    "id": "freerun:coffee_mug",
+    "count": 2
+  }
+}

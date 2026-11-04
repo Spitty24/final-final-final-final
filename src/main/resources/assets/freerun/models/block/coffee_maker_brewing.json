@@ -1,0 +1,253 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "freerun:block/coffee_maker_body",
+    "body": "freerun:block/coffee_maker_body",
+    "glass": "freerun:block/carafe_glass",
+    "coffee": "freerun:block/coffee",
+    "light": "minecraft:block/red_concrete"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        0,
+        3
+      ],
+      "to": [
+        13,
+        1,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        1,
+        9
+      ],
+      "to": [
+        13,
+        12,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        9,
+        3
+      ],
+      "to": [
+        13,
+        12,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        1,
+        4
+      ],
+      "to": [
+        11,
+        2,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        5.3,
+        2.1,
+        4.3
+      ],
+      "to": [
+        10.7,
+        5,
+        7.7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#coffee"
+        },
+        "south": {
+          "texture": "#coffee"
+        },
+        "east": {
+          "texture": "#coffee"
+        },
+        "west": {
+          "texture": "#coffee"
+        },
+        "up": {
+          "texture": "#coffee"
+        },
+        "down": {
+          "texture": "#coffee"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        2,
+        4
+      ],
+      "to": [
+        11,
+        8,
+        8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#glass"
+        },
+        "south": {
+          "texture": "#glass"
+        },
+        "east": {
+          "texture": "#glass"
+        },
+        "west": {
+          "texture": "#glass"
+        },
+        "up": {
+          "texture": "#glass"
+        },
+        "down": {
+          "texture": "#glass"
+        }
+      }
+    },
+    {
+      "from": [
+        10.5,
+        4,
+        5
+      ],
+      "to": [
+        12,
+        7,
+        7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#body"
+        },
+        "south": {
+          "texture": "#body"
+        },
+        "east": {
+          "texture": "#body"
+        },
+        "west": {
+          "texture": "#body"
+        },
+        "up": {
+          "texture": "#body"
+        },
+        "down": {
+          "texture": "#body"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        1.5,
+        2.9
+      ],
+      "to": [
+        12,
+        2.5,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#light"
+        }
+      }
+    }
+  ]
+}

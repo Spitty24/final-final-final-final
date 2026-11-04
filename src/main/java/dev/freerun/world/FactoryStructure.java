@@ -51,6 +51,8 @@ public class FactoryStructure extends Structure {
         return Optional.of(new GenerationStub(origin, builder -> {
             builder.addPiece(new FactoryPiece(origin));
             builder.addPiece(new ParkingLotPiece(origin));
+            builder.addPiece(new BreakRoomPiece(origin));
+            builder.addPiece(new ProcessingPiece(origin));
         }));
     }
 

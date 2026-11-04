@@ -37,7 +37,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
      * New roles must be appended (the ordinal is saved). The office pair only appear in the office;
      * WELDER and PRESS_OPERATOR work in the welding factory.
      */
-    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY, WELDER, PRESS_OPERATOR }
+    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY, WELDER, PRESS_OPERATOR, SAUSAGE_MAKER }
 
     private static final Role[] RESTAURANT_ROLES = {Role.HOST, Role.WAITER, Role.COOK, Role.CUSTOMER};
 
@@ -80,6 +80,16 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             "Stock racks are along the west wall. Help yourself.",
             "The gear chest is at the back. Don't tell the foreman I told you.",
             "This press has been running since before you were born."
+    };
+
+    private static final String[] SAUSAGE_LINES = {
+            "Load the crop in the hopper first, then the meat. Never the other way around.",
+            "Pork on its own makes boudin. Add beetroot and it's chorizo.",
+            "Beef and potato: kielbasa. Beef and wheat: bratwurst. Write that down.",
+            "Chicken wants an apple. Mutton wants beetroot. Rabbit wants a carrot.",
+            "Fish and dried kelp. Don't make that face, it's good.",
+            "Somebody keeps making chud sausage on night shift. Rotten flesh and Stone. Disgusting.",
+            "Hairnets are not optional."
     };
 
     private long lastGiftTime = -GIFT_COOLDOWN;
@@ -127,6 +137,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             case SAFETY -> "Safety Nick";
             case WELDER -> "Welder";
             case PRESS_OPERATOR -> "Press Operator";
+            case SAUSAGE_MAKER -> "Sausage Maker";
         };
     }
 
@@ -169,9 +180,11 @@ public class RoadhouseNpcEntity extends PathfinderMob {
 
     private boolean isWorkBlock(net.minecraft.core.BlockPos pos) {
         net.minecraft.world.level.block.state.BlockState st = level().getBlockState(pos);
-        return getRole() == Role.WELDER
-                ? st.is(net.minecraft.world.level.block.Blocks.IRON_BLOCK)
-                : st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock;
+        return switch (getRole()) {
+            case WELDER -> st.is(net.minecraft.world.level.block.Blocks.IRON_BLOCK);
+            case SAUSAGE_MAKER -> st.getBlock() instanceof dev.freerun.food.SausageStufferBlock;
+            default -> st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock;
+        };
     }
 
     private void doFactoryWork(Role role) {
@@ -216,6 +229,17 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                         tx, ty + 0.3, tz, 2, 0.08, 0.1, 0.08, 0.01);
             }
             if (t % 15 == 0) playSound(net.minecraft.sounds.SoundEvents.CAMPFIRE_CRACKLE, 0.8f, 1.8f);
+        } else if (role == Role.SAUSAGE_MAKER) {
+            if (Math.floorMod(now + getId() * 11L, 140L) == 0L) {
+                net.minecraft.world.level.block.state.BlockState st = level().getBlockState(workSpot);
+                if (st.getBlock() instanceof dev.freerun.food.SausageStufferBlock) {
+                    dev.freerun.food.SausageStufferBlock.crank(server, workSpot, st);
+                    server.sendParticles(new net.minecraft.core.particles.ItemParticleOption(
+                                    net.minecraft.core.particles.ParticleTypes.ITEM,
+                                    new net.minecraft.world.item.ItemStack(net.minecraft.world.item.Items.PORKCHOP)),
+                            tx, ty + 0.4, tz, 6, 0.1, 0.1, 0.1, 0.04);
+                }
+            }
         } else if (pressPhase(now, getId()) == 0) {
             net.minecraft.world.level.block.state.BlockState st = level().getBlockState(workSpot);
             if (st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock) {
@@ -246,7 +270,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
     protected void customServerAiStep() {
         super.customServerAiStep();
         Role role = getRole();
-        if (role == Role.WELDER || role == Role.PRESS_OPERATOR) {
+        if (role == Role.WELDER || role == Role.PRESS_OPERATOR || role == Role.SAUSAGE_MAKER) {
             doFactoryWork(role);
             return;
         }
@@ -342,6 +366,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             case SAFETY -> line = OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
             case WELDER -> line = pick(WELDER_LINES);
             case PRESS_OPERATOR -> line = pick(PRESS_LINES);
+            case SAUSAGE_MAKER -> line = pick(SAUSAGE_LINES);
             default -> line = pick(CUSTOMER_LINES);
         }
         getLookControl().setLookAt(player, 30.0f, 30.0f);
