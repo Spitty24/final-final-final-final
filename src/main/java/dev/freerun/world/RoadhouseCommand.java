@@ -32,9 +32,9 @@ public final class RoadhouseCommand {
     private static int buildFactory(CommandSourceStack src) {
         ServerLevel level = src.getLevel();
         BlockPos feet = BlockPos.containing(src.getPosition());
-        BlockPos origin = feet.offset(-FactoryPiece.MAX_X / 2, -1, 2);
+        BlockPos origin = feet.offset(-FactoryPiece.MAX_X / 2, -1, 2 + ParkingLotPiece.DEPTH);
         for (int x = 0; x <= FactoryPiece.MAX_X; x++) {
-            for (int z = 0; z <= FactoryPiece.MAX_Z; z++) {
+            for (int z = -ParkingLotPiece.DEPTH; z <= FactoryPiece.MAX_Z; z++) {
                 for (int y = 1; y <= 6; y++) {
                     BlockPos p = origin.offset(x, -y, z);
                     net.minecraft.world.level.block.state.BlockState st = level.getBlockState(p);
@@ -46,7 +46,11 @@ public final class RoadhouseCommand {
         FactoryPiece piece = new FactoryPiece(origin);
         piece.postProcess(level, level.structureManager(), level.getChunkSource().getGenerator(),
                 level.getRandom(), piece.getBoundingBox(), new ChunkPos(origin), origin);
-        src.sendSuccess(() -> Component.literal("Welding factory built. The front door is right in front of you (south)."), true);
+        ParkingLotPiece lot = new ParkingLotPiece(origin);
+        lot.postProcess(level, level.structureManager(), level.getChunkSource().getGenerator(),
+                level.getRandom(), lot.getBoundingBox(), new ChunkPos(origin), origin);
+        src.sendSuccess(() -> Component.literal(
+                "Welding factory built: the parking lot starts just ahead of you (south), the building is past it."), true);
         return 1;
     }
 

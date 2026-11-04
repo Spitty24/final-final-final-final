@@ -50,5 +50,15 @@
   "item.freerun.forklift_driver_spawn_egg": "Forklift Driver Spawn Egg",
   "block.freerun.conveyor": "Conveyor Belt",
   "key.freerun.forks_up": "Forklift: forks up",
-  "key.freerun.forks_down": "Forklift: forks down"
+  "key.freerun.forks_down": "Forklift: forks down",
+  "item.freerun.boudin": "Boudin",
+  "block.freerun.sausage_stuffer": "Sausage Stuffer",
+  "entity.freerun.living_stone": "Stone",
+  "entity.freerun.ethan_james_patrick": "Ethan James Patrick",
+  "entity.freerun.gangster": "Crew Member",
+  "entity.freerun.gang_turf": "Gang Turf",
+  "item.freerun.living_stone_spawn_egg": "Living Stone Spawn Egg",
+  "item.freerun.ethan_james_patrick_spawn_egg": "Ethan James Patrick Spawn Egg",
+  "item.freerun.gangster_spawn_egg": "Crew Member Spawn Egg",
+  "key.freerun.skills": "Open skill tree"
 }

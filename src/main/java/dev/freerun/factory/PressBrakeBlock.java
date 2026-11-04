@@ -94,6 +94,7 @@ public class PressBrakeBlock extends HorizontalDirectionalBlock {
             cycle(server, pos, state);
             Block.popResourceFromFace(level, pos, state.getValue(FACING), out);
             player.displayClientMessage(Component.literal("§a" + done), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) dev.freerun.career.Careers.addXp(sp, 5, "pressing");
         }
         return ItemInteractionResult.sidedSuccess(level.isClientSide);
     }

@@ -41,7 +41,7 @@ public final class BlockRegistry {
 
     public static void register() {
         POINTLESS_ORE = block("pointless_ore",
-                new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)), CreativeModeTabs.NATURAL_BLOCKS);
+                new PointlessOreBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.STONE)), CreativeModeTabs.NATURAL_BLOCKS);
 
         // Decorative blocks for the Texas Roadhouse.
         TEXAS_ROADHOUSE_SIGN = block("texas_roadhouse_sign",

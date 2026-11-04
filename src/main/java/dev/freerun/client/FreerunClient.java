@@ -28,6 +28,25 @@ public final class FreerunClient implements ClientModInitializer {
     private static KeyMapping forksUpKey;
     private static KeyMapping forksDownKey;
     private static int lastForkDir;
+    private static KeyMapping skillsKey;
+    private static boolean skillsKeyWasDown;
+    private static boolean pickerPending;
+
+    /** Whether a key event is the skill tree key (used to close the screen with the same key). */
+    public static boolean skillsKeyMatches(int keyCode, int scanCode) {
+        return skillsKey != null && skillsKey.matches(keyCode, scanCode);
+    }
+
+    /**
+     * Raw key check for the skill tree key. P is also vanilla's Social Interactions key, and when two
+     * bindings share a key only one of them receives presses, so we read the key directly as well.
+     */
+    private static boolean skillsKeyDown(net.minecraft.client.Minecraft client) {
+        if (skillsKey.isDown()) return true;
+        InputConstants.Key key = KeyBindingHelper.getBoundKeyOf(skillsKey);
+        return key.getType() == InputConstants.Type.KEYSYM && key.getValue() != InputConstants.UNKNOWN.getValue()
+                && InputConstants.isKeyDown(client.getWindow().getWindow(), key.getValue());
+    }
 
     @Override
     public void onInitializeClient() {
@@ -35,6 +54,8 @@ public final class FreerunClient implements ClientModInitializer {
                 "key.freerun.toggle", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.categories.freerun"));
         forksUpKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.forks_up", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.freerun"));
+        skillsKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.skills", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_P, "key.categories.freerun"));
         forksDownKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.forks_down", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_V, "key.categories.freerun"));
 
@@ -87,6 +108,14 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.factory.CraneRenderer::new);
         EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.FORKLIFT_DRIVER,
                 dev.freerun.client.factory.ForkliftDriverRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.LivingStoneModel.LAYER, dev.freerun.client.mobs.LivingStoneModel::createLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.mobs.EthanModel.LAYER, dev.freerun.client.mobs.EthanModel::createLayer);
+        EntityRendererRegistry.register(dev.freerun.mobs.MoreMobs.LIVING_STONE, dev.freerun.client.mobs.LivingStoneRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.mobs.MoreMobs.ETHAN, dev.freerun.client.mobs.EthanRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.mobs.MoreMobs.GANGSTER, dev.freerun.client.mobs.GangsterRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.mobs.MoreMobs.GANG_TURF, net.minecraft.client.renderer.entity.NoopRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 
@@ -104,6 +133,21 @@ public final class FreerunClient implements ClientModInitializer {
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.level != null && !client.isPaused()) ClientClock.tick();
+            // Skill tree (P), and the career picker the server asks for on your first visit.
+            boolean skillsDown = client.player != null && skillsKeyDown(client);
+            if (skillsDown && !skillsKeyWasDown && client.screen == null) {
+                client.setScreen(dev.freerun.career.CareerClientState.career == 0
+                        ? new dev.freerun.client.career.CareerSelectScreen(null)
+                        : new dev.freerun.client.career.SkillTreeScreen());
+            }
+            skillsKeyWasDown = skillsDown;
+            while (skillsKey.consumeClick()) { }
+            if (pickerPending && client.screen == null && client.player != null) {
+                pickerPending = false;
+                if (dev.freerun.career.CareerClientState.career == 0) {
+                    client.setScreen(new dev.freerun.client.career.CareerSelectScreen(null));
+                }
+            }
             // Forklift fork controls: tell the server whenever the held direction changes.
             if (client.player != null && client.player.getVehicle() instanceof dev.freerun.factory.ForkliftEntity) {
                 int dir = (forksUpKey.isDown() ? 1 : 0) - (forksDownKey.isDown() ? 1 : 0);
@@ -133,7 +177,36 @@ public final class FreerunClient implements ClientModInitializer {
             }
         });
 
+        ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.CareerPayloads.Sync.TYPE, (payload, context) ->
+                context.client().execute(() -> {
+                    int oldLevel = dev.freerun.career.CareerClientState.level;
+                    boolean known = dev.freerun.career.CareerClientState.owner != null;
+                    dev.freerun.career.CareerClientState.owner =
+                            context.client().player != null ? context.client().player.getUUID() : null;
+                    dev.freerun.career.CareerClientState.career = payload.career();
+                    dev.freerun.career.CareerClientState.level = payload.level();
+                    dev.freerun.career.CareerClientState.xp = payload.xp();
+                    dev.freerun.career.CareerClientState.skills = java.util.List.copyOf(payload.skills());
+                    if (payload.gained() > 0) {
+                        dev.freerun.career.CareerClientState.lastGain = payload.gained();
+                        dev.freerun.career.CareerClientState.lastReason = payload.reason();
+                        dev.freerun.career.CareerClientState.lastGainMillis = System.currentTimeMillis();
+                    }
+                    if (known && payload.level() > oldLevel) {
+                        dev.freerun.career.CareerClientState.levelUpMillis = System.currentTimeMillis();
+                    }
+                }));
+        ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.CareerPayloads.OpenSelect.TYPE, (payload, context) ->
+                context.client().execute(() -> pickerPending = true));
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.career.CareerHud.render(guiGraphics));
+
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            dev.freerun.career.CareerClientState.owner = null;
+            dev.freerun.career.CareerClientState.career = 0;
+            dev.freerun.career.CareerClientState.level = 1;
+            dev.freerun.career.CareerClientState.xp = 0;
+            dev.freerun.career.CareerClientState.skills = java.util.List.of();
+            pickerPending = false;
             AnimState.clearAll();
             CONTROLLER.reset();
         });

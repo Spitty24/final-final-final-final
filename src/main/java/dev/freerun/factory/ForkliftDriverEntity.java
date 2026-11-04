@@ -123,9 +123,21 @@ public class ForkliftDriverEntity extends PathfinderMob {
         playSound(SoundEvents.VILLAGER_AMBIENT, 1.0f, 0.65f + random.nextFloat() * 0.15f);
     }
 
-    /** Right-clicked (directly, or via his forklift). */
+    /** Right-clicked (directly, or via his forklift). Hand him boudin and he lights right up. */
     public void chatter(Player player) {
         getLookControl().setLookAt(player, 30.0f, 30.0f);
+        net.minecraft.world.item.ItemStack held = player.getMainHandItem();
+        if (held.is(dev.freerun.food.FoodRegistry.BOUDIN)) {
+            held.consume(1, player);
+            say(player, "BOUDIN?! Mais cher, ça c'est bon! " + gibberish(random));
+            if (level() instanceof net.minecraft.server.level.ServerLevel server) {
+                server.sendParticles(net.minecraft.core.particles.ParticleTypes.HEART,
+                        getX(), getY() + 2.1, getZ(), 6, 0.4, 0.3, 0.4, 0.0);
+            }
+            playSound(SoundEvents.GENERIC_EAT, 1.0f, 0.8f);
+            chatterCooldown = 200;
+            return;
+        }
         say(player, gibberish(random));
         if (random.nextInt(3) == 0) {
             player.displayClientMessage(Component.literal("§7§o(You didn't catch a single word of that.)"), false);

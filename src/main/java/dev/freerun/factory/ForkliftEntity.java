@@ -169,7 +169,13 @@ public class ForkliftEntity extends LivingEntity {
         int dir = playerDriving ? forkInput : npcForkDir;
         if (!playerDriving && !(getFirstPassenger() instanceof ForkliftDriverEntity)) dir = 0;
         if (dir != 0) {
-            float next = (float) Mth.clamp(fork + dir * FORK_SPEED, 0.0, MAX_FORK);
+            double speed = FORK_SPEED;
+            if (playerDriving && getControllingPassenger() instanceof Player driver
+                    && (dev.freerun.career.Careers.has(driver, "forklift_certified")
+                    || dev.freerun.career.Careers.has(driver, "heavy_equipment"))) {
+                speed *= 2.0;
+            }
+            float next = (float) Mth.clamp(fork + dir * speed, 0.0, MAX_FORK);
             if (next != fork) {
                 if (dir > 0 && playerDriving && carried.isEmpty()) pickUpLoad(next);
                 entityData.set(DATA_FORK, next);
@@ -206,6 +212,9 @@ public class ForkliftEntity extends LivingEntity {
         carried.addAll(found);
         if (!carried.isEmpty()) {
             level().playSound(null, getX(), getY(), getZ(), SoundEvents.ANVIL_PLACE, SoundSource.NEUTRAL, 0.3f, 1.5f);
+            if (getControllingPassenger() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                dev.freerun.career.Careers.addXp(sp, 4, "forklift work");
+            }
         }
     }
 
@@ -275,7 +284,8 @@ public class ForkliftEntity extends LivingEntity {
 
     @Override
     protected float getRiddenSpeed(Player player) {
-        return (float) getAttributeValue(Attributes.MOVEMENT_SPEED);
+        float base = (float) getAttributeValue(Attributes.MOVEMENT_SPEED);
+        return dev.freerun.career.Careers.has(player, "forklift_certified") ? base * 1.35f : base;
     }
 
     @Override

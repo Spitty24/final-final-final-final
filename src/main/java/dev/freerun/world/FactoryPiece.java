@@ -373,6 +373,20 @@ public class FactoryPiece extends StructurePiece {
                 .setValue(HorizontalDirectionalBlock.FACING, Direction.WEST), 12, 1, 28, box);
         placeBlock(level, Blocks.WHITE_CONCRETE.defaultBlockState(), 14, 1, 29, box);
         placeBlock(level, Blocks.LIGHT_BLUE_STAINED_GLASS.defaultBlockState(), 14, 2, 29, box);
+        // Lunch counter: a sausage stuffer and a barrel of pork for making boudin
+        placeBlock(level, dev.freerun.food.FoodRegistry.SAUSAGE_STUFFER.defaultBlockState()
+                .setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 9, 1, 29, box);
+        placeBlock(level, Blocks.BARREL.defaultBlockState().setValue(BlockStateProperties.FACING, Direction.UP), 8, 1, 29, box);
+        fill(level, box, 8, 1, 29, new ItemStack(Items.PORKCHOP, 16), new ItemStack(dev.freerun.food.FoodRegistry.BOUDIN, 4));
+
+        // Ethan James Patrick, wandering the floor with questions
+        BlockPos ethanAt = getWorldPos(20, 1, 12).immutable();
+        if (box.isInside(ethanAt)) {
+            dev.freerun.mobs.EthanEntity ethan = new dev.freerun.mobs.EthanEntity(dev.freerun.mobs.MoreMobs.ETHAN, level.getLevel());
+            ethan.moveTo(ethanAt.getX() + 0.5, ethanAt.getY(), ethanAt.getZ() + 0.5, 0.0f, 0.0f);
+            ethan.setHome(getWorldPos(20, 1, 15).immutable(), 13);
+            level.addFreshEntityWithPassengers(ethan);
+        }
     }
 
     // ------------------------------------------------------------------ helpers

@@ -64,6 +64,9 @@ public class CraneEntity extends Entity {
     private double targetX, targetZ;
     private int driveTicks;
     private UUID operator;
+    private State lastState = State.IDLE;
+    private double speedBoost = 1.0;
+    private int stateTicks;
     private float clientDropO = (float) CARRY_DROP;
     private float clientDrop = (float) CARRY_DROP;
 
@@ -103,11 +106,19 @@ public class CraneEntity extends Entity {
         return Mth.lerp(partialTick, clientDropO, clientDrop);
     }
 
+    /**
+     * Cable length. The server keeps the exact value here and only syncs a float copy for drawing:
+     * comparing the rounded float against CARRY_DROP is what used to leave the hook stuck "raising"
+     * forever after the first lift.
+     */
+    private double dropExact = CARRY_DROP;
+
     private double drop() {
-        return entityData.get(DATA_DROP);
+        return level().isClientSide ? entityData.get(DATA_DROP) : dropExact;
     }
 
     private void setDrop(double d) {
+        dropExact = d;
         entityData.set(DATA_DROP, (float) d);
     }
 
@@ -147,11 +158,13 @@ public class CraneEntity extends Entity {
         targetZ = Mth.clamp(aim.z, minZ, maxZ);
         driveTicks = 3;
         operator = player.getUUID();
+        speedBoost = dev.freerun.career.Careers.has(player, "heavy_equipment") ? 1.6 : 1.0;
     }
 
     /** Sneak + right-click: hook down to grab, or down to set the load on the floor. */
     public void hookAction(Player player) {
         operator = player.getUUID();
+        if (state != State.IDLE && stateTicks > 200) state = State.IDLE;   // never let the controls wedge
         if (state != State.IDLE) {
             player.displayClientMessage(Component.literal("§7The hook is still moving."), true);
             return;
@@ -159,6 +172,12 @@ public class CraneEntity extends Entity {
         state = load != null ? State.LOWER_RELEASE : State.LOWER_GRAB;
         player.displayClientMessage(Component.literal(load != null ? "§eSetting the load down..." : "§eLowering the hook..."), true);
         playSound(SoundEvents.CHAIN_STEP, 1.0f, 0.6f);
+    }
+
+    private void operatorXp(int amount) {
+        if (operator != null && level().getPlayerByUUID(operator) instanceof net.minecraft.server.level.ServerPlayer sp) {
+            dev.freerun.career.Careers.addXp(sp, amount, "crane work");
+        }
     }
 
     private void tell(String text) {
@@ -187,7 +206,7 @@ public class CraneEntity extends Entity {
             double dz = targetZ - getZ();
             double dist = Math.sqrt(dx * dx + dz * dz);
             if (dist > 0.02) {
-                double step = Math.min(SPEED, dist);
+                double step = Math.min(SPEED * speedBoost, dist);
                 setPos(getX() + dx / dist * step, getY(), getZ() + dz / dist * step);
                 if (tickCount % 20 == 0) {
                     level().playSound(null, getX(), getY(), getZ(), SoundEvents.BEACON_AMBIENT, SoundSource.BLOCKS, 0.4f, 0.5f);
@@ -195,12 +214,17 @@ public class CraneEntity extends Entity {
             }
         }
 
+        stateTicks = state == lastState ? stateTicks + 1 : 0;
+        lastState = state;
         switch (state) {
             case LOWER_GRAB -> lowerToGrab();
             case LOWER_RELEASE -> lowerToRelease();
             case RAISE -> {
                 setDrop(Math.max(CARRY_DROP, drop() - HOIST_SPEED));
-                if (drop() <= CARRY_DROP) state = State.IDLE;
+                if (drop() <= CARRY_DROP + 1.0E-4) {
+                    setDrop(CARRY_DROP);
+                    state = State.IDLE;
+                }
                 if (tickCount % 6 == 0) playSound(SoundEvents.CHAIN_STEP, 0.6f, 0.8f);
             }
             default -> { }
@@ -233,6 +257,7 @@ public class CraneEntity extends Entity {
                 playSound(SoundEvents.CHAIN_PLACE, 1.0f, 0.8f);
                 playSound(SoundEvents.ANVIL_PLACE, 0.3f, 1.6f);
                 tell("§aHooked a " + (part.partCount() > 1 ? "welded assembly" : part.getParts().get(0).type().displayName()) + ".");
+                operatorXp(4);
                 return;
             }
         }
@@ -254,6 +279,7 @@ public class CraneEntity extends Entity {
             state = State.RAISE;
             playSound(SoundEvents.CHAIN_BREAK, 0.8f, 1.0f);
             tell("§aLoad set down.");
+            operatorXp(2);
             return;
         }
         setDrop(drop() + HOIST_SPEED * 0.75);

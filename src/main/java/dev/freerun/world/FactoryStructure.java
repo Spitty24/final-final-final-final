@@ -48,7 +48,10 @@ public class FactoryStructure extends Structure {
         if (centre <= context.heightAccessor().getMinBuildHeight() + 2) return Optional.empty();
 
         BlockPos origin = new BlockPos(x0, centre - 1, z0);   // the floor replaces the top ground block
-        return Optional.of(new GenerationStub(origin, builder -> builder.addPiece(new FactoryPiece(origin))));
+        return Optional.of(new GenerationStub(origin, builder -> {
+            builder.addPiece(new FactoryPiece(origin));
+            builder.addPiece(new ParkingLotPiece(origin));
+        }));
     }
 
     @Override

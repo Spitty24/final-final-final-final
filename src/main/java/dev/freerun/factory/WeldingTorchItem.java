@@ -89,6 +89,7 @@ public class WeldingTorchItem extends Item {
             sparks(level, part.getBoundingBox().getCenter(), 30);
             part.split();
             player.displayClientMessage(Component.literal("§6Cut the welds: " + n + " loose parts."), true);
+            if (player instanceof net.minecraft.server.level.ServerPlayer sp) dev.freerun.career.Careers.addXp(sp, 2, "cutting");
             return;
         }
 
@@ -122,6 +123,7 @@ public class WeldingTorchItem extends Item {
         level.playSound(null, mid.x, mid.y, mid.z, SoundEvents.CAMPFIRE_CRACKLE, SoundSource.PLAYERS, 2.0f, 1.8f);
         player.displayClientMessage(Component.literal(
                 "§aWelded! §7The assembly has " + first.partCount() + " parts."), true);
+        if (player instanceof net.minecraft.server.level.ServerPlayer sp) dev.freerun.career.Careers.addXp(sp, 8, "welding");
     }
 
     private static void select(Player player, SteelPartEntity part) {
