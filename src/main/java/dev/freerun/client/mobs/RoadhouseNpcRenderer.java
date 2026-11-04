@@ -22,11 +22,14 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
     private static final ResourceLocation COOK = tex("cook");
     private static final ResourceLocation SLATER = tex("slater");
     private static final ResourceLocation NICK = tex("nick");
+    private static final ResourceLocation WELDER = tex("welder");
+    private static final ResourceLocation PRESS_OPERATOR = tex("press_operator");
     private static final ResourceLocation[] CUSTOMERS = {tex("customer_0"), tex("customer_1"), tex("customer_2")};
 
     public RoadhouseNpcRenderer(EntityRendererProvider.Context ctx) {
         super(ctx, new RoadhouseNpcModel(ctx.bakeLayer(ModelLayers.PLAYER)), 0.5f);
         addLayer(new NpcHairLayer(this, ctx.getModelSet()));
+        addLayer(new net.minecraft.client.renderer.entity.layers.ItemInHandLayer<>(this, ctx.getItemInHandRenderer()));
     }
 
     private static ResourceLocation tex(String name) {
@@ -41,6 +44,8 @@ public class RoadhouseNpcRenderer extends MobRenderer<RoadhouseNpcEntity, Roadho
             case COOK -> COOK;
             case SUPERVISOR -> SLATER;
             case SAFETY -> NICK;
+            case WELDER -> WELDER;
+            case PRESS_OPERATOR -> PRESS_OPERATOR;
             case CUSTOMER -> CUSTOMERS[Math.floorMod(entity.getVariant(), CUSTOMERS.length)];
         };
     }

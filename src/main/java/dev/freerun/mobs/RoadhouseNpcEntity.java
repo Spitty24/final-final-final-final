@@ -33,8 +33,11 @@ import net.minecraft.world.level.ServerLevelAccessor;
  *  - CUSTOMER makes small talk.
  */
 public class RoadhouseNpcEntity extends PathfinderMob {
-    /** New roles must be appended (the ordinal is saved). The office pair only appear in the office. */
-    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY }
+    /**
+     * New roles must be appended (the ordinal is saved). The office pair only appear in the office;
+     * WELDER and PRESS_OPERATOR work in the welding factory.
+     */
+    public enum Role { HOST, WAITER, COOK, CUSTOMER, SUPERVISOR, SAFETY, WELDER, PRESS_OPERATOR }
 
     private static final Role[] RESTAURANT_ROLES = {Role.HOST, Role.WAITER, Role.COOK, Role.CUSTOMER};
 
@@ -60,6 +63,23 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             "Best peanuts in the whole county.",
             "I'm saving room for dessert. Probably.",
             "Is it just me or is the cook singing back there?"
+    };
+
+    private static final String[] WELDER_LINES = {
+            "Don't stare at the arc. Trust me on that one.",
+            "Need a torch? Empty hand, right-click any welder machine.",
+            "Click one part, then the part touching it. That's a weld.",
+            "Sneak-click with the torch if you need to cut a weld back apart.",
+            "Gravity gun's the only way to line up the big assemblies.",
+            "Forty years of welding and I still burn my wrist every Tuesday."
+    };
+    private static final String[] PRESS_LINES = {
+            "Sheet goes in, part comes out. Mind your fingers.",
+            "Empty hand on the press flips it between CUT and BEND.",
+            "CUT gets you two plates. BEND gets you a bracket, or a channel from a plate.",
+            "Stock racks are along the west wall. Help yourself.",
+            "The gear chest is at the back. Don't tell the foreman I told you.",
+            "This press has been running since before you were born."
     };
 
     private long lastGiftTime = -GIFT_COOLDOWN;
@@ -105,6 +125,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
             case CUSTOMER -> "Customer";
             case SUPERVISOR -> "Supervisor Slater";
             case SAFETY -> "Safety Nick";
+            case WELDER -> "Welder";
+            case PRESS_OPERATOR -> "Press Operator";
         };
     }
 
@@ -129,10 +151,87 @@ public class RoadhouseNpcEntity extends PathfinderMob {
     private RoadhouseNpcEntity partner;
     private int partnerScan;
 
+    // --- factory work ---
+
+    private net.minecraft.core.BlockPos workSpot;
+    private int workScan;
+    private int lookAtPlayerTicks;
+
+    /** True while this worker's arc is lit; the client model uses the same clock for its pose. */
+    public static boolean arcOn(long gameTime, int entityId) {
+        return Math.floorMod(gameTime + entityId * 7L, 90L) < 60L;
+    }
+
+    /** Ticks into this operator's 100-tick press cycle. */
+    public static int pressPhase(long gameTime, int entityId) {
+        return (int) Math.floorMod(gameTime + entityId * 13L, 100L);
+    }
+
+    private boolean isWorkBlock(net.minecraft.core.BlockPos pos) {
+        net.minecraft.world.level.block.state.BlockState st = level().getBlockState(pos);
+        return getRole() == Role.WELDER
+                ? st.is(net.minecraft.world.level.block.Blocks.IRON_BLOCK)
+                : st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock;
+    }
+
+    private void doFactoryWork(Role role) {
+        if (workSpot == null || --workScan <= 0) {
+            workScan = 100;
+            if (workSpot == null || !isWorkBlock(workSpot)) {
+                workSpot = null;
+                double best = Double.MAX_VALUE;
+                for (net.minecraft.core.BlockPos p : net.minecraft.core.BlockPos.betweenClosed(
+                        blockPosition().offset(-2, -1, -2), blockPosition().offset(2, 1, 2))) {
+                    if (isWorkBlock(p)) {
+                        double d = p.distToCenterSqr(position());
+                        if (d < best) {
+                            best = d;
+                            workSpot = p.immutable();
+                        }
+                    }
+                }
+            }
+        }
+        if (lookAtPlayerTicks > 0) {
+            lookAtPlayerTicks--;
+            return;
+        }
+        if (workSpot == null || !(level() instanceof net.minecraft.server.level.ServerLevel server)) return;
+
+        double tx = workSpot.getX() + 0.5;
+        double ty = workSpot.getY() + (role == Role.WELDER ? 1.0 : 0.6);
+        double tz = workSpot.getZ() + 0.5;
+        getLookControl().setLookAt(tx, ty, tz, 30.0f, 30.0f);
+        long now = level().getGameTime();
+
+        if (role == Role.WELDER) {
+            if (!arcOn(now, getId())) return;
+            long t = now + getId();
+            if (t % 3 == 0) {
+                server.sendParticles(net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK,
+                        tx, ty + 0.05, tz, 3, 0.12, 0.04, 0.12, 0.08);
+            }
+            if (t % 20 == 0) {
+                server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE,
+                        tx, ty + 0.3, tz, 2, 0.08, 0.1, 0.08, 0.01);
+            }
+            if (t % 15 == 0) playSound(net.minecraft.sounds.SoundEvents.CAMPFIRE_CRACKLE, 0.8f, 1.8f);
+        } else if (pressPhase(now, getId()) == 0) {
+            net.minecraft.world.level.block.state.BlockState st = level().getBlockState(workSpot);
+            if (st.getBlock() instanceof dev.freerun.factory.PressBrakeBlock) {
+                dev.freerun.factory.PressBrakeBlock.cycle(server, workSpot, st);
+            }
+        }
+    }
+
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
         Role role = getRole();
+        if (role == Role.WELDER || role == Role.PRESS_OPERATOR) {
+            doFactoryWork(role);
+            return;
+        }
         if (role != Role.SUPERVISOR && role != Role.SAFETY) return;
 
         // Keep facing each other.
@@ -223,9 +322,12 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                     ? "*covers phone* Hold on, I'm on with the boss."
                     : "Not now. I'm dealing with Nick.";
             case SAFETY -> line = OfficeSkit.nickDown(now) ? "*incoherent sobbing*" : "*sniff* Did you hear what he said to me?";
+            case WELDER -> line = pick(WELDER_LINES);
+            case PRESS_OPERATOR -> line = pick(PRESS_LINES);
             default -> line = pick(CUSTOMER_LINES);
         }
         getLookControl().setLookAt(player, 30.0f, 30.0f);
+        lookAtPlayerTicks = 40;
         player.displayClientMessage(Component.literal("§6<" + title(getRole()) + "> §f" + line), false);
     }
 

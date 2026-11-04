@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "cut=false,facing=north,pressing=false": {
+      "model": "freerun:block/press_brake"
+    },
+    "cut=false,facing=east,pressing=false": {
+      "model": "freerun:block/press_brake",
+      "y": 90
+    },
+    "cut=false,facing=south,pressing=false": {
+      "model": "freerun:block/press_brake",
+      "y": 180
+    },
+    "cut=false,facing=west,pressing=false": {
+      "model": "freerun:block/press_brake",
+      "y": 270
+    },
+    "cut=false,facing=north,pressing=true": {
+      "model": "freerun:block/press_brake_pressing"
+    },
+    "cut=false,facing=east,pressing=true": {
+      "model": "freerun:block/press_brake_pressing",
+      "y": 90
+    },
+    "cut=false,facing=south,pressing=true": {
+      "model": "freerun:block/press_brake_pressing",
+      "y": 180
+    },
+    "cut=false,facing=west,pressing=true": {
+      "model": "freerun:block/press_brake_pressing",
+      "y": 270
+    },
+    "cut=true,facing=north,pressing=false": {
+      "model": "freerun:block/press_brake_cut"
+    },
+    "cut=true,facing=east,pressing=false": {
+      "model": "freerun:block/press_brake_cut",
+      "y": 90
+    },
+    "cut=true,facing=south,pressing=false": {
+      "model": "freerun:block/press_brake_cut",
+      "y": 180
+    },
+    "cut=true,facing=west,pressing=false": {
+      "model": "freerun:block/press_brake_cut",
+      "y": 270
+    },
+    "cut=true,facing=north,pressing=true": {
+      "model": "freerun:block/press_brake_cut_pressing"
+    },
+    "cut=true,facing=east,pressing=true": {
+      "model": "freerun:block/press_brake_cut_pressing",
+      "y": 90
+    },
+    "cut=true,facing=south,pressing=true": {
+      "model": "freerun:block/press_brake_cut_pressing",
+      "y": 180
+    },
+    "cut=true,facing=west,pressing=true": {
+      "model": "freerun:block/press_brake_cut_pressing",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "freerun:welding_factory",
+  "biomes": "#minecraft:is_overworld",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_box",
+  "spawn_overrides": {}
+}

@@ -1,0 +1,12 @@
+{
+  "structures": [
+    { "structure": "freerun:welding_factory", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 77123,
+    "spacing": 36,
+    "separation": 14,
+    "spread_type": "linear"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/welder"
+    },
+    "facing=east": {
+      "model": "freerun:block/welder",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "freerun:block/welder",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "freerun:block/welder",
+      "y": 270
+    }
+  }
+}

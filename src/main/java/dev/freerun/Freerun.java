@@ -60,6 +60,7 @@ public final class Freerun implements ModInitializer {
         dev.freerun.world.StructureRegistry.register();
         dev.freerun.world.BlockRegistry.register();
         dev.freerun.item.ItemRegistry.register();
+        dev.freerun.factory.FactoryRegistry.register();
         dev.freerun.menu.MenuRegistry.register();
 
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register(

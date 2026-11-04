@@ -42,6 +42,26 @@ public class RoadhouseNpcModel extends HumanoidModel<RoadhouseNpcEntity> {
             leftArm.zRot = -0.7f;
             head.zRot = 0.15f;
             hat.copyFrom(head);
+        } else if (entity.getRole() == Role.WELDER) {
+            // Hunched over the weld table: torch hand forward, other hand steadying the work.
+            boolean arc = RoadhouseNpcEntity.arcOn(time, entity.getId());
+            float jitter = arc ? Mth.sin(ageInTicks * 2.3f) * 0.03f : 0.0f;
+            rightArm.xRot = -1.05f + jitter;
+            rightArm.yRot = -0.25f;
+            leftArm.xRot = -0.85f;
+            leftArm.yRot = 0.35f;
+            rightLeg.xRot = 0.0f;
+            leftLeg.xRot = 0.0f;
+        } else if (entity.getRole() == Role.PRESS_OPERATOR) {
+            // Feeding the press, then hands back off the bed while the ram comes down.
+            int phase = RoadhouseNpcEntity.pressPhase(time, entity.getId());
+            float reach = phase < 18 ? -0.35f : -0.95f;
+            rightArm.xRot = reach;
+            leftArm.xRot = reach;
+            rightArm.yRot = -0.15f;
+            leftArm.yRot = 0.15f;
+            rightLeg.xRot = 0.0f;
+            leftLeg.xRot = 0.0f;
         } else if (entity.getRole() == Role.SUPERVISOR && OfficeSkit.slaterLecturing(time)) {
             // Pointing right at Nick, other hand on hip.
             rightArm.xRot = -1.5f;

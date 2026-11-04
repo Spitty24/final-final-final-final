@@ -32,5 +32,14 @@
   "entity.freerun.seat": "Seat",
   "item.freerun.roadhouse_npc_spawn_egg": "Roadhouse NPC Spawn Egg",
   "entity.freerun.meowbean": "Meowbean",
-  "item.freerun.meowbean_spawn_egg": "Meowbean Spawn Egg"
+  "item.freerun.meowbean_spawn_egg": "Meowbean Spawn Egg",
+  "entity.freerun.steel_part": "Steel Part",
+  "item.freerun.steel_sheet": "Steel Sheet",
+  "item.freerun.steel_plate": "Steel Plate",
+  "item.freerun.steel_bracket": "Steel Bracket",
+  "item.freerun.steel_channel": "Steel Channel",
+  "item.freerun.welding_torch": "Welding Torch",
+  "item.freerun.gravity_gun": "Gravity Gun",
+  "block.freerun.welder": "Welder",
+  "block.freerun.press_brake": "Press Brake"
 }

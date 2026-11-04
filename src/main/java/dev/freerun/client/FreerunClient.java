@@ -58,6 +58,16 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.client.mobs.MeowbeanRenderer::new);
         EntityRendererRegistry.register(dev.freerun.mobs.SoldierRegistry.SEAT,
                 net.minecraft.client.renderer.entity.NoopRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.SteelPartRenderer.SHEET, dev.freerun.client.factory.SteelPartRenderer::sheetLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.SteelPartRenderer.PLATE, dev.freerun.client.factory.SteelPartRenderer::plateLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.SteelPartRenderer.BRACKET, dev.freerun.client.factory.SteelPartRenderer::bracketLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.factory.SteelPartRenderer.CHANNEL, dev.freerun.client.factory.SteelPartRenderer::channelLayer);
+        EntityRendererRegistry.register(dev.freerun.factory.FactoryRegistry.STEEL_PART,
+                dev.freerun.client.factory.SteelPartRenderer::new);
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.NUKE_PROJECTILE,
                 net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
 

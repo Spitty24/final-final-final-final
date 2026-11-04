@@ -13,6 +13,8 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 public final class StructureRegistry {
     public static StructureType<RoadhouseStructure> TEXAS_ROADHOUSE;
     public static StructurePieceType ROADHOUSE_PIECE;
+    public static StructureType<FactoryStructure> WELDING_FACTORY;
+    public static StructurePieceType FACTORY_PIECE;
 
     private StructureRegistry() {}
 
@@ -21,5 +23,9 @@ public final class StructureRegistry {
                 Freerun.id("texas_roadhouse"), () -> RoadhouseStructure.CODEC);
         ROADHOUSE_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
                 Freerun.id("texas_roadhouse"), RoadhousePiece::new);
+        WELDING_FACTORY = Registry.register(BuiltInRegistries.STRUCTURE_TYPE,
+                Freerun.id("welding_factory"), () -> FactoryStructure.CODEC);
+        FACTORY_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("welding_factory"), FactoryPiece::new);
     }
 }
