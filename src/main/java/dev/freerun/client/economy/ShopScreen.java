@@ -25,6 +25,7 @@ public class ShopScreen extends Screen {
     private boolean selling;
     private int scroll;
     private int left, top, w, h;
+    private Button buyTab, sellTab;
 
     public ShopScreen(int clerkId, Shops.Shop shop) {
         super(Component.literal(shop.title));
@@ -42,9 +43,9 @@ public class ShopScreen extends Screen {
         h = ROWS * CELL + 58;
         left = (width - w) / 2;
         top = (height - h) / 2;
-        addRenderableWidget(Button.builder(Component.literal("Buy"), b -> { selling = false; scroll = 0; })
+        buyTab = addRenderableWidget(Button.builder(Component.literal("Buy"), b -> { selling = false; scroll = 0; })
                 .bounds(left + 6, top + 18, 50, 16).build());
-        addRenderableWidget(Button.builder(Component.literal("Sell"), b -> { selling = true; scroll = 0; })
+        sellTab = addRenderableWidget(Button.builder(Component.literal("Sell"), b -> { selling = true; scroll = 0; })
                 .bounds(left + 60, top + 18, 50, 16).build());
     }
 
@@ -58,7 +59,8 @@ public class ShopScreen extends Screen {
         String b = "Cash: " + Money.fmt(bal);
         g.drawString(font, b, left + w - 6 - font.width(b), top + 3, 0x7CFF7C);
         g.drawString(font, selling ? "§7What they'll pay you" : "§7Click: buy 1 · Shift-click: buy 5", left + 116, top + 22, 0xAAAAAA);
-        for (var r : renderables) r.render(g, mouseX, mouseY, partialTick);
+        buyTab.render(g, mouseX, mouseY, partialTick);
+        sellTab.render(g, mouseX, mouseY, partialTick);
 
         List<Shops.Offer> list = list();
         int gx = left + 8, gy = top + 40;
