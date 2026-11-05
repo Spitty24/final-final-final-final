@@ -16,7 +16,11 @@ public enum ParkourState {
     SLIDE(         0,      false, true),
     ROLL_READY(    0,      false, true),
     ROLL(          12,     false, true),
-    WALL_JUMP(     8,      false, true);
+    WALL_JUMP(     8,      false, true),
+    /** Hands and feet on a brick/stone/wood facade, moving freely in any direction. */
+    FREE_CLIMB(    0,      true,  true),
+    /** A scripted jump from one handhold to another (up, sideways, down or across an alley). */
+    LEDGE_LEAP(    10,     true,  true);
 
     private static final ParkourState[] VALUES = values();
 

@@ -69,6 +69,7 @@ public final class Freerun implements ModInitializer {
         dev.freerun.economy.EconomyRegistry.register();
         dev.freerun.city.CityRegistry.register();
         dev.freerun.life.LifeRegistry.register();
+        dev.freerun.economy.Apparel.register();
         dev.freerun.economy.EconomyRegistry.buildShops();
 
         net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback.EVENT.register(

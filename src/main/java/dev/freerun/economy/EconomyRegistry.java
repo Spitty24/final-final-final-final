@@ -430,6 +430,10 @@ public final class EconomyRegistry {
                 {dev.freerun.life.LifeRegistry.PELICAN_PLUSH, 1, 30}, {UMBRELLA, 1, 40}, {FLASHLIGHT, 1, 45},
                 {Items.NAME_TAG, 1, 50}, {Items.SADDLE, 1, 80}, {dev.freerun.life.LifeRegistry.ARCADE_CABINET.asItem(), 1, 300},
                 {SMARTPHONE, 1, 400}, {Items.DIAMOND, 1, 500}}));
+        buy.put(Shops.Shop.SHOES, offers(Apparel.SHOE_PRICES.toArray(new Object[0][])));
+        buy.put(Shops.Shop.CLOTHES, offers(Apparel.CLOTHES_PRICES.toArray(new Object[0][])));
+        sell.put(Shops.Shop.SHOES, List.of(Shops.of(Items.LEATHER, 2, 1)));
+        sell.put(Shops.Shop.CLOTHES, List.of(Shops.of(Items.WHITE_WOOL, 4, 1), Shops.of(Items.STRING, 8, 1)));
         Shops.build(buy, sell);
     }
 

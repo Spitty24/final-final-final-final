@@ -17,11 +17,34 @@ public final class CityCommands {
         dispatcher.register(Commands.literal("cityprobe").requires(s -> s.hasPermission(2))
                 .executes(ctx -> probe(ctx.getSource(), false))
                 .then(Commands.literal("check").executes(ctx -> probe(ctx.getSource(), true))));
+        dispatcher.register(Commands.literal("cityclean").requires(s -> s.hasPermission(2))
+                .executes(ctx -> clean(ctx.getSource(), 4))
+                .then(Commands.argument("radius", com.mojang.brigadier.arguments.IntegerArgumentType.integer(0, 16))
+                        .executes(ctx -> clean(ctx.getSource(), com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(ctx, "radius")))));
         dispatcher.register(Commands.literal("cityclear").requires(s -> s.hasPermission(2)).executes(ctx -> {
             int n = TrafficControl.clearAll(ctx.getSource().getLevel(), BlockPos.containing(ctx.getSource().getPosition()));
             ctx.getSource().sendSuccess(() -> Component.literal("Cleared " + n + " stuck car" + (n == 1 ? "" : "s") + "."), true);
             return n;
         }));
+    }
+
+    /** Sweeps stray trees, grass and dirt out of the city chunks within {@code radius} chunks of you. */
+    private static int clean(CommandSourceStack src, int radius) {
+        ServerLevel level = src.getLevel();
+        net.minecraft.world.level.ChunkPos here = new net.minecraft.world.level.ChunkPos(BlockPos.containing(src.getPosition()));
+        int blocks = 0, chunks = 0;
+        for (int dx = -radius; dx <= radius; dx++) for (int dz = -radius; dz <= radius; dz++) {
+            net.minecraft.world.level.ChunkPos cp = new net.minecraft.world.level.ChunkPos(here.x + dx, here.z + dz);
+            if (level.getChunkSource().getChunkNow(cp.x, cp.z) == null) continue;
+            BlockPos o = CityWorld.anyCityFor(level, cp);
+            if (o == null) continue;
+            blocks += CityCleaner.clean(level, o, cp, true);
+            chunks++;
+        }
+        int b = blocks, c = chunks;
+        if (c == 0) src.sendFailure(Component.literal("You're not in a city."));
+        else src.sendSuccess(() -> Component.literal("Swept " + c + " city chunks: removed " + b + " stray leaves, logs, plants and dirt."), true);
+        return b;
     }
 
     /**

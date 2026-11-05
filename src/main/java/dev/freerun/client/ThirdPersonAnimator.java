@@ -61,8 +61,16 @@ public final class ThirdPersonAnimator {
                 set(p, LL, -c * 1.1f - 0.3f, 0f, 0f);
                 set(p, BODY, 0.25f, 0f, 0f);
             }
-            case WALL_CLIMB -> {
-                float c = Mth.sin(age * 1.2f);
+            case LEDGE_LEAP -> {
+                float e = AnimState.ease(prog);
+                set(p, RA, -2.9f, 0f, Mth.lerp(e, 0.6f, 0.2f));
+                set(p, LA, -2.9f, 0f, -Mth.lerp(e, 0.6f, 0.2f));
+                set(p, RL, -1.1f * arc, 0f, 0.1f);
+                set(p, LL, -0.5f * arc, 0f, -0.1f);
+                set(p, BODY, 0.15f * arc, 0f, 0f);
+            }
+            case WALL_CLIMB, FREE_CLIMB -> {
+                float c = Mth.sin(age * (s == ParkourState.FREE_CLIMB ? 0.5f : 1.2f));
                 set(p, RA, -2.6f + 0.35f * c, 0f, 0.15f);
                 set(p, LA, -2.6f - 0.35f * c, 0f, -0.15f);
                 set(p, RL, -0.5f - 0.5f * c, 0f, 0f);
@@ -152,7 +160,7 @@ public final class ThirdPersonAnimator {
         return switch (s) {
             case WALLRUN_RIGHT -> new float[]{0f, 0.35f, 0f, 0f};    // lean away from the wall
             case WALLRUN_LEFT -> new float[]{0f, -0.35f, 0f, 0f};
-            case WALL_CLIMB -> new float[]{-0.08f, 0f, 0f, 0f};
+            case WALL_CLIMB, FREE_CLIMB -> new float[]{-0.08f, 0f, 0f, 0f};
             case MANTLE -> new float[]{-0.3f * arc, 0f, 0f, 0f};
             case VAULT -> new float[]{0f, 0.35f * arc, 0.5f, 0f};
             case SLIDE -> new float[]{1.0f, 0f, 0f, 0f};

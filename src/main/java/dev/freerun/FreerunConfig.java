@@ -25,6 +25,10 @@ public final class FreerunConfig {
     public boolean autoVault = true;
     public boolean slide = true;
     public boolean roll = true;
+    /** Climb freely on brick, stone, wood and iron facades (anything in the freerun:climbable block tag). */
+    public boolean freeClimb = true;
+    /** Jump from a hanging ledge to another ledge: up, left, right, down, or back across a gap. */
+    public boolean ledgeLeaps = true;
     /** Sprinting builds extra speed over ~2 seconds. */
     public boolean momentum = true;
     public double momentumBonus = 0.20;
@@ -32,6 +36,8 @@ public final class FreerunConfig {
     // --- tuning ---
     public int wallRunTicks = 30;
     public int wallClimbTicks = 14;
+    /** Free-climbing speed in blocks per tick. */
+    public double climbSpeed = 0.11;
     /** Blocks of fall distance a landing roll absorbs (server side). */
     public float rollFallReduction = 12.0f;
 

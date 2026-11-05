@@ -48,8 +48,14 @@ public class OfficePiece extends CityPieceBase {
             if ((x + z) % 2 == 0) put(level, box, Blocks.POLISHED_ANDESITE, x, 0, z);
         }
         if (w > 60) {
-            tower(level, box, 5, 7, 30, 24, 0);
-            tower(level, box, w - 35, 7, 30, 24, 1);
+            int a = tower(level, box, 5, 7, 30, 24, 0);
+            int b = tower(level, box, w - 35, 7, 30, 24, 1);
+            // a narrow beam from the lower roof across to a ledge on the taller tower: a balance run
+            int y = Math.min(a, b) * FLOOR;
+            for (int x = 35; x <= w - 36; x++) {
+                put(level, box, Blocks.STONE_BRICKS, x, y, 20);
+                if ((x - 35) % 3 == 1) put(level, box, Blocks.IRON_BARS, x, y - 1, 20);
+            }
         } else {
             tower(level, box, 7, 7, 24, 24, 0);
         }
@@ -73,11 +79,13 @@ public class OfficePiece extends CityPieceBase {
         }
     }
 
-    private void tower(WorldGenLevel level, BoundingBox box, int x0, int z0, int tw, int td, int index) {
+    /** Builds a tower and returns its number of floors. */
+    private int tower(WorldGenLevel level, BoundingBox box, int x0, int z0, int tw, int td, int index) {
         int seed = Math.floorMod((ox + x0) * 73 + (oz + z0) * 19, 1009);
         int floors = 5 + seed % 6;
         String company = COMPANIES[seed % COMPANIES.length];
-        BlockState column = (seed % 2 == 0 ? Blocks.LIGHT_GRAY_CONCRETE : Blocks.SMOOTH_QUARTZ).defaultBlockState();
+        // the columns are stone you can get a grip on: climb them, and hop column to column
+        BlockState column = (seed % 2 == 0 ? Blocks.POLISHED_ANDESITE : Blocks.QUARTZ_BRICKS).defaultBlockState();
         BlockState glass = (seed % 3 == 0 ? Blocks.LIGHT_BLUE_STAINED_GLASS : seed % 3 == 1 ? Blocks.GLASS : Blocks.CYAN_STAINED_GLASS).defaultBlockState();
         BlockState band = Blocks.GRAY_CONCRETE.defaultBlockState();
         int x1 = x0 + tw - 1, z1 = z0 + td - 1;
@@ -89,6 +97,30 @@ public class OfficePiece extends CityPieceBase {
             fill(level, box, band, x0, y0, z1, x1, y0, z1);
             fill(level, box, band, x0, y0, z0, x0, y0, z1);
             fill(level, box, band, x1, y0, z0, x1, y0, z1);
+            if (f > 0) {
+                // carry the columns through the floor band, and a ledge outside every floor between them
+                BlockState ledge = Blocks.SMOOTH_STONE_SLAB.defaultBlockState();
+                for (int x = x0; x <= x1; x++) {
+                    boolean col = (x - x0) % 4 == 0 || x == x1;
+                    if (col) {
+                        put(level, box, column, x, y0, z0);
+                        put(level, box, column, x, y0, z1);
+                    } else {
+                        put(level, box, ledge, x, y0, z0 - 1);
+                        put(level, box, ledge, x, y0, z1 + 1);
+                    }
+                }
+                for (int z = z0 + 1; z < z1; z++) {
+                    boolean col = (z - z0) % 4 == 0;
+                    if (col) {
+                        put(level, box, column, x0, y0, z);
+                        put(level, box, column, x1, y0, z);
+                    } else {
+                        put(level, box, ledge, x0 - 1, y0, z);
+                        put(level, box, ledge, x1 + 1, y0, z);
+                    }
+                }
+            }
             for (int y = y0 + 1; y < y0 + FLOOR; y++) {
                 for (int x = x0; x <= x1; x++) {
                     BlockState s = ((x - x0) % 4 == 0 || x == x1) ? column : glass;
@@ -135,6 +167,7 @@ public class OfficePiece extends CityPieceBase {
             put(level, box, Blocks.LIGHTNING_ROD, x1 - 2, top + 1, z1 - 2);
             put(level, box, Blocks.REDSTONE_LAMP.defaultBlockState().setValue(net.minecraft.world.level.block.RedstoneLampBlock.LIT, true), x1 - 2, top + 2, z1 - 2);
         }
+        return floors;
     }
 
     // ------------------------------------------------------------------ furnishing

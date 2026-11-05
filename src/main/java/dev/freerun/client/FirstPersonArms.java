@@ -78,8 +78,9 @@ public final class FirstPersonArms {
                         ? new ArmPose(0.25f, 0.05f, -0.05f, 20f, -35f, -15f)   // palm on the wall
                         : run(age * 0.3f, right);
             }
-            case WALL_CLIMB -> {
-                float alt = Mth.sin(age * 1.2f) * (right ? 1f : -1f);
+            case LEDGE_LEAP -> new ArmPose(-0.08f, 0.3f + 0.12f * prog, -0.15f, 50f + 15f * prog, 5f, 5f);
+            case WALL_CLIMB, FREE_CLIMB -> {
+                float alt = Mth.sin(age * (s == ParkourState.FREE_CLIMB ? 0.5f : 1.2f)) * (right ? 1f : -1f);
                 yield new ArmPose(-0.1f, 0.25f + 0.12f * alt, -0.1f, 45f + 12f * alt, 0f, 8f);
             }
             case LEDGE_HANG -> {

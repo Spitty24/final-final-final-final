@@ -1,0 +1,15 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:bricks", "minecraft:stone_bricks", "minecraft:mossy_stone_bricks", "minecraft:cracked_stone_bricks",
+    "minecraft:chiseled_stone_bricks", "minecraft:cobblestone", "minecraft:mossy_cobblestone",
+    "minecraft:deepslate_bricks", "minecraft:cracked_deepslate_bricks", "minecraft:deepslate_tiles",
+    "minecraft:polished_blackstone_bricks", "minecraft:mud_bricks", "minecraft:nether_bricks",
+    "minecraft:red_nether_bricks", "minecraft:end_stone_bricks", "minecraft:tuff_bricks",
+    "minecraft:polished_andesite", "minecraft:quartz_bricks", "minecraft:quartz_pillar",
+    "minecraft:sandstone", "minecraft:red_sandstone", "minecraft:prismarine_bricks", "minecraft:bookshelf",
+    "minecraft:iron_bars", "minecraft:chain", "minecraft:scaffolding",
+    "minecraft:copper_grate", "minecraft:exposed_copper_grate", "minecraft:weathered_copper_grate", "minecraft:oxidized_copper_grate",
+    "#minecraft:logs", "#minecraft:planks", "#minecraft:walls", "#minecraft:fences", "#minecraft:trapdoors"
+  ]
+}

@@ -26,7 +26,9 @@ public final class Shops {
         CHICKEN("Cluck Shack", 0xC8402A, "Cluck Shack Crew", true),
         FURNITURE("Bayou Home Furnishings", 0x8A5A3A, "Furniture Sales Associate", false),
         BAR("The Rusty Pelican", 0x3A6E8A, "Bartender", false),
-        PRIZES("Prize Counter", 0xC03AD8, "Prize Counter Attendant", false);
+        PRIZES("Prize Counter", 0xC03AD8, "Prize Counter Attendant", false),
+        SHOES("Foot Lockup", 0xE04040, "Sneaker Associate", false),
+        CLOTHES("Bayou Threads", 0x3A7AD8, "Sales Associate", false);
 
         public final String title;
         public final int color;

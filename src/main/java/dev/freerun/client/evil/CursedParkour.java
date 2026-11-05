@@ -19,7 +19,8 @@ public final class CursedParkour {
     public static boolean shouldFail(ParkourState state) {
         EvilConfig cfg = EvilConfig.get();
         if (!cfg.evilMode || !cfg.cursedParkour) return false;
-        if (!(state.isWallRun() || state == ParkourState.WALL_CLIMB || state == ParkourState.LEDGE_HANG)) {
+        if (!(state.isWallRun() || state == ParkourState.WALL_CLIMB || state == ParkourState.LEDGE_HANG
+                || state == ParkourState.FREE_CLIMB)) {
             return false;
         }
         return RAND.nextDouble() < cfg.failChance;

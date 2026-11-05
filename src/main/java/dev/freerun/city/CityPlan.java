@@ -67,9 +67,34 @@ public final class CityPlan {
                     out.add(new LotPiece(city, lx, lz, w, d, 6, baseKind(lots)));
                 }
                 for (CityLayout.Lot lot : lots) lot(out, city, lot);
+                alleys(out, city, lots);
             }
         }
         return out;
+    }
+
+    private static boolean alleySide(CityLayout.District d) {
+        return switch (d) {
+            case OFFICE, HOOD, BAR, ARCADE, DESSERT, POLICE -> true;
+            default -> false;
+        };
+    }
+
+    /** Back alleys in the 4-block gaps between neighbouring downtown / hood lots. */
+    private static void alleys(List<StructurePiece> out, BlockPos city, List<CityLayout.Lot> lots) {
+        for (CityLayout.Lot a : lots) {
+            for (CityLayout.Lot b : lots) {
+                if (!alleySide(a.district()) || !alleySide(b.district())) continue;
+                if (a.district() != CityLayout.District.OFFICE && a.district() != CityLayout.District.HOOD
+                        && b.district() != CityLayout.District.OFFICE && b.district() != CityLayout.District.HOOD) continue;
+                boolean hood = a.district() == CityLayout.District.HOOD || b.district() == CityLayout.District.HOOD;
+                if (a.lz() == b.lz() && a.d() == b.d() && b.lx() == a.lx() + a.w() + 4) {
+                    out.add(new AlleyPiece(city, a.lx() + a.w(), a.lz(), 4, a.d(), true, hood));
+                } else if (a.lx() == b.lx() && a.w() == b.w() && b.lz() == a.lz() + a.d() + 4) {
+                    out.add(new AlleyPiece(city, a.lx(), a.lz() + a.d(), a.w(), 4, false, hood));
+                }
+            }
+        }
     }
 
     private static int baseKind(List<CityLayout.Lot> lots) {

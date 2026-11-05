@@ -403,6 +403,8 @@ public final class CityWorld {
     public static final class Data extends SavedData {
         final List<Manual> manual = new ArrayList<>();
         final Map<Long, Books> books = new HashMap<>();
+        /** Natural-city chunks already swept of stray trees and grass (see {@link CityCleaner}). */
+        final it.unimi.dsi.fastutil.longs.LongOpenHashSet cleaned = new it.unimi.dsi.fastutil.longs.LongOpenHashSet();
 
         @Override
         public CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {
@@ -421,6 +423,7 @@ public final class CityWorld {
                 bl.add(c);
             }
             tag.put("Books", bl);
+            tag.putLongArray("Cleaned", cleaned.toLongArray());
             return tag;
         }
 
@@ -434,6 +437,7 @@ public final class CityWorld {
                 CompoundTag c = (CompoundTag) t;
                 d.books.put(c.getLong("City"), Books.load(c));
             }
+            for (long l : tag.getLongArray("Cleaned")) d.cleaned.add(l);
             return d;
         }
     }
@@ -487,6 +491,15 @@ public final class CityWorld {
         return QUEUE.size();
     }
 
+    /** Chunks of a generated city waiting to be swept of stray vegetation. */
+    private static final LinkedHashSet<Long> CLEAN = new LinkedHashSet<>();
+
+    /** The city (natural or made with /city) covering this chunk, or null. */
+    public static BlockPos anyCityFor(ServerLevel level, ChunkPos cp) {
+        for (Manual m : data(level).manual) if (m.index(cp) >= 0) return m.origin;
+        return naturalFor(level, cp);
+    }
+
     /** Chunks of a generated city just loaded, to be checked for holes. */
     private static final LinkedHashSet<Long> CHECK = new LinkedHashSet<>();
 
@@ -502,7 +515,10 @@ public final class CityWorld {
                     return;
                 }
             }
-            if (naturalFor(world, cp) != null) CHECK.add(cp.toLong());
+            if (naturalFor(world, cp) != null) {
+                CHECK.add(cp.toLong());
+                if (!d.cleaned.contains(cp.toLong())) CLEAN.add(cp.toLong());
+            }
         });
         ServerTickEvents.END_WORLD_TICK.register(level -> {
             if (level.dimension() != Level.OVERWORLD) return;
@@ -514,6 +530,24 @@ public final class CityWorld {
                 if (o != null && needsRepair(level, o, cp)) QUEUE.add(l);
             }
             for (int k = 0; k < 2 && !QUEUE.isEmpty(); k++) buildNext(level);
+            for (int k = 0; k < 2 && !CLEAN.isEmpty(); k++) {
+                long l = CLEAN.iterator().next();
+                CLEAN.remove(l);
+                ChunkPos cp = new ChunkPos(l);
+                var chunk = level.getChunkSource().getChunkNow(cp.x, cp.z);
+                BlockPos o = naturalFor(level, cp);
+                if (chunk == null || o == null || QUEUE.contains(l)) continue;
+                try {
+                    // dirt is only cleared where nobody has spent time (it could be yours)
+                    int n = CityCleaner.clean(level, o, cp, chunk.getInhabitedTime() < 20 * 60 * 10);
+                    if (n > 0) dev.freerun.Freerun.LOGGER.debug("Cleared {} stray plant blocks from city chunk {}", n, cp);
+                } catch (RuntimeException e) {
+                    dev.freerun.Freerun.LOGGER.error("Couldn't sweep city chunk {}", cp, e);
+                }
+                Data d = data(level);
+                d.cleaned.add(l);
+                d.setDirty();
+            }
         });
     }
 

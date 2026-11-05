@@ -12,6 +12,9 @@ import net.minecraft.client.Options;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Pose;
@@ -35,6 +38,12 @@ public final class ParkourController {
     private static final ResourceLocation MOMENTUM_ID = Freerun.id("momentum");
     /** Feet sit this far below a ledge while hanging (hands at the edge). */
     private static final double HANG_OFFSET = 2.0;
+    /** Facades you can free-climb, Assassin's Creed style (data/freerun/tags/block/climbable.json). */
+    public static final TagKey<Block> CLIMBABLE = TagKey.create(Registries.BLOCK, Freerun.id("climbable"));
+
+    private enum Leap { UP, DOWN, LEFT, RIGHT, BACK }
+    /** Where a leap lands: feet position, the wall faced there, the ledge top (NaN = free climb), whether it can be mantled. */
+    private record Target(Vec3 feet, Vec3 wall, double top, boolean mantle) {}
 
     private ParkourState state = NONE;
     private int t;
@@ -53,6 +62,12 @@ public final class ParkourController {
     private float turnPerTick;
     private boolean prevJump;
     private boolean prevSneak;
+    private boolean canMantle = true;
+    private int backHold;
+    private Target leap;
+    private Vec3 leapFrom = Vec3.ZERO;
+    private int leapTicks;
+    private double leapArc;
     private ParkourState lastSent = NONE;
 
     public ParkourState state() {
@@ -106,7 +121,9 @@ public final class ParkourController {
             case NONE -> tickNone(p, cfg, in);
             case WALLRUN_LEFT, WALLRUN_RIGHT -> tickWallRun(p, cfg, in);
             case WALL_CLIMB -> tickClimb(p, cfg, in);
-            case LEDGE_HANG -> tickHang(p, in);
+            case LEDGE_HANG -> tickHang(p, cfg, in);
+            case FREE_CLIMB -> tickFreeClimb(p, cfg, in);
+            case LEDGE_LEAP -> tickLeap(p);
             case MANTLE -> tickMantle(p);
             case VAULT -> tickVault(p);
             case SLIDE -> tickSlide(p, in);
@@ -201,12 +218,23 @@ public final class ParkourController {
         // Ledge grab: falling (or at the top of a jump) next to a ledge you're facing
         if (cfg.ledgeGrab && grabCooldown == 0 && in.forward && vel.y < 0.15 && blocked(p, fwd, 0.35, 0.6, 1.5)) {
             double top = findLedge(p, p.position(), fwd, 1.3, 2.4);
+            boolean mantle = !Double.isNaN(top);
+            if (!mantle) top = handholdAhead(p, p.position(), fwd, 1.3, 2.4);
             if (!Double.isNaN(top)) {
                 wallDir = fwd;
                 ledgeTop = top;
+                canMantle = mantle;
                 setState(p, LEDGE_HANG);
                 return;
             }
+        }
+        // Catch a brick / stone / wood facade you jump or fall onto and cling to it
+        if (cfg.freeClimb && grabCooldown == 0 && (state == NONE || state == WALL_JUMP) && in.forward && vel.y < 0.2
+                && forwardDotAxis(p, fwd) > 0.7 && blocked(p, fwd, 0.35, 0.3, 1.6)
+                && grip(p, p.position(), fwd, 1.0) && grip(p, p.position(), fwd, 1.8) && airTicks > 3) {
+            wallDir = fwd;
+            setState(p, FREE_CLIMB);
+            return;
         }
         // Wall climb from a jump that hits a wall while still rising
         if (cfg.wallClimb && climbAvailable && state == NONE && airTicks <= 10 && vel.y > 0 && in.forward
@@ -303,6 +331,10 @@ public final class ParkourController {
             wallKick(p);
             return;
         }
+        if (t > cfg.wallClimbTicks && cfg.freeClimb && grip(p, p.position(), wallDir, 1.0)) {
+            setState(p, FREE_CLIMB);   // out of run-up: keep climbing hand over hand
+            return;
+        }
         if (t > cfg.wallClimbTicks || !blocked(p, wallDir, 0.35, 0.3, 1.7)) {
             grabCooldown = 3;
             setState(p, NONE);
@@ -314,7 +346,7 @@ public final class ParkourController {
         p.resetFallDistance();
     }
 
-    private void tickHang(LocalPlayer p, Input in) {
+    private void tickHang(LocalPlayer p, FreerunConfig cfg, Input in) {
         // Cursed: the ledge crumbles after a short grace, or your grip randomly slips.
         if (t > CursedParkour.ledgeLifetime() || CursedParkour.shouldFail(state)) {
             p.setDeltaMovement(wallDir.scale(-0.12).add(0, -0.2, 0));
@@ -322,14 +354,31 @@ public final class ParkourController {
             setState(p, NONE);
             return;
         }
-        if (in.sneakPressed) {                       // let go
+        if (in.sneakPressed) {                       // drop: catch the next ledge down if there is one
+            if (cfg.ledgeLeaps && !in.back && tryLeap(p, Leap.DOWN, ledgeTop)) return;
             grabCooldown = 12;
             setState(p, NONE);
             return;
         }
         if (in.jumpPressed) {
+            if (cfg.ledgeLeaps) {
+                if (in.back && tryLeap(p, Leap.BACK, ledgeTop)) return;                         // across the alley
+                if (in.left != in.right && tryLeap(p, in.left ? Leap.LEFT : Leap.RIGHT, ledgeTop)) return;
+            }
             if (in.back) wallKick(p);                // back + jump: turn and leap away
-            else setState(p, MANTLE);                // jump: climb up
+            else if (canMantle) setState(p, MANTLE); // jump: climb up
+            else if (cfg.ledgeLeaps && tryLeap(p, Leap.UP, ledgeTop)) { }
+            else if (cfg.freeClimb && grip(p, p.position(), wallDir, HANG_OFFSET + 0.6)) setState(p, FREE_CLIMB);
+            return;
+        }
+        // Climbable wall above or below the ledge: hold forward / back to climb onto it
+        backHold = in.back ? backHold + 1 : 0;
+        if (cfg.freeClimb && in.forward && !canMantle && grip(p, p.position(), wallDir, HANG_OFFSET + 0.6)) {
+            setState(p, FREE_CLIMB);
+            return;
+        }
+        if (cfg.freeClimb && backHold > 6 && grip(p, p.position(), wallDir, 0.6) && grip(p, p.position(), wallDir, 1.4)) {
+            setState(p, FREE_CLIMB);
             return;
         }
 
@@ -340,6 +389,7 @@ public final class ParkourController {
             Vec3 side = new Vec3(-wallDir.z, 0, wallDir.x).scale(strafe);
             Vec3 probe = p.position().add(side.scale(0.4));
             double top = findLedge(p, probe, wallDir, 1.6, 2.4);
+            if (Double.isNaN(top)) top = handholdAhead(p, probe, wallDir, 1.6, 2.4);
             if (!Double.isNaN(top) && Math.abs(top - ledgeTop) < 0.01) shift = side.scale(0.08);
         }
 
@@ -347,6 +397,231 @@ public final class ParkourController {
         double dy = Mth.clamp((targetY - p.getY()) * 0.6, -0.3, 0.3);
         setVelocityCancellingInput(p, wallDir.x * 0.03 + shift.x, dy, wallDir.z * 0.03 + shift.z);
         p.resetFallDistance();
+    }
+
+    /** Hands and feet on a climbable facade: W/S climb, A/D traverse, jump leaps, sneak lets go. */
+    private void tickFreeClimb(LocalPlayer p, FreerunConfig cfg, Input in) {
+        if (CursedParkour.shouldFail(state)) {
+            p.setDeltaMovement(wallDir.scale(-0.12).add(0, -0.15, 0));
+            grabCooldown = 10;
+            setState(p, NONE);
+            return;
+        }
+        if (in.sneakPressed) {
+            grabCooldown = 10;
+            setState(p, NONE);
+            return;
+        }
+        Vec3 pos = p.position();
+        if (!blocked(p, wallDir, 0.35, 0.2, 1.7) || (!grip(p, pos, wallDir, 0.5) && !grip(p, pos, wallDir, 1.5))) {
+            // ran out of wall: a ledge at hand height is still something to hang on
+            double top = handholdAhead(p, pos, wallDir, 1.2, 2.4);
+            if (!Double.isNaN(top)) {
+                ledgeTop = top;
+                canMantle = false;
+                setState(p, LEDGE_HANG);
+                return;
+            }
+            grabCooldown = 6;
+            setState(p, NONE);
+            return;
+        }
+        if (in.jumpPressed) {
+            Leap kind = in.back ? Leap.BACK : in.left != in.right ? (in.left ? Leap.LEFT : Leap.RIGHT) : Leap.UP;
+            if (cfg.ledgeLeaps && tryLeap(p, kind, p.getY() + HANG_OFFSET)) return;
+            if (in.back) wallKick(p);
+            return;
+        }
+        double sp = cfg.climbSpeed;
+        int vert = (in.forward ? 1 : 0) - (in.back ? 1 : 0);
+        int strafe = (in.right ? 1 : 0) - (in.left ? 1 : 0);
+        double vy = 0, sx = 0, sz = 0;
+        if (vert > 0) {
+            double top = findLedge(p, pos, wallDir, 0.4, 1.9);
+            if (!Double.isNaN(top)) {                  // reached the top: pull yourself over
+                ledgeTop = top;
+                setState(p, MANTLE);
+                return;
+            }
+            if (grip(p, pos, wallDir, 2.0)) vy = sp;
+            else {
+                double hold = handholdAhead(p, pos, wallDir, 1.5, 2.4);
+                if (!Double.isNaN(hold)) {             // a sill or cornice above you: grab it
+                    ledgeTop = hold;
+                    canMantle = false;
+                    setState(p, LEDGE_HANG);
+                    return;
+                }
+            }
+        } else if (vert < 0) {
+            if (p.onGround()) {
+                setState(p, NONE);
+                return;
+            }
+            if (blocked(p, wallDir, 0.35, -0.5, 0.2)) vy = -sp * 1.3;
+        }
+        if (strafe != 0) {
+            Vec3 side = new Vec3(-wallDir.z, 0, wallDir.x).scale(strafe);
+            Vec3 probe = pos.add(side.scale(0.5));
+            if (grip(p, probe, wallDir, 1.0) && !blocked(p, side, 0.1, 0.2, 1.6)) {
+                sx = side.x * sp * 0.9;
+                sz = side.z * sp * 0.9;
+            }
+        }
+        setVelocityCancellingInput(p, wallDir.x * 0.04 + sx, vy, wallDir.z * 0.04 + sz);
+        p.setSprinting(false);
+        p.resetFallDistance();
+    }
+
+    // ------------------------------------------------------------------ ledge leaps
+
+    private boolean tryLeap(LocalPlayer p, Leap kind, double handY) {
+        Target tg = findTarget(p, kind, handY);
+        if (tg == null) return false;
+        leap = tg;
+        leapFrom = p.position();
+        double dist = leapFrom.distanceTo(tg.feet());
+        leapTicks = Mth.clamp((int) Math.round(4 + dist * 1.7), 6, 14);
+        leapArc = tg.feet().y >= leapFrom.y - 0.5 ? 0.6 + 0.12 * dist : 0.25;
+        if (tg.wall().dot(wallDir) < -0.5) {          // turning round to face the far wall
+            turnTicks = 6;
+            turnPerTick = 30f;
+        }
+        setState(p, LEDGE_LEAP);
+        return true;
+    }
+
+    private void tickLeap(LocalPlayer p) {
+        if (leap == null) {
+            setState(p, NONE);
+            return;
+        }
+        double s = Math.min(1.0, t / (double) leapTicks);
+        Vec3 want = leapFrom.lerp(leap.feet(), s).add(0, leapArc * Mth.sin((float) (s * Math.PI)), 0);
+        Vec3 v = want.subtract(p.position());
+        if (v.length() > 1.4) v = v.normalize().scale(1.4);
+        setVelocityCancellingInput(p, v.x, v.y, v.z);
+        p.resetFallDistance();
+        if (t < leapTicks) return;
+        Target tg = leap;
+        leap = null;
+        if (p.position().distanceTo(tg.feet()) > 0.9) {   // something got in the way
+            grabCooldown = 6;
+            setState(p, NONE);
+            return;
+        }
+        wallDir = tg.wall();
+        if (Double.isNaN(tg.top())) {
+            setState(p, FREE_CLIMB);
+        } else {
+            ledgeTop = tg.top();
+            canMantle = tg.mantle();
+            setState(p, LEDGE_HANG);
+        }
+    }
+
+    /**
+     * Searches for somewhere to leap to from a hang or a climb with hands at {@code handY}:
+     * another ledge first, then (for up/left/right on a climbable wall) a fresh grip on the facade.
+     */
+    private Target findTarget(LocalPlayer p, Leap kind, double handY) {
+        Level level = p.level();
+        Vec3 f = wallDir;
+        Vec3 side = new Vec3(-f.z, 0, f.x);
+        Vec3 pos = p.position();
+        switch (kind) {
+            case UP -> {
+                Target tg = ledgeNear(p, pos, f, handY + 0.9, handY + 3.6, false);
+                if (tg != null) return tg;
+                Vec3 up = pos.add(0, 1.7, 0);
+                if (grip(p, up, f, 1.0) && grip(p, up, f, 1.8) && bodyFree(level, p, up)) return new Target(up, f, Double.NaN, false);
+            }
+            case DOWN -> {
+                return ledgeNear(p, pos, f, handY - 4.5, handY - 1.0, true);
+            }
+            case LEFT, RIGHT -> {
+                Vec3 dir = side.scale(kind == Leap.RIGHT ? 1 : -1);
+                for (double d = 1.5; d <= 4.01; d += 0.5) {
+                    Vec3 o = pos.add(dir.scale(d));
+                    if (!bodyFree(level, p, pos.add(dir.scale(d * 0.5)).add(0, 0.3, 0))) break;   // something in the way
+                    Target tg = ledgeNear(p, o, f, handY - 2.0, handY + 1.6, false);
+                    if (tg != null) return tg;
+                    if (d >= 2.0 && d <= 3.0 && grip(p, o, f, 1.0) && grip(p, o, f, 1.8) && bodyFree(level, p, o)) {
+                        return new Target(o, f, Double.NaN, false);
+                    }
+                }
+            }
+            case BACK -> {
+                Vec3 back = f.scale(-1);
+                for (double d = 1.5; d <= 6.01; d += 0.5) {
+                    Vec3 o = pos.add(back.scale(d));
+                    if (!bodyFree(level, p, pos.add(back.scale(d * 0.5)).add(0, 0.4, 0))) break;
+                    // only a wall you can actually reach: something solid just past the landing spot
+                    Target tg = ledgeNear(p, o, back, handY - 4.0, handY + 1.2, false);
+                    if (tg != null) return tg;
+                    if (blocked(level, p, o, back, 0.35, 0.3, 1.6) && grip(p, o, back, 1.0) && grip(p, o, back, 1.8)) {
+                        return new Target(flush(o, back), back, Double.NaN, false);
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /** A hangable ledge in front of a body at {@code o} (facing {@code f}) with its top between y0 and y1. */
+    private Target ledgeNear(LocalPlayer p, Vec3 o, Vec3 f, double y0, double y1, boolean fromTop) {
+        Level level = p.level();
+        Vec3 feet0 = flush(o, f);
+        int bx = Mth.floor(feet0.x + f.x * 0.8), bz = Mth.floor(feet0.z + f.z * 0.8);
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        int lo = Mth.floor(y0) - 1, hi = Mth.floor(y1);
+        for (int i = 0; i <= hi - lo; i++) {
+            int y = fromTop ? hi - i : lo + i;
+            m.set(bx, y, bz);
+            VoxelShape shape = level.getBlockState(m).getCollisionShape(level, m);
+            if (shape.isEmpty()) continue;
+            double top = y + shape.max(Direction.Axis.Y);
+            if (top < y0 || top > y1) continue;
+            if (Math.abs(top - ledgeTop) < 0.01 && Math.abs(o.subtract(p.position()).horizontalDistance()) < 0.5
+                    && f.dot(wallDir) > 0.5 && state == LEDGE_HANG) continue;   // the ledge you're on
+            // room for your hands on top of it
+            if (!level.noCollision(p, new AABB(bx + 0.05, top + 0.05, bz + 0.05, bx + 0.95, top + 0.8, bz + 0.95))) continue;
+            Vec3 feet = new Vec3(feet0.x, top - HANG_OFFSET, feet0.z);
+            if (!bodyFree(level, p, feet)) continue;
+            AABB stand = p.getDimensions(Pose.CROUCHING).makeBoundingBox(bx + 0.5, top + 0.01, bz + 0.5).deflate(0.01);
+            return new Target(feet, f, top, level.noCollision(p, stand));
+        }
+        return null;
+    }
+
+    /** Moves {@code o} along {@code f} so the body would sit flush against the block face ahead. */
+    private static Vec3 flush(Vec3 o, Vec3 f) {
+        double half = 0.3;
+        if (f.x != 0) {
+            int col = Mth.floor(o.x + f.x * 0.8);
+            double face = f.x > 0 ? col : col + 1;
+            return new Vec3(face - f.x * (half + 0.005), o.y, o.z);
+        }
+        int col = Mth.floor(o.z + f.z * 0.8);
+        double face = f.z > 0 ? col : col + 1;
+        return new Vec3(o.x, o.y, face - f.z * (half + 0.005));
+    }
+
+    private static boolean bodyFree(Level level, LocalPlayer p, Vec3 feet) {
+        AABB box = p.getDimensions(Pose.STANDING).makeBoundingBox(feet.x, feet.y, feet.z).deflate(0.03);
+        return level.noCollision(p, box);
+    }
+
+    /** Is the wall block in front of a body at {@code o}, {@code yRel} above its feet, something you can climb? */
+    private static boolean grip(LocalPlayer p, Vec3 o, Vec3 f, double yRel) {
+        BlockPos b = BlockPos.containing(o.x + f.x * 0.8, o.y + yRel, o.z + f.z * 0.8);
+        return p.level().getBlockState(b).is(CLIMBABLE);
+    }
+
+    /** Top of a ledge directly ahead with room for hands on it but not necessarily to stand: a sill or cornice. */
+    private double handholdAhead(LocalPlayer p, Vec3 o, Vec3 f, double minRel, double maxRel) {
+        Target tg = ledgeNear(p, o, f, o.y + minRel, o.y + maxRel, false);
+        return tg == null ? Double.NaN : tg.top();
     }
 
     private void tickMantle(LocalPlayer p) {
@@ -508,10 +783,14 @@ public final class ParkourController {
 
     /** Is there something solid {@code dist} blocks in {@code dir}, between y0 and y1 above the feet? */
     private static boolean blocked(LocalPlayer p, Vec3 dir, double dist, double y0, double y1) {
-        AABB b = p.getBoundingBox();
+        return blocked(p.level(), p, p.position(), dir, dist, y0, y1);
+    }
+
+    private static boolean blocked(Level level, LocalPlayer p, Vec3 at, Vec3 dir, double dist, double y0, double y1) {
+        AABB b = p.getBoundingBox().move(at.subtract(p.position()));
         AABB probe = new AABB(b.minX, b.minY + y0, b.minZ, b.maxX, b.minY + y1, b.maxZ)
                 .move(dir.x * dist, 0, dir.z * dist);
-        return !p.level().noCollision(p, probe);
+        return !level.noCollision(p, probe);
     }
 
     /**

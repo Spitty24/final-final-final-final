@@ -15,11 +15,11 @@ jobs:
           chmod +x gradlew
           mkdir -p run && echo "eula=true" > run/eula.txt
           printf 'level-seed=freerun\nspawn-protection=0\nonline-mode=false\n' > run/server.properties
-          ( sleep 240; echo "findcity"; echo "cityprobe"; sleep 120; echo "cityprobe check"; echo "city"; sleep 60; \
+          ( sleep 240; echo "findcity"; echo "cityprobe"; sleep 120; echo "cityprobe check"; echo "cityclean 6"; echo "city"; sleep 60; \
             echo "time set 13000"; echo "factory"; echo "doublequick"; sleep 40; echo "stop" ) \
             | timeout 900 ./gradlew runServer --no-daemon --console=plain 2>&1 | tee server.log || true
       - name: Report
         run: |
           grep -nE "Exception|ERROR|Caused by|FATAL|Missing|Couldn't" server.log | grep -v "Failed to load properties" | head -80 || true
-          grep -nE "City probe|Nearest city|City founded|already|planned|Filled in a missing|City generation failed" server.log || true
+          grep -nE "City probe|Nearest city|City founded|already|planned|Filled in a missing|City generation failed|Swept" server.log || true
           grep -n "street found = true" server.log || (echo "the generated city was not found" && exit 1)
