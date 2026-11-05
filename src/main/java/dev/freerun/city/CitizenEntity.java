@@ -388,10 +388,11 @@ public class CitizenEntity extends PathfinderMob {
 
     private void officeDay(ServerLevel server) {
         long t = level().getDayTime() % 24000L;
-        if (t > 11500L) {   // quitting time
+        if (t > 11500L) {   // quitting time: pack up and go home (out of sight, they just go)
             stopRiding();
             entityData.set(DATA_TYPING, false);
-            officeSeat = null;
+            if (level().getNearestPlayer(this, 32.0) == null) discard();
+            else if (getNavigation().isDone()) getNavigation().moveTo(getX() + random.nextInt(17) - 8, getY(), getZ() + random.nextInt(17) - 8, 0.8);
             return;
         }
         boolean seated = getVehicle() instanceof dev.freerun.world.SeatEntity;

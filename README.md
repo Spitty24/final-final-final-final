@@ -5,7 +5,7 @@ with animated arms in first person and full-body animation in third person (visi
 players when the server has the mod too).
 
 > **Status:** builds cleanly on GitHub Actions against Minecraft 1.21.1. Newer features
-> (most recently the 20× city, the new stores and drive-thrus, police and crime) haven't been play-tested yet, so expect
+> (most recently office jobs, rentals, furniture, the arcade and the bar) haven't been play-tested yet, so expect
 > some tuning.
 
 ## Build the .jar
@@ -126,6 +126,10 @@ building, stop at the **menu board** on the back and **right-click it from your 
 answers over the speaker and the menu opens; pay, then drive round to the **pickup window** and
 your bag is handed through as soon as you pull up beside it.
 
+| **Pixel Bayou Arcade** | Rows of playable cabinets, claw machines, a dart board | Prize counter: trade tickets for plushies, snacks, gear, even a diamond |
+| **The Rusty Pelican** | Bar & grill with pool tables, darts, booths, a stage | Alcohol-free house drinks (Bayou Brew, Pelican Punch, Hurricanes, floats), pretzels, loaded fries, wings |
+| **Bayou Home Furnishings** | Furniture showroom | Every piece of home and office furniture below |
+
 ### Streets and traffic
 
 Two-lane roads with sidewalks, crosswalks, street lamps, hydrants and benches. Every third street
@@ -183,6 +187,71 @@ or more they draw their weapons. Stay out of sight for a minute to lose them. Up
 Each city keeps its books in the world's saved data: wages paid, rent collected and what everyone
 spends in the shops. Store prices follow demand: a busy day pushes them up (to +30%), a slow one
 brings discounts (to −20%). The City app on your phone shows the numbers.
+
+## Office jobs
+
+Every office tower's lobby has a **job board** ("NOW HIRING"). Right-click it, pick a job and
+you're on the clock: work turns up around you while you're in the building, and every job pays
+straight into your account plus career XP. Pay rises with your career level, and every ten jobs in
+one shift is a 10% raise. Quit at the board, or leave the building for a minute, to clock out.
+
+| Job | Pay | The work |
+|---|---|---|
+| Janitor | $9 | Coffee spills and split trash bags appear nearby; clean them with the mop you're given |
+| IT Technician | $15 | Computers blue-screen, printers jam, server racks throw alarms; three goes with the toolkit fixes each |
+| Accountant | $13 | Ledgers pop up on nearby computers; work out the closing balance |
+| Office Manager | $17 | Coworkers (glowing) bring requests: expenses, days off, overtime, equipment. Approve or deny by the policy given |
+| Receptionist | $8 | The desk phone rings; answer within 25 seconds and put the caller through to the right department |
+
+The offices themselves are rebuilt: real **computers** (monitor, keyboard and mouse, with a desktop,
+a blue screen or a spreadsheet on screen), **office desks**, swivel **office chairs**, **cubicle**
+partitions in four-desk pods, **filing cabinets**, **printers**, **water coolers**, **whiteboards**,
+**desk phones**, a glass-walled **server room** and IT help desk, an accounting floor, and on the
+top floor glass **corner offices** for the director, the VP and the CFO round a **conference room**.
+
+From 7 AM to 5 PM the offices around you fill with people at their desks: typing (you'll hear the
+keyboards), getting up for the water cooler or the printer, stopping by a coworker's desk, then
+heading back. Right-click one for office small talk; the water cooler is where the gossip is.
+
+## Renting a home
+
+Every suburban house and every apartment building in the hood has a **mailbox** out front.
+Right-click a vacant one to see the terms, again to sign: houses are **$40 a day** and apartments
+**$25 a day** (a Minecraft day is 20 minutes), with a two-day deposit and the first day up front.
+Rent comes out of your account each morning (never while you're offline). Your bed there becomes
+your respawn point, and **nobody else can break, build or open anything on your lot**. Miss three
+days and you're evicted; sneak-right-click your mailbox to move out and get the deposit back. One
+place at a time. The phone's Bank app shows your lease.
+
+**Furniture** (all from Bayou Home Furnishings; houses come with some of it already):
+
+| Piece | What it does |
+|---|---|
+| Sofa, armchair, bar stool, office chair, bathtub | Sit in it |
+| Toilet | Sit, and it flushes |
+| Fridge, wardrobe, nightstand, filing cabinet | 27 slots of storage |
+| Stove | Right-click with raw food to cook it; right-click empty to light a burner |
+| Sink | Fills bottles and buckets |
+| Floor lamp, fireplace | Click to switch on and off (they light the room) |
+| Piano | Plays the note under where you click along the keys |
+| Grandfather clock | Tells the time and chimes |
+| Coffee table, rug, potted plant, whiteboard, cubicle walls, desks, computers | Furnishing |
+
+## The arcade and the bar
+
+Arcade cabinets are **$1 a play** and run real games on your screen; your score pays out in
+**arcade tickets**, and each game keeps a city-wide high score.
+
+| Game | How to play |
+|---|---|
+| **Gator Chomp** (snake) | Arrows/WASD to steer; eat the fish, don't bite your tail. It speeds up |
+| **Brick Bayou** (breakout) | ←/→ to move the paddle, three balls, clear the wall for a bonus and a faster one |
+| **Pelican Flap** | Space or click to flap through the gaps between the pilings |
+| **Darts** (bar and arcade) | The aim drifts round the board; Space to throw, three darts, bullseye 50 |
+
+The **claw machine** is $2 a try and wins about one time in four. Trade tickets at the **prize
+counter**. At **The Rusty Pelican**, order from the bartender, shoot pool (right-click the table),
+play darts, or sit in a booth.
 
 ## Smartphone
 
