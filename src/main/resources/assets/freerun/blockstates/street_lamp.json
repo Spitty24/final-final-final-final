@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "freerun:block/street_lamp"
+    },
+    "lit=true": {
+      "model": "freerun:block/street_lamp_on"
+    }
+  }
+}

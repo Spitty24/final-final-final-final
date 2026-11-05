@@ -36,51 +36,53 @@ public final class Amenities {
 
     // ------------------------------------------------------------------ smartphone
 
-    /** Clock, balance, next break, location, and whatever notification just came in. */
-    public static class Smartphone extends Item {
-        private static final String[] NOTIFICATIONS = {
-                "Mom: call me when you get a chance",
-                "Your package has been delivered (to the wrong house)",
-                "Supervisor Slater: where are you",
-                "Double Quick Rewards: 2-for-$3 roller dogs today only!",
-                "Low storage. Delete some of your 4,000 photos of the crane.",
-                "Ethan James Patrick sent you a message: \"what am i supposed to do here\"",
-                "Weather alert: it's humid. It's always humid.",
-                "Bayou Federal Credit Union: direct deposit received",
-                "Johnny Sim: who parked in front of my forklift",
-                "You have 1 new voicemail from an unknown number (probably your car's warranty)",
-                "Screen time is up 400% this week",
-                "Co-op group chat (37): did anybody figure out what we're supposed to do"
-        };
+    /** Set by the client: opens the phone screen. */
+    public static Runnable OPEN_PHONE = () -> { };
 
+    /**
+     * A smartphone with apps (Bank, Map, Blackwire, Jobs, City, Messages). Use it to open the phone.
+     * Blackwire lets you profile and hack whatever you look at (H / Shift+H) using battery, which
+     * recharges while the phone sits in your inventory.
+     */
+    public static class Smartphone extends Item {
         public Smartphone(Properties p) {
             super(p);
         }
 
+        public static float battery(ItemStack stack) {
+            CustomData d = stack.get(DataComponents.CUSTOM_DATA);
+            return d == null || !d.copyTag().contains("Battery") ? 100.0f : d.copyTag().getFloat("Battery");
+        }
+
+        public static void setBattery(ItemStack stack, float b) {
+            float v = Math.max(0.0f, Math.min(100.0f, b));
+            CustomData.update(DataComponents.CUSTOM_DATA, stack, t -> t.putFloat("Battery", v));
+        }
+
         @Override
         public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-            ItemStack stack = player.getItemInHand(hand);
-            if (!level.isClientSide) {
-                long day = level.getDayTime() % 24000L;
-                int hours = (int) ((day / 1000L + 6L) % 24L);
-                int minutes = (int) (day % 1000L * 60L / 1000L);
-                String clock = String.format("%d:%02d %s", hours % 12 == 0 ? 12 : hours % 12, minutes, hours < 12 ? "AM" : "PM");
-                int until = BreakTime.ticksUntilBreak(level);
-                String br = BreakTime.isBreak(level) ? "§aon break now!" : "next break in " + (until / 1200) + "m " + (until % 1200 / 20) + "s";
-                player.displayClientMessage(Component.literal("§8┌ §f📱 " + clock + " §8· §a" + Money.fmt(Money.balance(player))
-                        + " §8· §7" + br), false);
-                player.displayClientMessage(Component.literal("§8│ §7GPS: " + player.blockPosition().getX() + ", "
-                        + player.blockPosition().getY() + ", " + player.blockPosition().getZ()), false);
-                player.displayClientMessage(Component.literal("§8└ §e🔔 " + NOTIFICATIONS[level.random.nextInt(NOTIFICATIONS.length)]), false);
-                level.playSound(null, player.blockPosition(), SoundEvents.NOTE_BLOCK_CHIME.value(), SoundSource.PLAYERS, 0.5f, 1.8f);
+            if (level.isClientSide) OPEN_PHONE.run();
+            return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide);
+        }
+
+        @Override
+        public void inventoryTick(ItemStack stack, Level level, Entity entity, int slot, boolean selected) {
+            if (!level.isClientSide && entity.tickCount % 20 == 0) {
+                float b = battery(stack);
+                if (b < 100.0f) setBattery(stack, b + 1.0f);
             }
-            player.getCooldowns().addCooldown(this, 20);
-            return InteractionResultHolder.sidedSuccess(stack, level.isClientSide);
+        }
+
+        @Override
+        public boolean allowComponentsUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
+            return false;
         }
 
         @Override
         public void appendHoverText(ItemStack stack, TooltipContext ctx, List<Component> tooltip, TooltipFlag flag) {
-            tip(tooltip, "Use: time, balance, next break, GPS", "and your latest notification.");
+            tip(tooltip, "Use: open your phone (Bank, Map, Blackwire, Jobs, City, Messages)",
+                    "Blackwire: look at something and press H to hack it (Shift+H for the other option)",
+                    "§3Battery: " + (int) battery(stack) + "%");
         }
     }
 

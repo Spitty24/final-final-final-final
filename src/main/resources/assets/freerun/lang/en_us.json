@@ -163,5 +163,12 @@
   "subtitles.freerun.car_horn": "Car honks",
   "subtitles.freerun.car_crash": "Car crashes",
   "subtitles.freerun.cash_register": "Register rings",
-  "subtitles.freerun.break_buzzer": "Break buzzer"
+  "subtitles.freerun.break_buzzer": "Break buzzer",
+  "block.freerun.traffic_light": "Traffic Light",
+  "block.freerun.stop_sign": "Stop Sign",
+  "block.freerun.street_lamp": "Street Lamp",
+  "entity.freerun.citizen": "Citizen",
+  "entity.freerun.city_hub": "City Hub",
+  "item.freerun.citizen_spawn_egg": "Citizen Spawn Egg",
+  "key.freerun.hack": "Blackwire: hack target"
 }

@@ -23,6 +23,9 @@ public final class RoadhouseCommand {
         dispatcher.register(Commands.literal("factory")
                 .requires(src -> src.hasPermission(2))
                 .executes(ctx -> buildFactory(ctx.getSource())));
+        dispatcher.register(Commands.literal("city")
+                .requires(src -> src.hasPermission(2))
+                .executes(ctx -> buildCity(ctx.getSource())));
         dispatcher.register(Commands.literal("doublequick")
                 .requires(src -> src.hasPermission(2))
                 .executes(ctx -> buildDoubleQuick(ctx.getSource())));
@@ -62,6 +65,35 @@ public final class RoadhouseCommand {
         src.sendSuccess(() -> Component.literal(
                 "Welding factory built: the parking lot starts just ahead of you (south), the building is past it. "
                         + "The Double Quick is east of the lot, the General Store beside the factory."), true);
+        return 1;
+    }
+
+    /**
+     * /city: builds a whole city centred on you (244 x 244 blocks: streets, downtown, suburbs, the
+     * hood, the park, the factory, the Roadhouse and the stores). Takes a few seconds.
+     */
+    private static int buildCity(CommandSourceStack src) {
+        ServerLevel level = src.getLevel();
+        BlockPos feet = BlockPos.containing(src.getPosition());
+        BlockPos city = feet.offset(-dev.freerun.city.CityLayout.HALF, -1, -dev.freerun.city.CityLayout.HALF);
+        java.util.List<net.minecraft.world.level.levelgen.structure.StructurePiece> pieces = dev.freerun.city.CityPlan.pieces(city);
+        net.minecraft.world.level.levelgen.structure.BoundingBox all = new net.minecraft.world.level.levelgen.structure.BoundingBox(
+                city.getX(), city.getY() - 8, city.getZ(), city.getX() + dev.freerun.city.CityLayout.SIZE, city.getY() + 64,
+                city.getZ() + dev.freerun.city.CityLayout.SIZE);
+        // build chunk by chunk, the way world generation would
+        for (int cx = all.minX() >> 4; cx <= all.maxX() >> 4; cx++) {
+            for (int cz = all.minZ() >> 4; cz <= all.maxZ() >> 4; cz++) {
+                ChunkPos cp = new ChunkPos(cx, cz);
+                net.minecraft.world.level.levelgen.structure.BoundingBox chunkBox = new net.minecraft.world.level.levelgen.structure.BoundingBox(
+                        cp.getMinBlockX(), level.getMinBuildHeight(), cp.getMinBlockZ(), cp.getMaxBlockX(), level.getMaxBuildHeight(), cp.getMaxBlockZ());
+                for (var piece : pieces) {
+                    if (!piece.getBoundingBox().intersects(chunkBox)) continue;
+                    piece.postProcess(level, level.structureManager(), level.getChunkSource().getGenerator(),
+                            level.getRandom(), chunkBox, cp, city);
+                }
+            }
+        }
+        src.sendSuccess(() -> Component.literal("City built around you. Open your phone's Map app to find your way around."), true);
         return 1;
     }
 

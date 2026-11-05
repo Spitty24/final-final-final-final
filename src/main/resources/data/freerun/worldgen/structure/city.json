@@ -1,0 +1,7 @@
+{
+  "type": "freerun:city",
+  "biomes": "#freerun:has_city",
+  "step": "surface_structures",
+  "terrain_adaptation": "beard_box",
+  "spawn_overrides": {}
+}

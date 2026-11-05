@@ -11,10 +11,11 @@ public final class ShopPayloads {
     private ShopPayloads() {}
 
     /** Server -> client: open {@code shop} for the clerk with this entity id. */
-    public record Open(int entityId, int shop) implements CustomPacketPayload {
+    public record Open(int entityId, int shop, int pricePercent) implements CustomPacketPayload {
         public static final Type<Open> TYPE = new Type<>(Freerun.id("shop_open"));
         public static final StreamCodec<RegistryFriendlyByteBuf, Open> CODEC = StreamCodec.composite(
-                ByteBufCodecs.VAR_INT, Open::entityId, ByteBufCodecs.VAR_INT, Open::shop, Open::new);
+                ByteBufCodecs.VAR_INT, Open::entityId, ByteBufCodecs.VAR_INT, Open::shop,
+                ByteBufCodecs.VAR_INT, Open::pricePercent, Open::new);
 
         @Override
         public Type<? extends CustomPacketPayload> type() {

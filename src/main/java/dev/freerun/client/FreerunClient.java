@@ -31,6 +31,7 @@ public final class FreerunClient implements ClientModInitializer {
     private static KeyMapping skillsKey;
     private static boolean skillsKeyWasDown;
     private static boolean hornWasDown;
+    private static KeyMapping hackKey;
     private static boolean pickerPending;
 
     /** Whether a key event is the skill tree key (used to close the screen with the same key). */
@@ -62,6 +63,22 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.economy.EconomyRegistry.GAS_PUMP, dev.freerun.economy.EconomyRegistry.ROLLER_GRILL,
                 dev.freerun.food.FoodRegistry.STORE_SHELF);
 
+        // The city: street furniture, residents, and the phone
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.renderer.RenderType.cutout(),
+                dev.freerun.city.CityRegistry.TRAFFIC_LIGHT, dev.freerun.city.CityRegistry.STOP_SIGN, dev.freerun.city.CityRegistry.STREET_LAMP);
+        EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITIZEN, dev.freerun.client.city.CitizenRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITY_HUB, net.minecraft.client.renderer.entity.NoopRenderer::new);
+        hackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.hack", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.freerun"));
+        dev.freerun.economy.Amenities.OPEN_PHONE = () -> net.minecraft.client.Minecraft.getInstance()
+                .setScreen(new dev.freerun.client.phone.PhoneScreen());
+        ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.PhonePayloads.Data.TYPE, (payload, context) ->
+                context.client().execute(() -> {
+                    dev.freerun.client.phone.PhoneState.city = payload.tag();
+                    dev.freerun.client.phone.PhoneState.cityAt = System.currentTimeMillis();
+                }));
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.phone.Blackwire.render(guiGraphics));
+
         // Guns, cars, stores, and the new folks at the factory
         net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry.getInstance().register(
                 dev.freerun.item.ItemRegistry.MUZZLE_FLASH, dev.freerun.client.gun.MuzzleFlashParticle.Provider::new);
@@ -79,7 +96,7 @@ public final class FreerunClient implements ClientModInitializer {
         EntityRendererRegistry.register(dev.freerun.mobs.MoreMobs.COOP, dev.freerun.client.mobs.CoopRenderer::new);
         ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.ShopPayloads.Open.TYPE, (payload, context) ->
                 context.client().execute(() -> context.client().setScreen(new dev.freerun.client.economy.ShopScreen(
-                        payload.entityId(), dev.freerun.economy.Shops.Shop.byId(payload.shop())))));
+                        payload.entityId(), dev.freerun.economy.Shops.Shop.byId(payload.shop()), payload.pricePercent()))));
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.economy.CashHud.render(guiGraphics));
 
         toggleKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
@@ -181,6 +198,10 @@ public final class FreerunClient implements ClientModInitializer {
                 }
             }
             dev.freerun.client.vehicle.CarEngineSound.tickAll(client);
+            dev.freerun.client.phone.Blackwire.tick(client);
+            while (hackKey.consumeClick()) {
+                if (client.screen == null) dev.freerun.client.phone.Blackwire.hack(net.minecraft.client.gui.screens.Screen.hasShiftDown());
+            }
             // In a car, the forks-up key is the horn.
             boolean inCar = client.player != null && client.player.getVehicle() instanceof dev.freerun.vehicle.CarEntity;
             boolean horn = inCar && forksUpKey.isDown();

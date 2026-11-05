@@ -1,0 +1,411 @@
+package dev.freerun.city;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.FloatGoal;
+import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
+import net.minecraft.world.entity.ai.goal.PanicGoal;
+import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
+import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
+
+/**
+ * A city resident. Everyone has a name, an age, a job, a home and a bank balance, and lives a day:
+ *
+ *   6–8 AM    commute to work           8 AM–4 PM  at work (paid when the shift ends)
+ *   4–7 PM    errands: shopping, the park, the Roadhouse (spends money at the stores)
+ *   7 PM–6 AM home (pays rent), stays in
+ *
+ * Retirees, students and the unemployed keep their own hours. Some citizens drive the city's
+ * cars instead and just cruise. Your phone can profile any of them (and, well, hack them).
+ */
+public class CitizenEntity extends PathfinderMob {
+    public enum Job {
+        OFFICE_WORKER("Office worker", 140, CityLayout.District.OFFICE),
+        ACCOUNTANT("Accountant", 160, CityLayout.District.OFFICE),
+        CASHIER("Cashier", 90, CityLayout.District.DOUBLE_QUICK),
+        SHOP_CLERK("Shop clerk", 85, CityLayout.District.GENERAL_STORE),
+        LINE_COOK("Line cook", 95, CityLayout.District.ROADHOUSE),
+        WELDER("Welder", 150, CityLayout.District.FACTORY),
+        NURSE("Nurse", 135, CityLayout.District.PARK),
+        TEACHER("Teacher", 110, CityLayout.District.PARK),
+        STUDENT("Student", 0, CityLayout.District.PARK),
+        RETIREE("Retiree", 55, CityLayout.District.PARK),
+        RIDESHARE_DRIVER("Rideshare driver", 100, null),
+        MUSICIAN("Street musician", 40, CityLayout.District.PARK),
+        UNEMPLOYED("Between jobs", 0, CityLayout.District.HOOD);
+
+        public final String title;
+        public final int wage;
+        public final CityLayout.District work;
+
+        Job(String title, int wage, CityLayout.District work) {
+            this.title = title;
+            this.wage = wage;
+            this.work = work;
+        }
+    }
+
+    private static final String[] FIRST = {"Marcus", "Dana", "Luis", "Priya", "Tom", "Keisha", "Wei", "Hannah", "Andre", "Sofia",
+            "Jake", "Nadia", "Omar", "Grace", "Tyrell", "Molly", "Raj", "Bethany", "Diego", "Aisha", "Cole", "Mei", "Darnell",
+            "Rosa", "Ethan", "Lena", "Kofi", "Megan", "Ivan", "Brianna", "Hector", "Joy", "Pierre", "Tasha", "Ben", "Yuki"};
+    private static final String[] LAST = {"Thibodeaux", "Nguyen", "Garcia", "Johnson", "Patel", "Landry", "Kim", "Washington",
+            "Hebert", "Robinson", "Okafor", "Broussard", "Martinez", "Chen", "Williams", "Guidry", "Lopez", "Davis",
+            "Fontenot", "Singh", "Jackson", "Arceneaux", "Rossi", "Brown", "LeBlanc", "Ali", "Miller", "Doucet"};
+    public static final String[] FACTS = {
+            "Owes $340 in library fines", "Has a 1,200-day streak on a language app", "Secretly can't stand boudin",
+            "Collects vintage forklift manuals", "Has been 'about to start a podcast' for 3 years", "Afraid of geese",
+            "Won a hot dog eating contest in 2019", "Still uses a flip phone for 'security'", "Has 47 unread voicemails",
+            "Runs a fan page for the overhead crane", "Can name every Double Quick location", "Allergic to cats, owns four",
+            "Thinks the Rust Rats are a band", "Writes one-star reviews of the weather", "Has never once returned a cart",
+            "Practises karaoke in the car every day", "Lost a bet and now has to say 'cher' a lot", "Night owl: 4 hours of sleep",
+            "Has a lucky scratch-off they refuse to scratch", "Recently searched: 'how to look busy at work'",
+            "Has been mistaken for Ethan James Patrick", "Puts hot sauce on everything", "Volunteers at the animal shelter",
+            "Is training for a marathon (has run once)", "Keeps a spare tyre in the living room"};
+    private static final String[] GREETINGS = {"Morning!", "Hey there.", "Oh, hi.", "How's it going?", "Can't talk long.", "Hey neighbour."};
+
+    private static final EntityDataAccessor<Integer> DATA_VARIANT = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_JOB = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_AGE = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_MONEY = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_FACT = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Integer> DATA_DISTRACTED = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+
+    private enum Plan { WORK, ERRAND, HOME, WANDER }
+
+    private BlockPos city;
+    private BlockPos home;
+    private BlockPos work;
+    private BlockPos goal;
+    private Plan plan = Plan.WANDER;
+    private int planDay = -1;
+    private boolean paidToday, rentToday, shoppedToday;
+    private int stuck;
+    private Vec3 lastPos = Vec3.ZERO;
+    private boolean arrived;
+    private long hackedUntil;
+
+    public CitizenEntity(EntityType<? extends CitizenEntity> type, Level level) {
+        super(type, level);
+        setPersistenceRequired();
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return PathfinderMob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 20.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.24)
+                .add(Attributes.FOLLOW_RANGE, 24.0);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_VARIANT, 0);
+        builder.define(DATA_JOB, 0);
+        builder.define(DATA_AGE, 30);
+        builder.define(DATA_MONEY, 100);
+        builder.define(DATA_FACT, 0);
+        builder.define(DATA_DISTRACTED, 0);
+    }
+
+    // ------------------------------------------------------------------ identity
+
+    public int variant() { return entityData.get(DATA_VARIANT); }
+    public Job job() { return Job.values()[Mth.clamp(entityData.get(DATA_JOB), 0, Job.values().length - 1)]; }
+    public int age() { return entityData.get(DATA_AGE); }
+    public int money() { return entityData.get(DATA_MONEY); }
+    public String fact() { return FACTS[Math.floorMod(entityData.get(DATA_FACT), FACTS.length)]; }
+    public boolean distracted() { return entityData.get(DATA_DISTRACTED) > 0; }
+
+    public void setMoney(int m) {
+        entityData.set(DATA_MONEY, Math.max(0, m));
+    }
+
+    /** Makes up a whole person. {@code home} is where they live (world pos), {@code city} the city origin. */
+    public void setup(RandomSource r, BlockPos city, BlockPos home, Job job) {
+        this.city = city == null ? null : city.immutable();
+        this.home = home.immutable();
+        entityData.set(DATA_JOB, job.ordinal());
+        int age = switch (job) {
+            case STUDENT -> 16 + r.nextInt(7);
+            case RETIREE -> 66 + r.nextInt(25);
+            default -> 21 + r.nextInt(42);
+        };
+        entityData.set(DATA_AGE, age);
+        entityData.set(DATA_MONEY, 40 + r.nextInt(job.wage * 3 + 120));
+        entityData.set(DATA_FACT, r.nextInt(FACTS.length));
+        int variant = switch (job) {
+            case OFFICE_WORKER, ACCOUNTANT -> r.nextInt(2);           // suits
+            case NURSE -> 2;
+            case WELDER -> 3;
+            case RETIREE -> 4;
+            case STUDENT -> 5;
+            default -> 5 + r.nextInt(3);                             // casual
+        };
+        entityData.set(DATA_VARIANT, variant);
+        setCustomName(Component.literal(FIRST[r.nextInt(FIRST.length)] + " " + LAST[r.nextInt(LAST.length)]));
+        if (job.work != null && city != null) {
+            List<BlockPos> spots = CityLayout.spots(job.work);
+            if (!spots.isEmpty()) work = city.offset(spots.get(r.nextInt(spots.size())));
+        }
+    }
+
+    public BlockPos cityOrigin() {
+        return city;
+    }
+
+    // ------------------------------------------------------------------ AI
+
+    @Override
+    protected void registerGoals() {
+        goalSelector.addGoal(0, new FloatGoal(this));
+        goalSelector.addGoal(1, new PanicGoal(this, 1.4));
+        goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.7, 0.008f));
+        goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 8.0f));
+        goalSelector.addGoal(7, new RandomLookAroundGoal(this));
+    }
+
+    @Override
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data) {
+        SpawnGroupData out = super.finalizeSpawn(level, difficulty, reason, data);
+        if (home == null) {
+            CityHubEntity hub = CityHubEntity.nearest(level.getLevel(), blockPosition());
+            Job[] jobs = Job.values();
+            setup(random, hub != null ? hub.origin() : null, blockPosition(), jobs[random.nextInt(jobs.length)]);
+        }
+        return out;
+    }
+
+    private Plan planFor(long dayTime) {
+        Job j = job();
+        long t = dayTime % 24000L;
+        boolean night = t >= 13000L;
+        if (night) return Plan.HOME;
+        if (j == Job.UNEMPLOYED || j == Job.MUSICIAN) return t < 6000L ? Plan.WANDER : Plan.ERRAND;
+        if (t < 10000L) return work != null ? Plan.WORK : Plan.WANDER;
+        return Plan.ERRAND;
+    }
+
+    @Override
+    protected void customServerAiStep() {
+        super.customServerAiStep();
+        if (!(level() instanceof ServerLevel server) || isPassenger()) return;
+        int distracted = entityData.get(DATA_DISTRACTED);
+        if (distracted > 0) {
+            entityData.set(DATA_DISTRACTED, distracted - 1);
+            getNavigation().stop();
+            setXRot(40.0f);
+            if (distracted % 40 == 0) playSound(SoundEvents.NOTE_BLOCK_CHIME.value(), 0.5f, 1.8f);
+            return;
+        }
+        if (home == null) home = blockPosition();
+        long day = level().getDayTime() / 24000L;
+        if (day != planDay) {
+            planDay = (int) day;
+            paidToday = rentToday = shoppedToday = false;
+        }
+        Plan want = planFor(level().getDayTime());
+        if (want != plan) {
+            // finishing a shift: get paid
+            if (plan == Plan.WORK && !paidToday && job().wage > 0) {
+                paidToday = true;
+                setMoney(money() + job().wage);
+                CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
+                if (hub != null) hub.recordWages(job().wage);
+            }
+            plan = want;
+            arrived = false;
+            stuck = 0;
+            goal = switch (plan) {
+                case WORK -> work;
+                case HOME -> home;
+                case ERRAND -> errandSpot(server);
+                case WANDER -> null;
+            };
+            clearRestriction();
+        }
+        if (goal == null) {
+            if (!hasRestriction()) restrictTo(home, 24);
+            return;
+        }
+        if (!arrived) {
+            if (walk(goal)) {
+                arrived = true;
+                restrictTo(goal, plan == Plan.HOME ? 3 : 8);
+                onArrive(server);
+            }
+        }
+    }
+
+    private BlockPos errandSpot(ServerLevel server) {
+        CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
+        if (hub == null) return home;
+        BlockPos shop = hub.randomShop(random);
+        if (shop != null && random.nextInt(3) != 0) return shop;
+        List<BlockPos> park = CityLayout.spots(job() == Job.UNEMPLOYED ? CityLayout.District.HOOD : CityLayout.District.PARK);
+        return park.isEmpty() || city == null ? home : city.offset(park.get(random.nextInt(park.size())));
+    }
+
+    private void onArrive(ServerLevel server) {
+        if (plan == Plan.ERRAND && !shoppedToday) {
+            CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
+            if (hub != null && hub.isShop(goal) && money() > 5) {
+                shoppedToday = true;
+                int spend = Math.min(money(), 5 + random.nextInt(26));
+                setMoney(money() - spend);
+                hub.recordSale(spend);
+            }
+        }
+        if (plan == Plan.HOME && !rentToday) {
+            rentToday = true;
+            int rent = Math.min(money(), 15 + random.nextInt(15));
+            setMoney(money() - rent);
+            CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
+            if (hub != null) hub.recordRent(rent);
+        }
+    }
+
+    /** One step of a long walk, in short hops so the pathfinder never gives up. */
+    private boolean walk(BlockPos to) {
+        Vec3 target = Vec3.atBottomCenterOf(to);
+        Vec3 here = position();
+        double dx = target.x - here.x, dz = target.z - here.z;
+        double dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < 2.5 && Math.abs(target.y - here.y) < 3) return true;
+        if (tickCount % 10 != 0) return false;
+        if (here.distanceToSqr(lastPos) < 0.04) stuck += 10;
+        else stuck = Math.max(0, stuck - 5);
+        lastPos = here;
+        if (stuck > 400 && level().getNearestPlayer(this, 24.0) == null) {   // hopelessly stuck and nobody's watching
+            moveTo(target.x, target.y, target.z, getYRot(), 0.0f);
+            stuck = 0;
+            return true;
+        }
+        Vec3 hop = dist > 14.0 ? new Vec3(here.x + dx / dist * 12.0, here.y, here.z + dz / dist * 12.0) : target;
+        if (getNavigation().isDone() || tickCount % 60 == 0) getNavigation().moveTo(hop.x, hop.y, hop.z, 1.0);
+        return false;
+    }
+
+    // ------------------------------------------------------------------ hacks (see Hacking)
+
+    public boolean recentlyHacked() {
+        return level().getGameTime() < hackedUntil;
+    }
+
+    public int drain(int max) {
+        int take = Math.min(money(), max);
+        setMoney(money() - take);
+        hackedUntil = level().getGameTime() + 6000;   // their bank flags the account for 5 minutes
+        return take;
+    }
+
+    public void distract(int ticks) {
+        entityData.set(DATA_DISTRACTED, ticks);
+        getNavigation().stop();
+    }
+
+    // ------------------------------------------------------------------ talking
+
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        if (!level().isClientSide) {
+            Job j = job();
+            String line = GREETINGS[random.nextInt(GREETINGS.length)] + " " + switch (plan) {
+                case WORK -> j == Job.STUDENT ? "Late for class!" : "On my way to work. " + j.title + ", if you're wondering.";
+                case HOME -> "Heading home. Long day.";
+                case ERRAND -> "Just running errands.";
+                case WANDER -> j == Job.RETIREE ? "Just enjoying the day. I'm retired, you know." : "Just out for a walk.";
+            };
+            if (distracted()) line = "*staring at their phone* ...huh? Sorry, my phone's going crazy.";
+            player.displayClientMessage(Component.literal("§f<" + getName().getString() + "> " + line), false);
+            getLookControl().setLookAt(player, 30.0f, 30.0f);
+        }
+        return InteractionResult.sidedSuccess(level().isClientSide);
+    }
+
+    @Override
+    public boolean hurt(DamageSource source, float amount) {
+        boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide && random.nextInt(2) == 0) {
+            String[] yells = {"HEY! What's your problem?!", "Somebody call the cops!", "Ow! Are you crazy?!", "HELP!"};
+            Component msg = Component.literal("§f<" + getName().getString() + "> §c" + yells[random.nextInt(yells.length)]);
+            for (Player p : level().players()) if (distanceToSqr(p) < 16 * 16) p.displayClientMessage(msg, false);
+        }
+        return hurt;
+    }
+
+    @Override
+    protected void dropCustomDeathLoot(ServerLevel level, DamageSource source, boolean recentlyHit) {
+        super.dropCustomDeathLoot(level, source, recentlyHit);
+        int cash = Math.min(money(), 5 + random.nextInt(25));
+        for (net.minecraft.world.item.ItemStack bill : dev.freerun.economy.Money.bills(cash)) spawnAtLocation(bill);
+    }
+
+    @Override
+    public boolean removeWhenFarAway(double distance) {
+        return false;
+    }
+
+    @Override
+    public void addAdditionalSaveData(CompoundTag tag) {
+        super.addAdditionalSaveData(tag);
+        tag.putInt("Variant", variant());
+        tag.putInt("Job", entityData.get(DATA_JOB));
+        tag.putInt("Age", age());
+        tag.putInt("Money", money());
+        tag.putInt("Fact", entityData.get(DATA_FACT));
+        put(tag, "Home", home);
+        put(tag, "Work", work);
+        put(tag, "City", city);
+        tag.putLong("HackedUntil", hackedUntil);
+    }
+
+    @Override
+    public void readAdditionalSaveData(CompoundTag tag) {
+        super.readAdditionalSaveData(tag);
+        entityData.set(DATA_VARIANT, tag.getInt("Variant"));
+        entityData.set(DATA_JOB, tag.getInt("Job"));
+        entityData.set(DATA_AGE, tag.getInt("Age"));
+        entityData.set(DATA_MONEY, tag.getInt("Money"));
+        entityData.set(DATA_FACT, tag.getInt("Fact"));
+        home = get(tag, "Home");
+        work = get(tag, "Work");
+        city = get(tag, "City");
+        hackedUntil = tag.getLong("HackedUntil");
+    }
+
+    private static void put(CompoundTag tag, String k, BlockPos p) {
+        if (p == null) return;
+        tag.putInt(k + "X", p.getX());
+        tag.putInt(k + "Y", p.getY());
+        tag.putInt(k + "Z", p.getZ());
+    }
+
+    private static BlockPos get(CompoundTag tag, String k) {
+        return tag.contains(k + "X") ? new BlockPos(tag.getInt(k + "X"), tag.getInt(k + "Y"), tag.getInt(k + "Z")) : null;
+    }
+}

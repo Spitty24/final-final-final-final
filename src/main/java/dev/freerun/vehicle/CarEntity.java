@@ -71,6 +71,9 @@ public class CarEntity extends LivingEntity {
     private int crashCooldown;
     // server side: the driver's client moves the car between ticks, so track movement ourselves
     private Vec3 lastServerPos;
+    // a resident at the wheel
+    private net.minecraft.core.BlockPos city;
+    private final dev.freerun.city.Autopilot autopilot = new dev.freerun.city.Autopilot();
     private double lastServerSpeed;
 
     public CarEntity(EntityType<? extends CarEntity> type, Level level) {
@@ -110,6 +113,45 @@ public class CarEntity extends LivingEntity {
 
     public void addFuel(float amount) {
         entityData.set(DATA_FUEL, Mth.clamp(fuel() + amount, 0.0f, MAX_FUEL));
+    }
+
+    public void setCity(net.minecraft.core.BlockPos city) {
+        this.city = city == null ? null : city.immutable();
+    }
+
+    public net.minecraft.core.BlockPos city() {
+        return city;
+    }
+
+    public boolean npcDriven() {
+        return getFirstPassenger() instanceof dev.freerun.city.CitizenEntity;
+    }
+
+    /** Forward speed in blocks per tick on the side simulating the car. */
+    public double speed() {
+        return level().isClientSide ? renderSpeed : speed;
+    }
+
+    public Vec3 forwardVec() {
+        return forward();
+    }
+
+    /** Hacked: the engine cuts out for a while. */
+    public void stall(int ticks) {
+        autopilot.stallTicks = ticks;
+        autopilot.joyrideTicks = 0;
+    }
+
+    /** Hacked: floor it and ignore every light. */
+    public void joyride(int ticks) {
+        autopilot.joyrideTicks = ticks;
+        autopilot.stallTicks = 0;
+    }
+
+    @Override
+    protected void serverAiStep() {
+        super.serverAiStep();
+        if (npcDriven() && city != null) autopilot.step(this, city);
     }
 
     public float steer(float partialTick) {
@@ -164,6 +206,7 @@ public class CarEntity extends LivingEntity {
         double horiz = Math.sqrt(moved.x * moved.x + moved.z * moved.z);
         if (horiz > 3.0) horiz = 0.0;   // teleported, not driven
         if (horiz > 0.01 && getControllingPassenger() != null) addFuel((float) (-horiz * 0.045));
+        if (horiz > 3.0 && npcDriven()) autopilot.reset();
         if (horiz > 0.32) runOver(moved, horiz);
         // Went from speed to a dead stop in one tick: that was a wall.
         if (lastServerSpeed > 0.5 && horiz < lastServerSpeed * 0.3 && crashCooldown <= 0) {
@@ -206,16 +249,21 @@ public class CarEntity extends LivingEntity {
         LivingEntity driver = getControllingPassenger();
         float throttle = 0.0f, steerIn = 0.0f;
         boolean handbrake = false;
+        float steerLimit = 1.0f;
         if (driver instanceof Player p) {
             throttle = p.zza;
             steerIn = p.xxa;
             handbrake = p.jumping;
+        } else if (npcDriven() && city != null) {
+            throttle = autopilot.throttle;
+            steerIn = autopilot.steer;
+            steerLimit = 1.35f;
         }
         boolean grounded = onGround();
         if (fuel() <= 0.0f && throttle > 0.0f && speed >= -0.01) throttle = 0.0f;
 
         // Steering eases toward the input and recentres on its own.
-        float target = Mth.clamp(steerIn, -1.0f, 1.0f);
+        float target = Mth.clamp(steerIn, -steerLimit, steerLimit);
         steer += Mth.clamp(target - steer, -0.09f, 0.09f);
 
         double v = speed;
@@ -439,6 +487,11 @@ public class CarEntity extends LivingEntity {
         super.addAdditionalSaveData(tag);
         tag.putInt("Color", color());
         tag.putFloat("Fuel", fuel());
+        if (city != null) {
+            tag.putInt("CityX", city.getX());
+            tag.putInt("CityY", city.getY());
+            tag.putInt("CityZ", city.getZ());
+        }
     }
 
     @Override
@@ -446,5 +499,6 @@ public class CarEntity extends LivingEntity {
         super.readAdditionalSaveData(tag);
         if (tag.contains("Color")) setColor(tag.getInt("Color"));
         if (tag.contains("Fuel")) entityData.set(DATA_FUEL, Mth.clamp(tag.getFloat("Fuel"), 0.0f, MAX_FUEL));
+        if (tag.contains("CityX")) city = new net.minecraft.core.BlockPos(tag.getInt("CityX"), tag.getInt("CityY"), tag.getInt("CityZ"));
     }
 }

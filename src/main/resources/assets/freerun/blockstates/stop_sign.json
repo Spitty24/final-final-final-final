@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/stop_sign"
+    },
+    "facing=east": {
+      "model": "freerun:block/stop_sign",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "freerun:block/stop_sign",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "freerun:block/stop_sign",
+      "y": 270
+    }
+  }
+}

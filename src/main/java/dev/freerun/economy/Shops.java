@@ -65,25 +65,36 @@ public final class Shops {
 
     // ------------------------------------------------------------------ server side
 
+    /** Shops inside a city charge whatever local demand says (see the city hub); elsewhere, list price. */
+    public static int pricePercent(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
+        dev.freerun.city.CityHubEntity hub = dev.freerun.city.CityHubEntity.nearest(level, pos);
+        return hub == null ? 100 : (int) Math.round(hub.priceMultiplier() * 100);
+    }
+
+    public static int price(int list, int percent) {
+        return Math.max(1, (int) Math.round(list * percent / 100.0));
+    }
+
     public static void buy(ServerPlayer player, Entity clerk, Shop shop, int index, int times) {
         List<Offer> list = buys(shop);
         if (index < 0 || index >= list.size() || clerk == null || player.distanceToSqr(clerk) > 10 * 10) return;
         Offer o = list.get(index);
+        int each = price(o.price(), pricePercent(player.serverLevel(), clerk.blockPosition()));
         int bought = 0;
         for (int i = 0; i < Math.max(1, Math.min(times, 16)); i++) {
-            if (!Money.pay(player, o.price())) break;
+            if (!Money.pay(player, each)) break;
             ItemStack give = o.stack().copy();
             if (!player.getInventory().add(give)) player.drop(give, false);
             bought++;
         }
         if (bought == 0) {
-            player.displayClientMessage(Component.literal("§cYou can't afford that. §7(" + Money.fmt(o.price())
+            player.displayClientMessage(Component.literal("§cYou can't afford that. §7(" + Money.fmt(each)
                     + ", you have " + Money.fmt(Money.balance(player)) + ")"), true);
             return;
         }
         player.level().playSound(null, clerk.blockPosition(), ModSounds.CASH_REGISTER, SoundSource.NEUTRAL, 0.8f, 1.0f);
         player.displayClientMessage(Component.literal("§aBought " + (bought > 1 ? bought + "× " : "")
-                + o.stack().getHoverName().getString() + " for " + Money.fmt(o.price() * bought) + ". §7Balance: "
+                + o.stack().getHoverName().getString() + " for " + Money.fmt(each * bought) + ". §7Balance: "
                 + Money.fmt(Money.balance(player))), true);
     }
 

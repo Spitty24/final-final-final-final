@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,signal=0": {
+      "model": "freerun:block/traffic_light_0"
+    },
+    "facing=north,signal=1": {
+      "model": "freerun:block/traffic_light_1"
+    },
+    "facing=north,signal=2": {
+      "model": "freerun:block/traffic_light_2"
+    },
+    "facing=east,signal=0": {
+      "model": "freerun:block/traffic_light_0",
+      "y": 90
+    },
+    "facing=east,signal=1": {
+      "model": "freerun:block/traffic_light_1",
+      "y": 90
+    },
+    "facing=east,signal=2": {
+      "model": "freerun:block/traffic_light_2",
+      "y": 90
+    },
+    "facing=south,signal=0": {
+      "model": "freerun:block/traffic_light_0",
+      "y": 180
+    },
+    "facing=south,signal=1": {
+      "model": "freerun:block/traffic_light_1",
+      "y": 180
+    },
+    "facing=south,signal=2": {
+      "model": "freerun:block/traffic_light_2",
+      "y": 180
+    },
+    "facing=west,signal=0": {
+      "model": "freerun:block/traffic_light_0",
+      "y": 270
+    },
+    "facing=west,signal=1": {
+      "model": "freerun:block/traffic_light_1",
+      "y": 270
+    },
+    "facing=west,signal=2": {
+      "model": "freerun:block/traffic_light_2",
+      "y": 270
+    }
+  }
+}

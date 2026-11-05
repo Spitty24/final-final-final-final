@@ -233,7 +233,7 @@ public class GangsterEntity extends Monster implements RangedAttackMob {
     private void holdUp() {
         Crew c = crew();
         String who = c.color + "<" + c.member + "> §f";
-        Component alarm = Component.literal("§4§l⚠ ROBBERY AT THE DOUBLE QUICK! §r" + who
+        Component alarm = Component.literal("§4§l⚠ ROBBERY IN PROGRESS! §r" + who
                 + (robShooting ? "EVERYBODY DOWN! *BANG* *BANG*" : "Nobody move! Wallets on the counter!"));
         for (Player p : level().players()) if (distanceToSqr(p) < 64 * 64) p.displayClientMessage(alarm, false);
         level().playSound(null, getX(), getY(), getZ(), net.minecraft.sounds.SoundEvents.BELL_BLOCK,

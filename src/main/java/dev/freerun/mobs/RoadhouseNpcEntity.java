@@ -440,7 +440,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
                 if (player instanceof net.minecraft.server.level.ServerPlayer sp
                         && net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.canSend(sp, dev.freerun.net.ShopPayloads.Open.TYPE)) {
                     net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking.send(sp,
-                            new dev.freerun.net.ShopPayloads.Open(getId(), shop().ordinal()));
+                            new dev.freerun.net.ShopPayloads.Open(getId(), shop().ordinal(),
+                                    dev.freerun.economy.Shops.pricePercent(sp.serverLevel(), blockPosition())));
                 }
             }
             default -> line = pick(CUSTOMER_LINES);

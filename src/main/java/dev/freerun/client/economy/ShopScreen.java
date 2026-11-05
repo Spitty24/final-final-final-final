@@ -22,15 +22,17 @@ public class ShopScreen extends Screen {
 
     private final int clerkId;
     private final Shops.Shop shop;
+    private final int pricePercent;
     private boolean selling;
     private int scroll;
     private int left, top, w, h;
     private Button buyTab, sellTab;
 
-    public ShopScreen(int clerkId, Shops.Shop shop) {
+    public ShopScreen(int clerkId, Shops.Shop shop, int pricePercent) {
         super(Component.literal(shop.title));
         this.clerkId = clerkId;
         this.shop = shop;
+        this.pricePercent = pricePercent;
     }
 
     private List<Shops.Offer> list() {
@@ -59,6 +61,10 @@ public class ShopScreen extends Screen {
         String b = "Cash: " + Money.fmt(bal);
         g.drawString(font, b, left + w - 6 - font.width(b), top + 3, 0x7CFF7C);
         g.drawString(font, selling ? "§7What they'll pay you" : "§7Click: buy 1 · Shift-click: buy 5", left + 116, top + 22, 0xAAAAAA);
+        if (pricePercent != 100 && !selling) {
+            String demand = pricePercent > 100 ? "§cBusy day: prices +" + (pricePercent - 100) + "%" : "§aSlow day: prices -" + (100 - pricePercent) + "%";
+            g.drawString(font, demand, left + 6, top + h - 12, 0xFFFFFF);
+        }
         buyTab.render(g, mouseX, mouseY, partialTick);
         sellTab.render(g, mouseX, mouseY, partialTick);
 
@@ -71,11 +77,12 @@ public class ShopScreen extends Screen {
             Shops.Offer o = list.get(idx);
             int x = gx + (i % COLS) * CELL, y = gy + (i / COLS) * CELL;
             boolean hover = mouseX >= x && mouseX < x + CELL - 2 && mouseY >= y && mouseY < y + CELL - 2;
-            boolean afford = selling || bal >= o.price();
+            int shown = selling ? o.price() : Shops.price(o.price(), pricePercent);
+            boolean afford = selling || bal >= shown;
             g.fill(x, y, x + CELL - 2, y + CELL - 2, hover ? 0xFF3C3C48 : 0xFF24242C);
             g.renderItem(o.stack(), x + 4, y + 1);
             g.renderItemDecorations(font, o.stack(), x + 4, y + 1);
-            String p = "$" + o.price();
+            String p = "$" + shown;
             g.pose().pushPose();
             g.pose().translate(0, 0, 200);
             g.pose().scale(0.75f, 0.75f, 1.0f);
@@ -92,7 +99,7 @@ public class ShopScreen extends Screen {
             List<Component> tip = new java.util.ArrayList<>(getTooltipFromItem(minecraft, hovered.stack()));
             tip.add(Component.literal(selling
                     ? "§eSell " + hovered.stack().getCount() + " for §a" + Money.fmt(hovered.price())
-                    : "§ePrice: §a" + Money.fmt(hovered.price())));
+                    : "§ePrice: §a" + Money.fmt(Shops.price(hovered.price(), pricePercent))));
             g.renderComponentTooltip(font, tip, mouseX, mouseY);
         }
     }
