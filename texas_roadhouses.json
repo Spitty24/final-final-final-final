@@ -1,0 +1,12 @@
+{
+  "structures": [
+    { "structure": "freerun:texas_roadhouse", "weight": 1 }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "salt": 1947562,
+    "spacing": 12,
+    "separation": 5,
+    "spread_type": "linear"
+  }
+}

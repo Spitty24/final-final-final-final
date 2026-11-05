@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.freerun.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": ["PlayerMixin"],
+  "client": [
+    "client.GameRendererMixin",
+    "client.ItemInHandRendererMixin",
+    "client.PlayerModelMixin",
+    "client.PlayerRendererMixin"
+  ],
+  "injectors": { "defaultRequire": 1 }
+}

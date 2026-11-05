@@ -1,0 +1,18 @@
+{
+  "key.categories.freerun": "Freerun",
+  "key.freerun.toggle": "Toggle parkour",
+  "entity.freerun.pursuer": "The Pursuer",
+  "entity.freerun.us_soldier": "US Soldier",
+  "entity.freerun.french_soldier": "French Soldier",
+  "entity.freerun.grumbus": "Grumbus",
+  "item.freerun.nuke_launcher": "Nuke Launcher",
+  "item.freerun.pistol": "Pistol",
+  "item.freerun.rifle": "Rifle",
+  "item.freerun.shotgun": "Shotgun",
+  "item.freerun.bullet": "Bullet",
+  "item.freerun.shotgun_shell": "Shotgun Shell",
+  "item.freerun.pursuer_spawn_egg": "Pursuer Spawn Egg",
+  "item.freerun.us_soldier_spawn_egg": "US Soldier Spawn Egg",
+  "item.freerun.french_soldier_spawn_egg": "French Soldier Spawn Egg",
+  "item.freerun.grumbus_spawn_egg": "Grumbus Spawn Egg"
+}
