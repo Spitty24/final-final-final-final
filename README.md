@@ -372,6 +372,82 @@ people. Right-click him while you're hurt or poisoned and he heals you completel
 copay**, with a lecture. If you're healthy he insults you, and if you can't pay he tells you to
 walk it off. Hit him and he shoots back, and he's a good shot.
 
+## Bayou Auto & Alignment (the garage)
+
+Across the road from the factory there's a three-bay garage with roll-up doors:
+
+- **Bay 1:** a **four-post lift** with a customer's car up on it, and a **Hunterra HawkSight**
+  wheel aligner in front of it.
+- **Bay 2:** a lift down at floor level, with **runways** leading in from the door.
+- **Bay 3:** the **build bay**: a chassis with an engine and two wheels already on it, racks of
+  parts, and red tool chests with **torque wrenches** in them.
+- **At the back:** the **parts counter**, which sells every car part, a chassis, the wrench, a
+  lift, runways and the aligner. There's also an office.
+
+### Build your own car
+
+1. Set down a **Car Chassis**.
+2. Right-click it with each part to bolt it on: 4 **Wheels**, an **Engine Block**, a
+   **Transmission**, a **Car Battery**, a **Fuel Tank**, a **Steering Column** and **Car Seats**.
+   Right-click the chassis with an empty hand to see what's still missing.
+3. **Body Panels** and **Car Windows** are optional. Without them you can see the engine,
+   gearbox, battery, tank and steering column.
+4. When the last part it needs goes on, it starts up and you can drive it.
+
+Every part can be bought at the garage or crafted from factory steel: press-brake plates,
+brackets and channels, and sheets. Sneak-punch an unfinished car to take it apart again; you get
+every part back.
+
+**Torque wrench:** right-click any car to raise its top speed and sneak + right-click to lower it,
+from 50% to 200% (about 36 to 144 km/h).
+
+### Four-post lifts and runways
+
+- **Four-Post Lift:** 3 × 6 blocks, with red posts, yellow cross-beams and two diamond-plate
+  runways.
+  - Place it, drive on, get out, then right-click a post to raise it to 2.1 blocks. The safety
+    locks click on the way up. Right-click again to lower it.
+  - It won't move with someone in the driver's seat.
+  - Sneak + right-click with an empty hand to fold it back into an item.
+- **Runway:** low diamond-plate blocks for leading up to the lift.
+
+### Hunterra HawkSight wheel aligner
+
+A camera aligner modelled on the 3D camera aligners shops use (Hunter's HawkEye Elite is the
+best known). Real ones have no electronics on the wheels: passive targets clamp to the tyres,
+cameras on a beam find them, and a short roll of the car (*rolling compensation*) cancels out any
+wobble in the clamps. Ours works the same way, fully animated:
+
+1. Face the console toward the front of a lift and right-click it with a car on the lift.
+2. **Mounting:** the four targets swing off the stand and clamp to the tyres, one by one.
+3. **Rolling compensation:** the car rolls back half a block and forward again.
+4. **Measuring:** the camera beam rides up to the targets' height. The LEDs blink, then go green
+   when they lock on.
+5. **Live readings:** you get a top-down view with camber, caster and toe at every wheel, each on
+   a bar meter. Green means in spec, red means out. Click − / + to turn that adjuster
+   (shift-click for big steps); you need a torque wrench on you.
+6. Press **Finish** and the targets come off.
+
+**Why it matters:** every car now has a real alignment, and most cars on the road are a bit out.
+A side-to-side difference in camber or caster makes the car **pull** to one side while you drive,
+and toe that's out of spec **scrubs** the tyres, costing top speed. Align it and it drives
+straight.
+
+### The crane lifts anything now
+
+The overhead crane's hook picks up whatever is under it:
+
+- Steel parts and laser-cut parts.
+- Cars and forklifts, with their passengers.
+- Players, animals, and every NPC.
+
+People do not like it. They yell the whole way up ("I'm telling Dustin about this!"), and Ethan,
+Taryn, Dr. Guild and the co-ops each have their own lines. Anyone who can fight back, such as
+Dr. Guild, gangsters or monsters, comes after whoever was on the pendant once they're set down.
+
+**Laser-cut parts are real steel parts now:** place them, stack them, rotate them, weld them to
+other parts, and hook them on the crane. They keep their shape the whole time.
+
 ## The work phone
 
 Pick a career and you're issued a **work phone** (also $1 at the General Store, or craft one). It
