@@ -406,7 +406,7 @@ public class CarEntity extends LivingEntity {
 
         // Steering eases toward the input and recentres on its own.
         float target = Mth.clamp(steerIn, -steerLimit, steerLimit);
-        if (driver instanceof Player && Math.abs(v) > 0.1) target += (float) (alignment().pull() * Math.min(1.0, Math.abs(v)));
+        if (driver instanceof Player && Math.abs(speed) > 0.1) target += (float) (alignment().pull() * Math.min(1.0, Math.abs(speed)));
         steer += Mth.clamp(target - steer, -0.09f, 0.09f);
 
         double v = speed;
