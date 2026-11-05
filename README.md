@@ -365,6 +365,13 @@ within 6 blocks. All three can be crafted.
 lot? How many toasters is that?"). One time in ten she says something that's actually right
 about lasers. She also comments when you start or finish a cut.
 
+**Dr. Guild**, the plant's occupational-health doctor, has an office in the corner of the laser
+bay. He's an original character: fleece over blue scrubs, a stethoscope, a can of diet cola that
+never runs out, and a pistol "for liability reasons". He's very good at medicine and very bad at
+people. Right-click him while you're hurt or poisoned and he heals you completely for a **$40
+copay**, with a lecture. If you're healthy he insults you, and if you can't pay he tells you to
+walk it off. Hit him and he shoots back, and he's a good shot.
+
 ## The work phone
 
 Pick a career and you're issued a **work phone** (also $1 at the General Store, or craft one). It
