@@ -26,7 +26,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 public final class CityRegistry {
     public static StructureType<CityStructure> CITY;
     public static StructurePieceType ROAD_PIECE, INTERSECTION_PIECE, LOT_PIECE, SUBURB_PIECE, OFFICE_PIECE, HOOD_PIECE, PARK_PIECE,
-            FAST_FOOD_PIECE, DESSERT_PIECE, POLICE_PIECE, MEGAMART_PIECE, DEPARTMENT_PIECE, STRIP_MALL_PIECE;
+            FAST_FOOD_PIECE, DESSERT_PIECE, POLICE_PIECE, MEGAMART_PIECE, DEPARTMENT_PIECE, STRIP_MALL_PIECE, FUN_PIECE;
     public static Block TRAFFIC_LIGHT, STOP_SIGN, STREET_LAMP, DRIVE_THRU_SPEAKER, PICKUP_WINDOW;
     public static net.minecraft.world.level.levelgen.feature.Feature<net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration> CITY_FEATURE;
     public static EntityType<PoliceOfficerEntity> POLICE_OFFICER;
@@ -54,6 +54,7 @@ public final class CityRegistry {
         MEGAMART_PIECE = piece("city_megamart", MegaMartPiece::new);
         DEPARTMENT_PIECE = piece("city_department_store", DepartmentStorePiece::new);
         STRIP_MALL_PIECE = piece("city_strip_mall", StripMallPiece::new);
+        FUN_PIECE = piece("city_fun", FunPiece::new);
 
         // cities are generated as a decoration, chunk by chunk (they're too big for a structure)
         CITY_FEATURE = Registry.register(BuiltInRegistries.FEATURE, Freerun.id("city"), new CityFeature());
@@ -110,6 +111,8 @@ public final class CityRegistry {
         PayloadTypeRegistry.playS2C().register(PhonePayloads.Data.TYPE, PhonePayloads.Data.CODEC);
         ServerPlayNetworking.registerGlobalReceiver(PhonePayloads.Request.TYPE, (payload, ctx) -> ctx.player().server.execute(() -> {
             CompoundTag tag = CityWorld.stats(ctx.player().serverLevel(), ctx.player().blockPosition());
+            tag.putString("Lease", dev.freerun.life.Rentals.describe(ctx.player()));
+            tag.putString("Shift", dev.freerun.life.OfficeJobs.describe(ctx.player()));
             if (ServerPlayNetworking.canSend(ctx.player(), PhonePayloads.Data.TYPE)) {
                 ServerPlayNetworking.send(ctx.player(), new PhonePayloads.Data(tag));
             }

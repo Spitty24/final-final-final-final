@@ -1,0 +1,30 @@
+{
+ "parent": "minecraft:block/block",
+ "ambientocclusion": false,
+ "textures": {
+  "rug": "freerun:block/rug",
+  "particle": "freerun:block/rug"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    0.5,
+    16
+   ],
+   "faces": {
+    "up": {
+     "texture": "#rug"
+    },
+    "down": {
+     "texture": "#rug"
+    }
+   }
+  }
+ ]
+}

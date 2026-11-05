@@ -35,6 +35,15 @@ public class CitizenRenderer extends HumanoidMobRenderer<CitizenEntity, CitizenR
         @Override
         public void setupAnim(CitizenEntity e, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
             super.setupAnim(e, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch);
+            if (e.typing()) {   // hands on the keyboard, eyes on the screen
+                float tap = (float) Math.sin(ageInTicks * 1.7f) * 0.06f;
+                rightArm.xRot = -1.05f + tap;
+                leftArm.xRot = -1.05f - tap;
+                rightArm.yRot = -0.15f;
+                leftArm.yRot = 0.15f;
+                head.xRot = 0.25f;
+                hat.copyFrom(head);
+            }
             if (e.distracted()) {
                 rightArm.xRot = -1.25f;
                 rightArm.yRot = -0.35f;

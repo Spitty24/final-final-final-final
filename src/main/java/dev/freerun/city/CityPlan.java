@@ -121,6 +121,9 @@ public final class CityPlan {
             case CHICKEN -> out.add(new FastFoodPiece(city, lx, lz, w, d, Shops.Shop.CHICKEN));
             case DESSERT -> out.add(new DessertShopPiece(city, lx, lz, w, d));
             case POLICE -> out.add(new PoliceStationPiece(city, lx, lz, w, d));
+            case ARCADE -> out.add(new FunPiece(city, lx, lz, w, d, FunPiece.ARCADE));
+            case BAR -> out.add(new FunPiece(city, lx, lz, w, d, FunPiece.BAR));
+            case FURNITURE -> out.add(new FunPiece(city, lx, lz, w, d, FunPiece.FURNITURE));
         }
     }
 

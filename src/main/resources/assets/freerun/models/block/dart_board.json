@@ -1,0 +1,43 @@
+{
+ "parent": "minecraft:block/block",
+ "ambientocclusion": false,
+ "textures": {
+  "board": "freerun:block/dartboard",
+  "back": "minecraft:block/black_concrete",
+  "particle": "freerun:block/dartboard"
+ },
+ "elements": [
+  {
+   "from": [
+    2,
+    2,
+    15
+   ],
+   "to": [
+    14,
+    14,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#board"
+    },
+    "south": {
+     "texture": "#back"
+    },
+    "east": {
+     "texture": "#back"
+    },
+    "west": {
+     "texture": "#back"
+    },
+    "up": {
+     "texture": "#back"
+    },
+    "down": {
+     "texture": "#back"
+    }
+   }
+  }
+ ]
+}

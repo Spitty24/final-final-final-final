@@ -133,6 +133,7 @@ public class HoodPiece extends CityPieceBase {
             put(level, box, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.WEST), x0 - 1, y, z0 + 7);
         }
         sign(level, box, x0 + 10, 3, z0 - 1, Direction.NORTH, "", (seed % 2 == 0 ? "MAGNOLIA" : "CYPRESS") + " ARMS", "Apartments", "");
+        put(level, box, facing(dev.freerun.life.LifeRegistry.MAILBOX, Direction.NORTH), x0 + 6, 1, z0 - 1);
     }
 
     // ------------------------------------------------------------------ corner store

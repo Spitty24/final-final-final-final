@@ -51,6 +51,8 @@ public final class EconomyRegistry {
             STRAWBERRY_SHAKE, BUN_BUDDY_MEAL, CLUCK_SANDWICH, SPICY_CLUCK, NUGGET_BOX, HOT_WINGS, HONEY_BISCUIT,
             RED_BEANS_AND_RICE, MAC_AND_CHEESE, BEIGNETS, PRALINE, KING_CAKE_SLICE, BREAD_PUDDING, SNOBALL, CUPCAKE,
             SOFT_SERVE, PECAN_PIE_SLICE, FUDGE_BROWNIE;
+    // the bar
+    public static Item BAYOU_BREW, PELICAN_PUNCH, ARNOLD_PALMER, VIRGIN_HURRICANE, ROOT_BEER_FLOAT, BAR_PRETZEL, LOADED_FRIES;
     // drinks
     public static Item FIZZ_COLA, LEMON_LIME_SODA, ROOT_BEER, ENERGY_DRINK, SPORTS_DRINK, BOTTLED_WATER, SWEET_TEA,
             CHOCOLATE_MILK, BLUE_SLUSHIE, CHERRY_SLUSHIE, ICED_COFFEE, EMPTY_CAN;
@@ -214,6 +216,21 @@ public final class EconomyRegistry {
                 eff(MobEffects.DAMAGE_RESISTANCE, 400, 0));
         FUDGE_BROWNIE = snack("fudge_brownie", 4, 0.4f, false, 24, "Corner piece. You earned it.", null, null,
                 eff(MobEffects.DIG_SPEED, 800, 0));
+
+        // ---- The Rusty Pelican (it's a bar, but everything on tap is alcohol-free)
+        BAYOU_BREW = snack("bayou_brew", 2, 0.2f, true, 32, "House-made ginger beer, served in a frosty mug.", null,
+                (l, e) -> msg(e, "§6*clink* §7The bar cheers for no reason."), eff(MobEffects.MOVEMENT_SPEED, 600, 0));
+        PELICAN_PUNCH = snack("pelican_punch", 3, 0.3f, true, 32, "Tropical punch with a paper umbrella.", null, null,
+                eff(MobEffects.REGENERATION, 160, 0), eff(MobEffects.LUCK, 1200, 0));
+        ARNOLD_PALMER = snack("arnold_palmer", 2, 0.2f, true, 32, "Half sweet tea, half lemonade.", null, null,
+                eff(MobEffects.DIG_SPEED, 900, 0));
+        VIRGIN_HURRICANE = snack("virgin_hurricane", 3, 0.2f, true, 32, "Passion fruit, orange and a cherry. Red as a sunset.", null, null,
+                eff(MobEffects.JUMP, 900, 1));
+        ROOT_BEER_FLOAT = snack("root_beer_float", 4, 0.4f, true, 40, "Root beer with a scoop of vanilla bobbing in it.", null,
+                (l, e) -> brainFreeze(e), eff(MobEffects.ABSORPTION, 900, 0));
+        BAR_PRETZEL = snack("bar_pretzel", 5, 0.5f, false, 28, "Soft pretzel the size of your head, with beer-free cheese dip.", null, null);
+        LOADED_FRIES = snack("loaded_fries", 7, 0.6f, false, 32, "Cheese, bacon, green onions, and regret.", null, null,
+                eff(MobEffects.DAMAGE_BOOST, 400, 0));
 
         // ---- amenities
         SMARTPHONE = item("smartphone", new Amenities.Smartphone(new Item.Properties().stacksTo(1)));
@@ -384,6 +401,35 @@ public final class EconomyRegistry {
                 Shops.of(Items.DIAMOND, 1, 48), Shops.of(Items.EMERALD, 1, 12), Shops.of(Items.AMETHYST_SHARD, 4, 3),
                 Shops.of(Items.LAPIS_LAZULI, 8, 3), Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_SHEET, 1, 4),
                 Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_CHANNEL, 1, 6)));
+        java.util.List<Shops.Offer> furniture = new java.util.ArrayList<>();
+        int[] homePrices = {60, 45, 25, 20, 90, 70, 55, 40, 85, 60, 25, 120, 160, 110, 15, 12};
+        for (int i = 0; i < dev.freerun.life.LifeRegistry.HOME_FURNITURE.size(); i++) {
+            furniture.add(Shops.of(dev.freerun.life.LifeRegistry.HOME_FURNITURE.get(i).asItem(), 1, homePrices[Math.min(i, homePrices.length - 1)]));
+        }
+        int[] officePrices = {80, 30, 25, 4, 30, 45, 20, 150, 15, 10};
+        for (int i = 0; i < dev.freerun.life.LifeRegistry.OFFICE_FURNITURE.size(); i++) {
+            furniture.add(Shops.of(dev.freerun.life.LifeRegistry.OFFICE_FURNITURE.get(i).asItem(), 1, officePrices[Math.min(i, officePrices.length - 1)]));
+        }
+        furniture.addAll(offers(new Object[][]{{TV.asItem(), 1, 95}, {FoodRegistry.MICROWAVE.asItem(), 1, 45},
+                {FoodRegistry.COFFEE_MAKER.asItem(), 1, 32}, {FoodRegistry.COUNTER.asItem(), 1, 18}, {BlockRegistry.TABLE.asItem(), 1, 15},
+                {BlockRegistry.CHAIR.asItem(), 1, 10}, {Items.WHITE_BED, 1, 25}, {Items.RED_BED, 1, 25}, {Items.BOOKSHELF, 1, 10},
+                {Items.PAINTING, 1, 6}, {Items.LANTERN, 2, 5}, {Items.WHITE_CARPET, 8, 5}, {Items.GRAY_CARPET, 8, 5},
+                {Items.FLOWER_POT, 2, 2}, {Items.OAK_DOOR, 1, 4}, {Items.GLASS_PANE, 16, 5}, {Items.JUKEBOX, 1, 55},
+                {dev.freerun.life.LifeRegistry.ARCADE_CABINET.asItem(), 1, 400}, {dev.freerun.life.LifeRegistry.POOL_TABLE.asItem(), 1, 90},
+                {dev.freerun.life.LifeRegistry.DART_BOARD.asItem(), 1, 35}, {dev.freerun.life.LifeRegistry.BAR_STOOL.asItem(), 1, 12}}));
+        buy.put(Shops.Shop.FURNITURE, furniture);
+        sell.put(Shops.Shop.FURNITURE, List.of(Shops.of(Items.OAK_PLANKS, 16, 2), Shops.of(Items.WHITE_WOOL, 8, 3), Shops.of(Items.LEATHER, 4, 3)));
+        buy.put(Shops.Shop.BAR, offers(new Object[][]{
+                {BAYOU_BREW, 1, 4}, {PELICAN_PUNCH, 1, 5}, {ARNOLD_PALMER, 1, 3}, {VIRGIN_HURRICANE, 1, 5}, {ROOT_BEER_FLOAT, 1, 4},
+                {ROOT_BEER, 1, 2}, {FIZZ_COLA, 1, 2}, {SWEET_TEA, 1, 2}, {BAR_PRETZEL, 1, 4}, {LOADED_FRIES, 1, 6},
+                {HOT_WINGS, 1, 7}, {NACHOS, 1, 4}, {BOILED_PEANUTS, 1, 2}}));
+        sell.put(Shops.Shop.BAR, List.of(Shops.of(EMPTY_CAN, 4, 1)));
+        buy.put(Shops.Shop.PRIZES, offers(new Object[][]{
+                {CANDY_BAR, 1, 5}, {GUMMY_WORMS, 1, 5}, {FIZZ_COLA, 1, 4}, {dev.freerun.life.LifeRegistry.RUBBER_DUCK, 1, 10},
+                {SCRATCH_OFF, 1, 15}, {AIR_HORN, 1, 20}, {SUNGLASSES, 1, 25}, {dev.freerun.life.LifeRegistry.GATOR_PLUSH, 1, 30},
+                {dev.freerun.life.LifeRegistry.PELICAN_PLUSH, 1, 30}, {UMBRELLA, 1, 40}, {FLASHLIGHT, 1, 45},
+                {Items.NAME_TAG, 1, 50}, {Items.SADDLE, 1, 80}, {dev.freerun.life.LifeRegistry.ARCADE_CABINET.asItem(), 1, 300},
+                {SMARTPHONE, 1, 400}, {Items.DIAMOND, 1, 500}}));
         Shops.build(buy, sell);
     }
 

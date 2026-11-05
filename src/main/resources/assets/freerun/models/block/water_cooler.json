@@ -1,0 +1,108 @@
+{
+ "parent": "minecraft:block/block",
+ "ambientocclusion": false,
+ "textures": {
+  "base": "minecraft:block/white_concrete",
+  "jug": "minecraft:block/light_blue_stained_glass",
+  "tap": "minecraft:block/blue_concrete",
+  "particle": "minecraft:block/white_concrete"
+ },
+ "elements": [
+  {
+   "from": [
+    4,
+    0,
+    4
+   ],
+   "to": [
+    12,
+    10,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#base"
+    },
+    "south": {
+     "texture": "#base"
+    },
+    "east": {
+     "texture": "#base"
+    },
+    "west": {
+     "texture": "#base"
+    },
+    "up": {
+     "texture": "#base"
+    },
+    "down": {
+     "texture": "#base"
+    }
+   }
+  },
+  {
+   "from": [
+    5,
+    10,
+    5
+   ],
+   "to": [
+    11,
+    16,
+    11
+   ],
+   "faces": {
+    "north": {
+     "texture": "#jug"
+    },
+    "south": {
+     "texture": "#jug"
+    },
+    "east": {
+     "texture": "#jug"
+    },
+    "west": {
+     "texture": "#jug"
+    },
+    "up": {
+     "texture": "#jug"
+    },
+    "down": {
+     "texture": "#jug"
+    }
+   }
+  },
+  {
+   "from": [
+    7,
+    6,
+    3
+   ],
+   "to": [
+    9,
+    7,
+    4
+   ],
+   "faces": {
+    "north": {
+     "texture": "#tap"
+    },
+    "south": {
+     "texture": "#tap"
+    },
+    "east": {
+     "texture": "#tap"
+    },
+    "west": {
+     "texture": "#tap"
+    },
+    "up": {
+     "texture": "#tap"
+    },
+    "down": {
+     "texture": "#tap"
+    }
+   }
+  }
+ ]
+}

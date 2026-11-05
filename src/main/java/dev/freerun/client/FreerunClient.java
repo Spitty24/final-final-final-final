@@ -69,6 +69,27 @@ public final class FreerunClient implements ClientModInitializer {
                 dev.freerun.city.CityRegistry.DRIVE_THRU_SPEAKER, dev.freerun.city.CityRegistry.PICKUP_WINDOW);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITIZEN, dev.freerun.client.city.CitizenRenderer::new);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.POLICE_OFFICER, dev.freerun.client.city.PoliceRenderer::new);
+        {
+            net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.renderer.RenderType.cutout(),
+                    dev.freerun.life.LifeRegistry.COMPUTER, dev.freerun.life.LifeRegistry.OFFICE_DESK, dev.freerun.life.LifeRegistry.OFFICE_CHAIR,
+                    dev.freerun.life.LifeRegistry.CUBICLE_WALL, dev.freerun.life.LifeRegistry.FILING_CABINET, dev.freerun.life.LifeRegistry.PRINTER,
+                    dev.freerun.life.LifeRegistry.SERVER_RACK, dev.freerun.life.LifeRegistry.WHITEBOARD, dev.freerun.life.LifeRegistry.DESK_PHONE,
+                    dev.freerun.life.LifeRegistry.JOB_BOARD, dev.freerun.life.LifeRegistry.SPILL, dev.freerun.life.LifeRegistry.TRASH_BAG,
+                    dev.freerun.life.LifeRegistry.SOFA, dev.freerun.life.LifeRegistry.ARMCHAIR, dev.freerun.life.LifeRegistry.COFFEE_TABLE,
+                    dev.freerun.life.LifeRegistry.FLOOR_LAMP, dev.freerun.life.LifeRegistry.FRIDGE, dev.freerun.life.LifeRegistry.STOVE,
+                    dev.freerun.life.LifeRegistry.KITCHEN_SINK, dev.freerun.life.LifeRegistry.TOILET, dev.freerun.life.LifeRegistry.BATHTUB,
+                    dev.freerun.life.LifeRegistry.WARDROBE, dev.freerun.life.LifeRegistry.NIGHTSTAND, dev.freerun.life.LifeRegistry.FIREPLACE,
+                    dev.freerun.life.LifeRegistry.PIANO, dev.freerun.life.LifeRegistry.GRANDFATHER_CLOCK, dev.freerun.life.LifeRegistry.BIG_PLANT,
+                    dev.freerun.life.LifeRegistry.RUG, dev.freerun.life.LifeRegistry.MAILBOX, dev.freerun.life.LifeRegistry.ARCADE_CABINET,
+                    dev.freerun.life.LifeRegistry.CLAW_MACHINE, dev.freerun.life.LifeRegistry.DART_BOARD, dev.freerun.life.LifeRegistry.POOL_TABLE,
+                    dev.freerun.life.LifeRegistry.BAR_STOOL, dev.freerun.life.LifeRegistry.BAR_TAP, dev.freerun.life.LifeRegistry.WATER_COOLER);
+        }
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(dev.freerun.life.LifePayloads.Open.TYPE,
+                (payload, context) -> context.client().execute(() -> context.client().setScreen(switch (payload.screen()) {
+                    case dev.freerun.life.LifePayloads.BOARD -> new dev.freerun.client.life.OfficeJobScreen(payload.data());
+                    case dev.freerun.life.LifePayloads.TASK -> new dev.freerun.client.life.OfficeTaskScreen(payload.data());
+                    default -> new dev.freerun.client.life.ArcadeScreen(payload.data());
+                })));
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CRIMINAL, dev.freerun.client.city.CriminalRenderer::new);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITY_HUB, net.minecraft.client.renderer.entity.NoopRenderer::new);
         hackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(

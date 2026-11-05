@@ -38,7 +38,8 @@ public final class CityLayout {
         FACTORY("Welding Factory", 0x9A9A9A), DOUBLE_QUICK("Double Quick", 0xD8262E), MEGAMART("MegaMart", 0x2E9E6B),
         DEPARTMENT("Hargrove & Finch", 0x6A3FA0), STRIP_MALL("Strip Mall", 0xD9A441), BURGER("Big Bun Burgers", 0xE0601E),
         CHICKEN("Cluck Shack", 0xC8402A), DESSERT("Sugar Bayou Sweets", 0xF07AB8), POLICE("Police", 0x2F4FA8),
-        PARKING("Parking", 0x505056);
+        PARKING("Parking", 0x505056), ARCADE("Pixel Bayou Arcade", 0x9A30E0), BAR("The Rusty Pelican", 0x3A6E8A),
+        FURNITURE("Bayou Home Furnishings", 0xB07A4A);
 
         public final String title;
         public final int color;
@@ -118,8 +119,8 @@ public final class CityLayout {
         if (c >= 13 && r >= 13 && ring <= 6.5) return h < 50 ? District.PARKING : District.SUBURB;   // around the factory
         if (ring <= 4.5) {
             District[] mix = {District.PARKING, District.BURGER, District.CHICKEN, District.DESSERT, District.DOUBLE_QUICK,
-                    District.GENERAL_STORE, District.ROADHOUSE, District.OFFICE, District.PARKING, District.PARK, District.BURGER,
-                    District.OFFICE, District.DESSERT, District.CHICKEN, District.PARKING};
+                    District.GENERAL_STORE, District.ROADHOUSE, District.OFFICE, District.PARKING, District.PARK, District.ARCADE,
+                    District.OFFICE, District.BAR, District.FURNITURE, District.PARKING, District.ARCADE, District.BAR, District.FURNITURE};
             return mix[h % mix.length];
         }
         if (h < 74) return District.SUBURB;
@@ -130,6 +131,8 @@ public final class CityLayout {
         if (h < 92) return District.DESSERT;
         if (h < 94) return District.GENERAL_STORE;
         if (h < 96) return District.ROADHOUSE;
+        if (h < 97) return District.BAR;
+        if (h < 98) return District.FURNITURE;
         return District.PARKING;
     }
 
@@ -166,7 +169,7 @@ public final class CityLayout {
     /** Store types that shouldn't bunch up: no two of the same within this many blocks. */
     private static final class Spread {   // a holder, so it exists before the static plan above runs
         static final District[] TYPES = {District.BURGER, District.CHICKEN, District.DESSERT, District.DOUBLE_QUICK,
-                District.GENERAL_STORE, District.ROADHOUSE};
+                District.GENERAL_STORE, District.ROADHOUSE, District.ARCADE, District.BAR, District.FURNITURE};
     }
     private static final int SPACING = 230;
 

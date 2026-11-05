@@ -171,6 +171,8 @@ public class PhoneScreen extends Screen {
         y = line(g, y, "§7Next paycheck: §f" + (BreakTime.isBreak(minecraft.level) ? "paid this break" : "next break, in "
                 + BreakTime.ticksUntilBreak(minecraft.level) / 1200 + " min"));
         y += 4;
+        if (!PhoneState.city.getString("Lease").isEmpty()) y = line(g, y, "§7Home: §f" + PhoneState.city.getString("Lease"));
+        if (!PhoneState.city.getString("Shift").isEmpty()) y = line(g, y, "§7On the clock: §f" + PhoneState.city.getString("Shift"));
         if (PhoneState.hasCity()) {
             int pi = PhoneState.city.getInt("PriceIndex");
             line(g, y, "§7Local prices: " + (pi > 100 ? "§c+" + (pi - 100) + "%" : pi < 100 ? "§a-" + (100 - pi) + "%" : "§fnormal")

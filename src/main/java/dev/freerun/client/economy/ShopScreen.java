@@ -57,11 +57,13 @@ public class ShopScreen extends Screen {
         g.fill(left, top, left + w, top + h, 0xE0101014);
         g.fill(left, top, left + w, top + 14, 0xFF000000 | shop.color);
         g.drawString(font, "§l" + shop.title, left + 6, top + 3, 0xFFFFFF);
-        int bal = minecraft != null && minecraft.player != null ? Money.balance(minecraft.player) : 0;
-        String b = "Cash: " + Money.fmt(bal);
+        boolean tix = shop.tickets();
+        int bal = minecraft == null || minecraft.player == null ? 0
+                : tix ? Shops.count(minecraft.player, dev.freerun.life.LifeRegistry.TICKET) : Money.balance(minecraft.player);
+        String b = tix ? "Tickets: " + bal : "Cash: " + Money.fmt(bal);
         g.drawString(font, b, left + w - 6 - font.width(b), top + 3, 0x7CFF7C);
         g.drawString(font, selling ? "§7What they'll pay you" : "§7Click: buy 1 · Shift-click: buy 5", left + 116, top + 22, 0xAAAAAA);
-        if (pricePercent != 100 && !selling) {
+        if (pricePercent != 100 && !selling && !tix) {
             String demand = pricePercent > 100 ? "§cBusy day: prices +" + (pricePercent - 100) + "%" : "§aSlow day: prices -" + (100 - pricePercent) + "%";
             g.drawString(font, demand, left + 6, top + h - 12, 0xFFFFFF);
         }
@@ -78,13 +80,13 @@ public class ShopScreen extends Screen {
             int x = gx + (i % COLS) * CELL, y = gy + (i / COLS) * CELL;
             boolean hover = mouseX >= x && mouseX < x + CELL - 2 && mouseY >= y && mouseY < y + CELL - 2;
             double disc = dev.freerun.career.Skills.shopDiscount(dev.freerun.career.CareerClientState.skills);
-            int shown = selling ? (dev.freerun.career.CareerClientState.skills.contains("quality_control") ? (int) Math.round(o.price() * 1.15) : o.price())
+            int shown = tix ? o.price() : selling ? (dev.freerun.career.CareerClientState.skills.contains("quality_control") ? (int) Math.round(o.price() * 1.15) : o.price())
                     : Math.max(1, (int) Math.round(Shops.price(o.price(), pricePercent) * disc));
             boolean afford = selling || bal >= shown;
             g.fill(x, y, x + CELL - 2, y + CELL - 2, hover ? 0xFF3C3C48 : 0xFF24242C);
             g.renderItem(o.stack(), x + 4, y + 1);
             g.renderItemDecorations(font, o.stack(), x + 4, y + 1);
-            String p = "$" + shown;
+            String p = tix ? shown + "t" : "$" + shown;
             g.pose().pushPose();
             g.pose().translate(0, 0, 200);
             g.pose().scale(0.75f, 0.75f, 1.0f);
@@ -99,7 +101,8 @@ public class ShopScreen extends Screen {
         }
         if (hovered != null) {
             List<Component> tip = new java.util.ArrayList<>(getTooltipFromItem(minecraft, hovered.stack()));
-            tip.add(Component.literal(selling
+            if (tix) tip.add(Component.literal("§ePrice: §6" + hovered.price() + " tickets"));
+            else tip.add(Component.literal(selling
                     ? "§eSell " + hovered.stack().getCount() + " for §a" + Money.fmt(hovered.price())
                     : "§ePrice: §a" + Money.fmt(Math.max(1, (int) Math.round(Shops.price(hovered.price(), pricePercent)
                             * dev.freerun.career.Skills.shopDiscount(dev.freerun.career.CareerClientState.skills))))));

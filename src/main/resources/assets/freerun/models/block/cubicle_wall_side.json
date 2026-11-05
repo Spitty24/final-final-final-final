@@ -1,0 +1,7 @@
+{
+ "parent": "minecraft:block/template_glass_pane_side",
+ "textures": {
+  "pane": "freerun:block/cubicle",
+  "edge": "freerun:block/cubicle_top"
+ }
+}

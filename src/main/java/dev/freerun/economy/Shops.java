@@ -23,7 +23,10 @@ public final class Shops {
         DEPARTMENT("Hargrove & Finch", 0x6A3FA0, "Hargrove & Finch Clerk", false),
         DESSERT("Sugar Bayou Sweets", 0xF07AB8, "Sugar Bayou Baker", false),
         BURGER("Big Bun Burgers", 0xE0601E, "Big Bun Crew", true),
-        CHICKEN("Cluck Shack", 0xC8402A, "Cluck Shack Crew", true);
+        CHICKEN("Cluck Shack", 0xC8402A, "Cluck Shack Crew", true),
+        FURNITURE("Bayou Home Furnishings", 0x8A5A3A, "Furniture Sales Associate", false),
+        BAR("The Rusty Pelican", 0x3A6E8A, "Bartender", false),
+        PRIZES("Prize Counter", 0xC03AD8, "Prize Counter Attendant", false);
 
         public final String title;
         public final int color;
@@ -37,6 +40,11 @@ public final class Shops {
             this.color = color;
             this.worker = worker;
             this.driveThru = driveThru;
+        }
+
+        /** The prize counter takes arcade tickets instead of money. */
+        public boolean tickets() {
+            return this == PRIZES;
         }
 
         public static Shop byId(int id) {
@@ -91,6 +99,19 @@ public final class Shops {
         double reach = drive ? DriveThru.REACH : 10;
         if (index < 0 || index >= list.size() || clerk == null || player.distanceToSqr(clerk) > reach * reach) return;
         Offer o = list.get(index);
+        if (shop.tickets()) {
+            int bought = 0;
+            for (int i = 0; i < Math.max(1, Math.min(times, 16)); i++) {
+                if (count(player, dev.freerun.life.LifeRegistry.TICKET) < o.price()) break;
+                remove(player, dev.freerun.life.LifeRegistry.TICKET, o.price());
+                ItemStack give = o.stack().copy();
+                if (!player.getInventory().add(give)) player.drop(give, false);
+                bought++;
+            }
+            player.displayClientMessage(Component.literal(bought == 0 ? "§cYou need " + o.price() + " tickets for that."
+                    : "§d🎟 Traded " + o.price() * bought + " tickets for " + o.stack().getHoverName().getString() + "!"), true);
+            return;
+        }
         int each = price(o.price(), pricePercent(player.serverLevel(), clerk.blockPosition()));
         each = Math.max(1, (int) Math.round(each * dev.freerun.career.Skills.shopDiscount(dev.freerun.career.Careers.get(player).skills())));
         int bought = 0;

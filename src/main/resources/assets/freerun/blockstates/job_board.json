@@ -1,0 +1,34 @@
+{
+ "variants": {
+  "facing=north,lit=false": {
+   "model": "freerun:block/job_board"
+  },
+  "facing=north,lit=true": {
+   "model": "freerun:block/job_board"
+  },
+  "facing=east,lit=false": {
+   "model": "freerun:block/job_board",
+   "y": 90
+  },
+  "facing=east,lit=true": {
+   "model": "freerun:block/job_board",
+   "y": 90
+  },
+  "facing=south,lit=false": {
+   "model": "freerun:block/job_board",
+   "y": 180
+  },
+  "facing=south,lit=true": {
+   "model": "freerun:block/job_board",
+   "y": 180
+  },
+  "facing=west,lit=false": {
+   "model": "freerun:block/job_board",
+   "y": 270
+  },
+  "facing=west,lit=true": {
+   "model": "freerun:block/job_board",
+   "y": 270
+  }
+ }
+}

@@ -1,0 +1,108 @@
+{
+ "parent": "minecraft:block/block",
+ "ambientocclusion": false,
+ "textures": {
+  "pot": "minecraft:block/terracotta",
+  "soil": "minecraft:block/dirt",
+  "leaf": "minecraft:block/azalea_leaves",
+  "particle": "minecraft:block/terracotta"
+ },
+ "elements": [
+  {
+   "from": [
+    4,
+    0,
+    4
+   ],
+   "to": [
+    12,
+    6,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#pot"
+    },
+    "south": {
+     "texture": "#pot"
+    },
+    "east": {
+     "texture": "#pot"
+    },
+    "west": {
+     "texture": "#pot"
+    },
+    "up": {
+     "texture": "#soil"
+    },
+    "down": {
+     "texture": "#pot"
+    }
+   }
+  },
+  {
+   "from": [
+    2,
+    6,
+    2
+   ],
+   "to": [
+    14,
+    14,
+    14
+   ],
+   "faces": {
+    "north": {
+     "texture": "#leaf"
+    },
+    "south": {
+     "texture": "#leaf"
+    },
+    "east": {
+     "texture": "#leaf"
+    },
+    "west": {
+     "texture": "#leaf"
+    },
+    "up": {
+     "texture": "#leaf"
+    },
+    "down": {
+     "texture": "#leaf"
+    }
+   }
+  },
+  {
+   "from": [
+    4,
+    14,
+    4
+   ],
+   "to": [
+    12,
+    18,
+    12
+   ],
+   "faces": {
+    "north": {
+     "texture": "#leaf"
+    },
+    "south": {
+     "texture": "#leaf"
+    },
+    "east": {
+     "texture": "#leaf"
+    },
+    "west": {
+     "texture": "#leaf"
+    },
+    "up": {
+     "texture": "#leaf"
+    },
+    "down": {
+     "texture": "#leaf"
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,49 @@
+{
+ "variants": {
+  "facing=north,game=0": {
+   "model": "freerun:block/arcade_cabinet_0"
+  },
+  "facing=north,game=1": {
+   "model": "freerun:block/arcade_cabinet_1"
+  },
+  "facing=north,game=2": {
+   "model": "freerun:block/arcade_cabinet_2"
+  },
+  "facing=east,game=0": {
+   "model": "freerun:block/arcade_cabinet_0",
+   "y": 90
+  },
+  "facing=east,game=1": {
+   "model": "freerun:block/arcade_cabinet_1",
+   "y": 90
+  },
+  "facing=east,game=2": {
+   "model": "freerun:block/arcade_cabinet_2",
+   "y": 90
+  },
+  "facing=south,game=0": {
+   "model": "freerun:block/arcade_cabinet_0",
+   "y": 180
+  },
+  "facing=south,game=1": {
+   "model": "freerun:block/arcade_cabinet_1",
+   "y": 180
+  },
+  "facing=south,game=2": {
+   "model": "freerun:block/arcade_cabinet_2",
+   "y": 180
+  },
+  "facing=west,game=0": {
+   "model": "freerun:block/arcade_cabinet_0",
+   "y": 270
+  },
+  "facing=west,game=1": {
+   "model": "freerun:block/arcade_cabinet_1",
+   "y": 270
+  },
+  "facing=west,game=2": {
+   "model": "freerun:block/arcade_cabinet_2",
+   "y": 270
+  }
+ }
+}

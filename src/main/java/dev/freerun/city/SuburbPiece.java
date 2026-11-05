@@ -136,9 +136,20 @@ public class SuburbPiece extends CityPieceBase {
         Direction bedDir = dir(Direction.SOUTH);
         hp(level, box, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, bedDir).setValue(BedBlock.PART, BedPart.FOOT), 5, 1, 9);
         hp(level, box, Blocks.RED_BED.defaultBlockState().setValue(BedBlock.FACING, bedDir).setValue(BedBlock.PART, BedPart.HEAD), 5, 1, 10);
-        for (int x = 10; x <= 13; x++) hp(level, box, facing(FoodRegistry.COUNTER, dir(Direction.NORTH)), x, 1, 11);
+        // the kitchen: fridge, counters with the microwave and coffee maker, the stove
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.FRIDGE, dir(Direction.NORTH)), 10, 1, 11);
+        for (int x = 11; x <= 12; x++) hp(level, box, facing(FoodRegistry.COUNTER, dir(Direction.NORTH)), x, 1, 11);
         hp(level, box, facing(FoodRegistry.MICROWAVE, dir(Direction.NORTH)), 11, 2, 11);
         hp(level, box, facing(FoodRegistry.COFFEE_MAKER, dir(Direction.NORTH)), 12, 2, 11);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.STOVE, dir(Direction.NORTH)), 13, 1, 11);
+        // the living room: a sofa facing the TV, a lamp; a nightstand and wardrobe by the bed; the bathroom corner
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.SOFA, Direction.EAST), 7, 1, 5);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.SOFA, Direction.EAST), 7, 1, 6);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.COFFEE_TABLE, Direction.EAST), 10, 1, 6);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.FLOOR_LAMP, Direction.NORTH), 7, 1, 7);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.NIGHTSTAND, Direction.EAST), 5, 1, 11);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.WARDROBE, Direction.EAST), 5, 1, 7);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.TOILET, dir(Direction.SOUTH)), 7, 1, 11);
         hp(level, box, BlockRegistry.TABLE.defaultBlockState(), 9, 1, 8);
         hp(level, box, facing(BlockRegistry.CHAIR, Direction.EAST), 8, 1, 8);
         hp(level, box, facing(BlockRegistry.CHAIR, Direction.WEST), 10, 1, 8);
@@ -148,8 +159,7 @@ public class SuburbPiece extends CityPieceBase {
         tree(level, box, 3, 15 + (seed % 2));
         hp(level, box, Blocks.POPPY.defaultBlockState(), 7, 1, 3);
         hp(level, box, Blocks.DANDELION.defaultBlockState(), 11, 1, 3);
-        hp(level, box, Blocks.SPRUCE_FENCE.defaultBlockState(), 13, 1, 1);
-        hp(level, box, Blocks.POTTED_RED_TULIP.defaultBlockState(), 13, 2, 1);
+        hp(level, box, facing(dev.freerun.life.LifeRegistry.MAILBOX, dir(Direction.NORTH)), 13, 1, 1);
         // the family car on the driveway, nose to the street
         BlockPos carAt = at(bx + 16, 1, zz(6));
         if (box.isInside(carAt) && seed % 3 != 0) {

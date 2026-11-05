@@ -30,7 +30,8 @@ public class SeatEntity extends Entity {
     public void tick() {
         super.tick();
         if (!level().isClientSide) {
-            boolean chairGone = !(level().getBlockState(blockPosition()).getBlock() instanceof ChairBlock);
+            var block = level().getBlockState(blockPosition()).getBlock();
+            boolean chairGone = !(block instanceof ChairBlock || block instanceof dev.freerun.life.FurnitureBlock fb && fb.seat());
             if (getPassengers().isEmpty() || chairGone) {
                 ejectPassengers();
                 discard();

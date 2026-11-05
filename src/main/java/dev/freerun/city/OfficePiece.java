@@ -102,7 +102,7 @@ public class OfficePiece extends CityPieceBase {
                 }
             }
             if (f == 0) lobby(level, box, x0, z0, x1, z1, company);
-            else officeFloor(level, box, x0, y0, z0, x1, z1, seed + f);
+            else officeFloor(level, box, x0, y0, z0, x1, z1, seed + f, f == floors - 1);
         }
         // roof
         fill(level, box, Blocks.GRAY_CONCRETE.defaultBlockState(), x0, top, z0, x1, top, z1);
@@ -137,39 +137,165 @@ public class OfficePiece extends CityPieceBase {
         }
     }
 
+    // ------------------------------------------------------------------ furnishing
+
+    private static BlockState lf(net.minecraft.world.level.block.Block b, Direction d) {
+        return b.defaultBlockState().setValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING, d);
+    }
+
+    /** A desk with a computer on it and a chair; {@code toChair} points from the desk to where you sit. */
+    private void workstation(WorldGenLevel level, BoundingBox box, int x, int y, int z, Direction toChair, boolean on) {
+        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_DESK, toChair), x, y, z);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.COMPUTER, toChair).setValue(dev.freerun.life.ComputerBlock.SCREEN, on ? 1 : 0), x, y + 1, z);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_CHAIR, toChair.getOpposite()), x + toChair.getStepX(), y, z + toChair.getStepZ());
+    }
+
+    private void cubicleWall(WorldGenLevel level, BoundingBox box, int xa, int y, int za, int xb, int zb) {
+        BlockState wall = dev.freerun.life.LifeRegistry.CUBICLE_WALL.defaultBlockState();
+        boolean alongX = za == zb;
+        BlockState s = alongX ? wall.setValue(net.minecraft.world.level.block.IronBarsBlock.EAST, true).setValue(net.minecraft.world.level.block.IronBarsBlock.WEST, true)
+                : wall.setValue(net.minecraft.world.level.block.IronBarsBlock.NORTH, true).setValue(net.minecraft.world.level.block.IronBarsBlock.SOUTH, true);
+        fill(level, box, s, Math.min(xa, xb), y, Math.min(za, zb), Math.max(xa, xb), y, Math.max(za, zb));
+    }
+
+    /** A pod of four cubicles (7 x 6): two on each side of a centre partition, entered from the sides. */
+    private void cubiclePod(WorldGenLevel level, BoundingBox box, int px, int y, int pz, int seed) {
+        cubicleWall(level, box, px, y, pz, px + 6, pz);
+        cubicleWall(level, box, px, y, pz + 5, px + 6, pz + 5);
+        cubicleWall(level, box, px + 3, y, pz, px + 3, pz + 5);
+        cubicleWall(level, box, px, y, pz, px, pz + 1);
+        cubicleWall(level, box, px, y, pz + 4, px, pz + 5);
+        cubicleWall(level, box, px + 6, y, pz, px + 6, pz + 1);
+        cubicleWall(level, box, px + 6, y, pz + 4, px + 6, pz + 5);
+        workstation(level, box, px + 1, y, pz + 1, Direction.SOUTH, (seed & 1) == 0);
+        workstation(level, box, px + 5, y, pz + 1, Direction.SOUTH, (seed & 2) == 0);
+        workstation(level, box, px + 1, y, pz + 4, Direction.NORTH, (seed & 4) == 0);
+        workstation(level, box, px + 5, y, pz + 4, Direction.NORTH, true);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.FILING_CABINET, Direction.SOUTH), px + 2, y, pz + 1);
+        put(level, box, Blocks.POTTED_FERN, px + 4, y, pz + 4);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.DESK_PHONE, Direction.NORTH), px + 2, y, pz + 4);
+    }
+
     private void lobby(WorldGenLevel level, BoundingBox box, int x0, int z0, int x1, int z1, String company) {
         int mid = (x0 + x1) / 2;
         for (int x = mid - 1; x <= mid + 1; x++) for (int y = 1; y <= 3; y++) put(level, box, Blocks.AIR, x, y, z0);
         put(level, box, Blocks.GRAY_CARPET, mid, 1, z0 + 1);
         sign(level, box, mid, 4, z0 - 1, Direction.NORTH, "", company, "", "");
-        // reception desk, waiting chairs, plants, an ATM and the directory
+        // the reception desk: a long counter with the receptionist's computer and phone
         for (int x = mid - 3; x <= mid + 3; x++) put(level, box, facing(FoodRegistry.COUNTER, Direction.NORTH), x, 1, z0 + 6);
-        put(level, box, facing(EconomyRegistry.TV, Direction.NORTH).setValue(dev.freerun.economy.StoreBlocks.Tv.ON, true), mid, 2, z0 + 6);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.COMPUTER, Direction.SOUTH), mid - 1, 2, z0 + 6);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.DESK_PHONE, Direction.NORTH), mid + 1, 2, z0 + 6);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_CHAIR, Direction.NORTH), mid - 1, 1, z0 + 7);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_CHAIR, Direction.NORTH), mid + 1, 1, z0 + 7);
+        // waiting area, the job board, plants, ATM, vending, water cooler
         for (int x = x0 + 2; x <= x0 + 4; x++) put(level, box, facing(BlockRegistry.CHAIR, Direction.EAST), x, 1, z0 + 3);
-        put(level, box, Blocks.FLOWERING_AZALEA, x0 + 1, 1, z0 + 1);
-        put(level, box, Blocks.FLOWERING_AZALEA, x1 - 1, 1, z0 + 1);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.COFFEE_TABLE, Direction.NORTH), x0 + 3, 1, z0 + 4);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.JOB_BOARD, Direction.NORTH), mid + 4, 2, z0 + 11);
+        fill(level, box, Blocks.LIGHT_GRAY_CONCRETE.defaultBlockState(), mid + 3, 1, z0 + 12, mid + 5, 3, z0 + 12);
+        sign(level, box, mid + 4, 3, z0 + 11, Direction.NORTH, "§lNOW HIRING", "Janitor · IT", "Accounting", "Managers · Front desk");
+        put(level, box, lf(dev.freerun.life.LifeRegistry.BIG_PLANT, Direction.NORTH), x0 + 1, 1, z0 + 1);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.BIG_PLANT, Direction.NORTH), x1 - 1, 1, z0 + 1);
         put(level, box, facing(EconomyRegistry.ATM, Direction.SOUTH), x0 + 2, 1, z1 - 1);
         put(level, box, facing(EconomyRegistry.VENDING_MACHINE, Direction.SOUTH), x0 + 4, 1, z1 - 1);
-        sign(level, box, mid + 3, 2, z1 - 1, Direction.NORTH, "DIRECTORY", "1F Lobby", "2F+ Offices", "Roof: no.");
-        BlockPos desk = at(mid, 1, z0 + 8);
-        if (box.isInside(desk)) worker(level, desk);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.WATER_COOLER, Direction.SOUTH), x0 + 6, 1, z1 - 1);
+        sign(level, box, mid + 3, 2, z1 - 1, Direction.NORTH, "DIRECTORY", "1F Lobby & HR", "2F+ Offices", "Top: Executive");
     }
 
-    private void officeFloor(WorldGenLevel level, BoundingBox box, int x0, int y0, int z0, int x1, int z1, int seed) {
-        // rows of desks: table + monitor + chair
-        for (int z = z0 + 4; z <= z1 - 4; z += 4) {
-            for (int x = x0 + 2; x <= x1 - 6; x += 3) {
-                put(level, box, BlockRegistry.TABLE, x, y0 + 1, z);
-                put(level, box, facing(EconomyRegistry.TV, Direction.SOUTH).setValue(dev.freerun.economy.StoreBlocks.Tv.ON, (x + z + seed) % 3 != 0), x, y0 + 2, z);
-                put(level, box, facing(BlockRegistry.CHAIR, Direction.NORTH), x, y0 + 1, z + 1);
+    private void officeFloor(WorldGenLevel level, BoundingBox box, int x0, int y0, int z0, int x1, int z1, int seed, boolean top) {
+        int y = y0 + 1;
+        // every floor: carpet, the water cooler and printer by the stairs, a whiteboard, the janitor's closet
+        for (int x = x0 + 1; x < x1; x++) for (int z = z0 + 1; z < z1; z++) put(level, box, (seed % 2 == 0 ? Blocks.GRAY_CARPET : Blocks.LIGHT_GRAY_CARPET), x, y, z);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.WATER_COOLER, Direction.WEST), x1 - 1, y, z0 + 10);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.PRINTER, Direction.WEST), x1 - 1, y, z0 + 12);
+        put(level, box, lf(dev.freerun.life.LifeRegistry.WHITEBOARD, Direction.WEST), x1 - 1, y + 1, z0 + 15);
+        fill(level, box, Blocks.WHITE_CONCRETE.defaultBlockState(), x1 - 3, y, z1 - 3, x1 - 1, y + 2, z1 - 1);
+        fill(level, box, Blocks.AIR.defaultBlockState(), x1 - 2, y, z1 - 2, x1 - 1, y + 2, z1 - 1);
+        put(level, box, Blocks.AIR, x1 - 3, y, z1 - 2);
+        put(level, box, Blocks.AIR, x1 - 3, y + 1, z1 - 2);
+        put(level, box, Blocks.CAULDRON, x1 - 1, y, z1 - 1);
+        put(level, box, Blocks.BARREL, x1 - 2, y, z1 - 1);
+        sign(level, box, x1 - 3, y + 2, z1 - 2, Direction.WEST, "", "JANITOR", "", "");
+        int type = top ? 3 : Math.floorMod(seed, 4);
+        int w = x1 - x0;
+        switch (type) {
+            case 0, 1 -> {   // cubicle farm
+                for (int px = x0 + 2; px + 6 <= x1 - 6; px += 8) {
+                    for (int pz = z0 + 2; pz + 5 <= z1 - 2; pz += 7) cubiclePod(level, box, px, y, pz, seed + px * 3 + pz);
+                }
+            }
+            case 2 -> {      // IT and accounting
+                // the server room behind glass
+                int sx = x0 + 1, sz = z1 - 7;
+                fill(level, box, Blocks.GLASS.defaultBlockState(), sx, y, sz - 1, sx + 9, y + 3, sz - 1);
+                put(level, box, Blocks.AIR, sx + 4, y, sz - 1);
+                put(level, box, Blocks.AIR, sx + 4, y + 1, sz - 1);
+                for (int x = sx + 1; x <= sx + 8; x += 2) {
+                    for (int z = sz + 1; z <= sz + 4; z++) put(level, box, lf(dev.freerun.life.LifeRegistry.SERVER_RACK, Direction.EAST), x, y, z);
+                }
+                sign(level, box, sx + 6, y + 2, sz - 2, Direction.NORTH, "", "SERVER ROOM", "Authorized", "staff only");
+                // the IT help desk
+                workstation(level, box, sx + 12, y, sz + 2, Direction.NORTH, true);
+                workstation(level, box, sx + 14, y, sz + 2, Direction.NORTH, true);
+                put(level, box, lf(dev.freerun.life.LifeRegistry.DESK_PHONE, Direction.NORTH), sx + 13, y, sz + 2);
+                sign(level, box, sx + 13, y + 2, sz + 3, Direction.NORTH, "", "IT HELP DESK", "Have you tried", "turning it off?");
+                // accounting: rows of desks with filing cabinets between
+                for (int z = z0 + 3; z <= z0 + 10; z += 4) {
+                    for (int x = x0 + 2; x <= x0 + w - 8; x += 3) {
+                        workstation(level, box, x, y, z, Direction.SOUTH, (x + z + seed) % 3 != 0);
+                        put(level, box, lf(dev.freerun.life.LifeRegistry.FILING_CABINET, Direction.SOUTH), x + 1, y, z);
+                    }
+                }
+                sign(level, box, x0 + 2, y + 2, z0 + 1, Direction.SOUTH, "", "ACCOUNTING", "", "");
+            }
+            default -> {     // management: corner offices round a conference room
+                int[][] corners = {{x0 + 1, z0 + 1}, {x0 + 1, z1 - 7}, {x1 - 13, z1 - 7}};
+                String[] titles = {"DIRECTOR", "VP, SALES", "CFO"};
+                for (int k = 0; k < corners.length; k++) {
+                    int cx = corners[k][0], cz = corners[k][1];
+                    BlockState pane = Blocks.GLASS_PANE.defaultBlockState();
+                    boolean north = cz == z0 + 1;
+                    int wallZ = north ? cz + 6 : cz;
+                    for (int x = cx; x <= cx + 6; x++) for (int yy = y; yy <= y + 2; yy++) {
+                        put(level, box, pane.setValue(net.minecraft.world.level.block.IronBarsBlock.EAST, true).setValue(net.minecraft.world.level.block.IronBarsBlock.WEST, true), x, yy, wallZ);
+                    }
+                    for (int z = cz; z <= cz + 6; z++) for (int yy = y; yy <= y + 2; yy++) {
+                        put(level, box, pane.setValue(net.minecraft.world.level.block.IronBarsBlock.NORTH, true).setValue(net.minecraft.world.level.block.IronBarsBlock.SOUTH, true), cx + 6, yy, z);
+                    }
+                    put(level, box, Blocks.AIR, cx + 6, y, cz + 3);
+                    put(level, box, Blocks.AIR, cx + 6, y + 1, cz + 3);
+                    fill(level, box, Blocks.RED_CARPET.defaultBlockState(), cx + 1, y, cz + 1, cx + 5, y, cz + 5);
+                    // executive desk (two wide), bookshelf, plant, lamp, armchairs for visitors
+                    Direction toChair = north ? Direction.NORTH : Direction.SOUTH;
+                    int dz = north ? cz + 3 : cz + 3;
+                    workstation(level, box, cx + 2, y, dz, toChair, true);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_DESK, toChair), cx + 3, y, dz);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.DESK_PHONE, toChair), cx + 3, y + 1, dz);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.ARMCHAIR, toChair), cx + 2, y, dz - toChair.getStepZ() * 2);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.ARMCHAIR, toChair), cx + 3, y, dz - toChair.getStepZ() * 2);
+                    put(level, box, Blocks.BOOKSHELF, cx + 5, y, north ? cz + 1 : cz + 5);
+                    put(level, box, Blocks.BOOKSHELF, cx + 5, y + 1, north ? cz + 1 : cz + 5);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.BIG_PLANT, Direction.NORTH), cx + 1, y, north ? cz + 1 : cz + 5);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.FILING_CABINET, Direction.EAST), cx + 1, y, dz);
+                    sign(level, box, cx + 6, y + 2, cz + 2, Direction.EAST, "", titles[k], "", "");
+                }
+                // conference room: a long table, chairs down both sides, whiteboard and TV
+                int tx = x0 + 9, tz = z0 + 9;
+                for (int x = tx; x <= tx + 6; x++) {
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_DESK, Direction.NORTH), x, y, tz);
+                    put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_DESK, Direction.SOUTH), x, y, tz + 1);
+                    if ((x - tx) % 2 == 0) {
+                        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_CHAIR, Direction.SOUTH), x, y, tz - 1);
+                        put(level, box, lf(dev.freerun.life.LifeRegistry.OFFICE_CHAIR, Direction.NORTH), x, y, tz + 2);
+                    }
+                }
+                put(level, box, lf(dev.freerun.life.LifeRegistry.WHITEBOARD, Direction.EAST), tx - 2, y + 1, tz);
+                put(level, box, facing(EconomyRegistry.TV, Direction.WEST).setValue(dev.freerun.economy.StoreBlocks.Tv.ON, true), tx + 8, y + 1, tz + 1);
+                put(level, box, Blocks.LIGHT_GRAY_CONCRETE, tx + 8, y, tz + 1);
+                // the executive assistant
+                workstation(level, box, x0 + 12, y, z0 + 3, Direction.SOUTH, true);
+                put(level, box, lf(dev.freerun.life.LifeRegistry.DESK_PHONE, Direction.SOUTH), x0 + 13, y, z0 + 3);
             }
         }
-        // break corner
-        put(level, box, facing(FoodRegistry.COUNTER, Direction.NORTH), x0 + 1, y0 + 1, z1 - 1);
-        put(level, box, facing(FoodRegistry.COFFEE_MAKER, Direction.NORTH), x0 + 1, y0 + 2, z1 - 1);
-        put(level, box, facing(FoodRegistry.COUNTER, Direction.NORTH), x0 + 2, y0 + 1, z1 - 1);
-        put(level, box, facing(FoodRegistry.MICROWAVE, Direction.NORTH), x0 + 2, y0 + 2, z1 - 1);
-        put(level, box, Blocks.POTTED_BAMBOO, x1 - 1, y0 + 1, z1 - 1);
     }
 
     private void worker(WorldGenLevel level, BlockPos p) {

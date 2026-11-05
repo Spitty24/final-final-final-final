@@ -56,7 +56,14 @@ public class CitizenEntity extends PathfinderMob {
         RETIREE("Retiree", 55, CityLayout.District.PARK),
         RIDESHARE_DRIVER("Rideshare driver", 100, null),
         MUSICIAN("Street musician", 40, CityLayout.District.PARK),
-        UNEMPLOYED("Between jobs", 0, CityLayout.District.HOOD);
+        UNEMPLOYED("Between jobs", 0, CityLayout.District.HOOD),
+        IT_TECH("IT technician", 150, CityLayout.District.OFFICE),
+        JANITOR("Janitor", 85, CityLayout.District.OFFICE),
+        MANAGER("Office manager", 210, CityLayout.District.OFFICE),
+        RECEPTIONIST("Receptionist", 95, CityLayout.District.OFFICE),
+        SALES_REP("Sales rep", 130, CityLayout.District.OFFICE);
+
+        public static final Job[] OFFICE = {OFFICE_WORKER, ACCOUNTANT, IT_TECH, MANAGER, SALES_REP, OFFICE_WORKER, ACCOUNTANT, RECEPTIONIST, JANITOR};
 
         public final String title;
         public final int wage;
@@ -93,6 +100,7 @@ public class CitizenEntity extends PathfinderMob {
     private static final EntityDataAccessor<Integer> DATA_MONEY = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_FACT = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DATA_DISTRACTED = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.INT);
+    private static final EntityDataAccessor<Boolean> DATA_TYPING = SynchedEntityData.defineId(CitizenEntity.class, EntityDataSerializers.BOOLEAN);
 
     private enum Plan { WORK, ERRAND, HOME, WANDER }
 
@@ -134,6 +142,7 @@ public class CitizenEntity extends PathfinderMob {
         builder.define(DATA_MONEY, 100);
         builder.define(DATA_FACT, 0);
         builder.define(DATA_DISTRACTED, 0);
+        builder.define(DATA_TYPING, false);
     }
 
     // ------------------------------------------------------------------ identity
@@ -163,7 +172,9 @@ public class CitizenEntity extends PathfinderMob {
         entityData.set(DATA_MONEY, 40 + r.nextInt(job.wage * 3 + 120));
         entityData.set(DATA_FACT, r.nextInt(FACTS.length));
         int variant = switch (job) {
-            case OFFICE_WORKER, ACCOUNTANT -> r.nextInt(2);           // suits
+            case OFFICE_WORKER, ACCOUNTANT, MANAGER, SALES_REP -> r.nextInt(2);   // suits
+            case IT_TECH, RECEPTIONIST -> 5 + r.nextInt(3);
+            case JANITOR -> 3;
             case NURSE -> 2;
             case WELDER -> 3;
             case RETIREE -> 4;
@@ -239,7 +250,12 @@ public class CitizenEntity extends PathfinderMob {
     @Override
     protected void customServerAiStep() {
         super.customServerAiStep();
-        if (!(level() instanceof ServerLevel server) || isPassenger()) return;
+        if (!(level() instanceof ServerLevel server)) return;
+        if (officeSeat != null) {
+            officeDay(server);
+            return;
+        }
+        if (isPassenger()) return;
         if (fleeing > 0) {
             fleeing--;
             return;
@@ -346,6 +362,110 @@ public class CitizenEntity extends PathfinderMob {
         return false;
     }
 
+    // ------------------------------------------------------------------ a day at the office
+
+    private static final String[] OFFICE_LINES = {"Can't talk, I've got a deadline.", "Did you get my email? I sent it twice.",
+            "Who schedules a meeting at 4:55 on a Friday?", "Somebody hit reply-all again.", "Have you seen my stapler?",
+            "I'm just waiting for this spreadsheet to load. It's been an hour.", "Per my last email...",
+            "The coffee in the break room is basically tar today.", "I'm on mute. No wait, I'm not.", "Let's take this offline."};
+    private BlockPos officeSeat;
+    private BlockPos officeErrand;
+    private int officeTimer;
+
+    public boolean typing() {
+        return entityData.get(DATA_TYPING);
+    }
+
+    /** Gives this person a desk: they sit and work at the chair at {@code chair} until quitting time. */
+    public void setOffice(BlockPos chair) {
+        officeSeat = chair == null ? null : chair.immutable();
+        officeTimer = 200 + random.nextInt(1200);
+    }
+
+    public BlockPos officeSeat() {
+        return officeSeat;
+    }
+
+    private void officeDay(ServerLevel server) {
+        long t = level().getDayTime() % 24000L;
+        if (t > 11500L) {   // quitting time
+            stopRiding();
+            entityData.set(DATA_TYPING, false);
+            officeSeat = null;
+            return;
+        }
+        boolean seated = getVehicle() instanceof dev.freerun.world.SeatEntity;
+        entityData.set(DATA_TYPING, seated && officeErrand == null);
+        if (seated) {
+            if (tickCount % 30 == 0 && random.nextInt(3) == 0) {
+                playSound(SoundEvents.WOODEN_BUTTON_CLICK_ON, 0.15f, 1.8f + random.nextFloat() * 0.2f);   // clack clack
+            }
+            if (--officeTimer <= 0) {
+                officeErrand = errand(server);
+                stopRiding();
+                officeTimer = 100 + random.nextInt(140);
+            }
+            return;
+        }
+        if (officeErrand != null) {
+            if (distanceToSqr(Vec3.atBottomCenterOf(officeErrand)) > 2.5 * 2.5 && officeTimer > 0) {
+                if (getNavigation().isDone() || tickCount % 40 == 0) getNavigation().moveTo(officeErrand.getX() + 0.5, officeErrand.getY(), officeErrand.getZ() + 0.5, 0.8);
+                officeTimer--;
+                return;
+            }
+            getNavigation().stop();
+            if (--officeTimer < -80) officeErrand = null;   // done chatting at the cooler
+            return;
+        }
+        // back to the desk
+        if (distanceToSqr(Vec3.atBottomCenterOf(officeSeat)) > 1.6 * 1.6) {
+            if (getNavigation().isDone() || tickCount % 40 == 0) getNavigation().moveTo(officeSeat.getX() + 0.5, officeSeat.getY(), officeSeat.getZ() + 0.5, 0.8);
+            if (++stuck > 400) {
+                moveTo(officeSeat.getX() + 0.5, officeSeat.getY(), officeSeat.getZ() + 0.5);
+                stuck = 0;
+            }
+            return;
+        }
+        stuck = 0;
+        var state = level().getBlockState(officeSeat);
+        if (state.getBlock() instanceof dev.freerun.life.FurnitureBlock fb && fb.seat()
+                && level().getEntitiesOfClass(dev.freerun.world.SeatEntity.class, new net.minecraft.world.phys.AABB(officeSeat)).isEmpty()) {
+            dev.freerun.world.SeatEntity seat = dev.freerun.world.SeatEntity.create(level(), officeSeat);
+            level().addFreshEntity(seat);
+            startRiding(seat, true);
+            float yaw = state.getValue(net.minecraft.world.level.block.HorizontalDirectionalBlock.FACING).toYRot();
+            setYRot(yaw);
+            setYHeadRot(yaw);
+            setYBodyRot(yaw);
+            officeTimer = 600 + random.nextInt(1800);
+        } else if (!(state.getBlock() instanceof dev.freerun.life.FurnitureBlock)) {
+            officeSeat = null;   // their chair is gone
+        } else {
+            officeTimer = 200;
+            officeErrand = errand(server);
+        }
+    }
+
+    /** Somewhere to wander off to: the water cooler, the printer, the whiteboard, or a coworker's desk. */
+    private BlockPos errand(ServerLevel server) {
+        List<BlockPos> spots = new java.util.ArrayList<>();
+        for (BlockPos q : BlockPos.betweenClosed(blockPosition().offset(-10, -1, -10), blockPosition().offset(10, 1, 10))) {
+            var st = server.getBlockState(q);
+            if (st.is(dev.freerun.life.LifeRegistry.WATER_COOLER) || st.is(dev.freerun.life.LifeRegistry.PRINTER)
+                    || st.is(dev.freerun.life.LifeRegistry.WHITEBOARD) || st.is(dev.freerun.life.LifeRegistry.OFFICE_CHAIR) && random.nextInt(6) == 0) {
+                spots.add(q.immutable());
+            }
+        }
+        if (spots.isEmpty()) return officeSeat.offset(random.nextInt(7) - 3, 0, random.nextInt(7) - 3);
+        BlockPos at = spots.get(random.nextInt(spots.size()));
+        // stand next to it, not in it
+        for (net.minecraft.core.Direction d : net.minecraft.core.Direction.Plane.HORIZONTAL) {
+            BlockPos side = at.relative(d);
+            if (server.getBlockState(side).isAir() && server.getBlockState(side.above()).isAir()) return side;
+        }
+        return at;
+    }
+
     // ------------------------------------------------------------------ hacks (see Hacking)
 
     public boolean recentlyHacked() {
@@ -369,6 +489,14 @@ public class CitizenEntity extends PathfinderMob {
     @Override
     protected InteractionResult mobInteract(Player player, InteractionHand hand) {
         if (hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
+        if (!level().isClientSide && player instanceof net.minecraft.server.level.ServerPlayer sp && dev.freerun.life.OfficeJobs.talk(sp, this)) {
+            return InteractionResult.SUCCESS;
+        }
+        if (!level().isClientSide && officeSeat != null) {
+            player.displayClientMessage(Component.literal("§f<" + getName().getString() + "> " + OFFICE_LINES[random.nextInt(OFFICE_LINES.length)]
+                    + " §8(" + job().title + ")"), false);
+            return InteractionResult.SUCCESS;
+        }
         if (!level().isClientSide) {
             Job j = job();
             String line = GREETINGS[random.nextInt(GREETINGS.length)] + " " + switch (plan) {
