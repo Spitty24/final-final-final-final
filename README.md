@@ -5,7 +5,7 @@ with animated arms in first person and full-body animation in third person (visi
 players when the server has the mod too).
 
 > **Status:** builds cleanly on GitHub Actions against Minecraft 1.21.1. Newer features
-> (most recently the economy, the Double Quick, cars and the new guns) haven't been play-tested yet, so expect
+> (most recently the generated city, traffic, residents and the smartphone) haven't been play-tested yet, so expect
 > some tuning.
 
 ## Build the .jar
@@ -47,6 +47,7 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Slide | Sneak while sprinting; Jump out to keep speed |
 | Landing roll | Tap Sneak while falling; absorbs ~12 blocks of fall damage |
 | Toggle mod | **K** (rebind in Controls → Freerun) |
+| Blackwire hack | **H** / **Shift+H** while holding your phone |
 | Skill tree | **P** |
 
 ## Careers and skill trees
@@ -80,11 +81,82 @@ tier past the first needs a skill from the tier before it.
 P is also vanilla's Social Interactions key; the skill tree reads the key directly so it opens
 either way. Rebind it under Controls → Freerun if you like.
 
+## The city
+
+Everything now spawns together as one **city** (about 244 × 244 blocks) on flat-ish dry land:
+`/locate structure freerun:city`, or build one around you with **`/city`** (needs cheats; takes a
+few seconds). The old separate factory / Roadhouse / Double Quick spawns are gone.
+
+| | | | |
+|---|---|---|---|
+| Suburbs | Suburbs | City Hall & park | Suburbs |
+| Suburbs | Downtown offices | Downtown office towers | Downtown offices |
+| Suburbs | Downtown offices | Texas Roadhouse + parking | General Store |
+| The Hood | The Hood | Welding factory | Double Quick + parking |
+
+- **Streets:** two-lane roads (right-hand traffic) with sidewalks, curbs, dashed centre lines,
+  crosswalks at every intersection, street lamps that come on at night, hydrants and benches.
+  Downtown intersections have **traffic lights** on an 18-second cycle; the outer ring has
+  **stop signs**.
+- **Traffic:** residents drive the city's cars. They keep to their lane, slow for intersections,
+  stop at red lights, come to a full stop at stop signs and wait their turn, brake for anything in
+  front of them (and honk), and pick a random way to go at each intersection. Wrecked or stuck
+  cars get put back in their lane when nobody's looking.
+- **Downtown:** glass office towers 5–10 floors tall with lobbies, reception desks, open-plan
+  floors of desks and monitors, staircases, break corners, rooftop HVAC and the odd helipad.
+- **Suburbs:** four houses per block, each with a lawn, driveway and family car, a tree out back,
+  and a furnished inside (bed, kitchen with microwave and coffee maker, table, TV).
+- **The Hood:** four-storey brick apartment buildings with fire escapes, the Corner Mart (a shop),
+  a fenced basketball court, and a vacant lot that's Rust Rat and Chrome King turf (with shootouts).
+- **City Hall & the park:** columns, steps, flags, a council chamber; and a park with paths, a
+  fountain, trees, flower beds, benches and a statue of Big Boudin.
+
+**Residents** each have a name, age, job, home and bank balance, and live a daily routine: commute
+to work (offices, the stores, the Roadhouse, the factory, City Hall), work until 4 PM and get paid,
+run errands and shop until evening, then go home and pay rent. Students, retirees and the
+between-jobs crowd keep their own hours. Right-click one to say hi. New residents move in (and new
+cars come onto the roads) to keep the city populated.
+
+**City economy:** a hub under the middle intersection keeps the books: wages paid, rent collected
+and what everyone spends in the shops. Store prices in town follow demand: a busy day pushes them
+up (to +30%), a slow one brings discounts (to −20%). The shop screen shows when prices are up or
+down, and the City app on your phone shows the numbers.
+
+## Smartphone
+
+Right-click with the Smartphone to open it. Apps:
+
+| App | What it shows |
+|---|---|
+| Bank | Your balance, wallet, next paycheck, local price level |
+| Map | The city with every district, and where you are |
+| Blackwire | Hacking: battery, settings, what you can hack |
+| Jobs | Your career, paycheck and the next break |
+| City | Population, jobs, savings, cars, today's wages/sales/rent, price index |
+| Messages | Texts, and a log of your hacks |
+
+**Blackwire** (hacking): hold the phone (or turn on "always" in the app) and whatever you look at
+within 48 blocks gets profiled: a resident's name, age, job, income, bank balance and something
+they'd rather you didn't know. Press **H** to hack, **Shift+H** for the second option. Hacks use
+phone battery, which recharges by itself.
+
+| Target | H | Shift+H |
+|---|---|---|
+| Resident | Transfer $10–60 from their account | Flood their phone; they stop and stare at it |
+| Car with a driver | Kill the engine | Floor it through every light |
+| Parked car | Set off the alarm | — |
+| Traffic light | Every direction green (crashes) | Every direction red (gridlock) |
+| Street lamp | Black out the block for 30 s | — |
+| ATM | Dispense $10–40 (once per ATM per 10 min) | — |
+| Shop clerk | Skim the register (once per 5 min) | — |
+| Gangster | Overload their phone (zap) | Leak their location to the other crew |
+| Gas pump | Overload it (boom) | — |
+| Vending machine / TV | Free snack / change the channel | — |
+
 ## Welding factory
 
-A large factory generates on flat, dry land (`/locate structure freerun:welding_factory`), or
-build one with **`/factory`** (needs cheats; the parking lot starts just ahead of you and the
-building is past it). Inside:
+The factory is part of every city, or build one on its own with **`/factory`** (needs cheats;
+the parking lot starts just ahead of you and the building is past it). Inside:
 
 - a press department with five working press brakes (big 3×3 machines with side housings,
   hydraulic cylinders, a ram, back gauge, light curtains and a foot pedal) and their operators, who drop each part
