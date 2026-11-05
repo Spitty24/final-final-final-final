@@ -40,7 +40,9 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Mantle | Automatic at the top of a wall climb |
 | Ledge grab | Jump/fall at a ledge while holding Forward |
 | Hang: climb up / drop / shimmy | Jump / Sneak / Left & Right |
-| Hang: leap away | Back + Jump (turns you around) |
+| Hang: leap to another ledge | Left/Right + Jump sideways, Jump up (when you can't climb over), Sneak drops to the ledge below |
+| Hang: leap across a gap | Back + Jump: turns you round onto a ledge or wall behind you (up to ~6 blocks, e.g. across an alley); with nothing there, a wall kick |
+| Free climb | Jump or fall onto a **brick, stone-brick, cobblestone, wood, log or iron** wall holding Forward and you cling to it. W/S climb, A/D move sideways, Jump leaps (up, or with A/D/S sideways/backwards), Sneak lets go. Reach a ledge and you grab it; reach the top and you pull yourself over |
 | Wall run | Jump alongside a wall while sprinting, hold Forward |
 | Wall jump | Jump during a wall run (chain to the opposite wall) |
 | Wall kick | Jump during a wall climb (turns 180°) |
@@ -49,6 +51,25 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Toggle mod | **K** (rebind in Controls → Freerun) |
 | Blackwire hack | **H** / **Shift+H** while holding your phone |
 | Skill tree | **P** |
+
+**What can be climbed** is the block tag `freerun:climbable` (`data/freerun/tags/block/climbable.json`):
+bricks, all the stone bricks, cobblestone, deepslate bricks/tiles, mud and nether bricks,
+sandstone, polished andesite, quartz bricks and pillars, logs, planks, walls, fences, trapdoors,
+iron bars, chains and copper grates. Glass, concrete and smooth stone can't be climbed. Change
+the list with a datapack. Anything that sticks out with room for your hands on top (a window
+sill, a cornice, an AC unit, a fire-escape landing) can be hung from, even if you can't stand on it.
+
+### Parkour in the city
+
+- **Office towers** have climbable stone columns every four blocks and a ledge running round the
+  outside of every floor between the columns: climb a column, leap sideways onto a ledge, shimmy,
+  leap to the next column, and so on up to the roof. Twin-tower blocks have a narrow beam from the
+  lower roof across to a ledge on the taller tower.
+- **Back alleys** run through the gaps between downtown and hood blocks: two climbable brick walls
+  two blocks apart (wall-run along them, wall-jump between them, climb up and run along the tops),
+  with dumpsters and crates to vault, AC units and fire-escape landings to hang from, drainpipes,
+  clotheslines and a doorway halfway along each side.
+- **Hood apartments** are brick all the way up, with two-block roof-to-roof gaps between them.
 
 ## Careers and skill trees
 
@@ -92,6 +113,13 @@ cheats) to found one centred on you, at the height of the ground around you. A c
 built chunk by chunk as you explore (the part around you goes up within seconds). If a chunk of
 a city ever comes out missing, it's filled in automatically the next time it loads.
 
+No trees, grass, flowers or mushrooms generate in or right around a city any more (a tree growing
+in the next chunk used to drop leaves, logs and dirt into a block already built). Cities from
+before this fix are swept once, as each chunk loads: wild leaves, the trees they belong to, grass
+and ferns (and stray dirt, in chunks nobody has spent time in). **`/cityclean [radius]`** (cheats)
+sweeps the chunks around you right away, dirt included. Leaves, flowers and trees the city
+placed itself, and anything you placed, are left alone.
+
 ![City layout](docs/city_layout.png)
 
 - **Downtown:** office towers 5–10 floors tall around **City Hall** and the central park.
@@ -115,7 +143,23 @@ a city ever comes out missing, it's filled in automatically the next time it loa
 | **Big Bun Burgers** | Burger joint with a drive-thru | Big Bun, Double Big Bun, Bacon Stacker, crinkle fries, onion rings, shakes, the Bun Buddy Meal |
 | **Cluck Shack** | Fried chicken with a drive-thru | Cluck Sandwich, Spicy Cluck, nuggets, hot wings, honey biscuits, red beans & rice, mac & cheese |
 | **Sugar Bayou Sweets** | Bakery and sno-ball stand (also in every strip mall) | Beignets, pralines, king cake (mind the baby), bread pudding, sno-balls, cupcakes, soft serve, pecan pie, brownies |
-| **Strip malls** | Six storefronts and a shared lot | Sugar Bayou Sweets, Crescent Hardware & Cellular, plus a laundromat, pawn shop, bookstore, nail salon, po'boy shop or dry cleaner |
+| **Strip malls** | Six storefronts and a shared lot | Sugar Bayou Sweets, Crescent Hardware & Cellular, two sneaker stores (**Foot Lockup**, **Sole City**) and two clothing stores (**Bayou Threads**, **Fit Check**) |
+
+**Clothes and shoes you can wear.** The strip mall's sneaker and clothing stores sell off-brand
+gear that you wear in the armour slots (each piece is light armour). Mannequins in the windows show
+the outfits.
+
+| Brand | Pieces | Price |
+|---|---|---|
+| **Mike** Air Runners | Sneakers: +7% running speed | $110 |
+| **Abibas** Classics | Sneakers: jump a little higher | $95 |
+| **Pumba** Sprinters | Sneakers: +4% speed, 1.5 blocks of safe fall | $85 |
+| **Vanz** Skate Lows | Sneakers: fall 3 blocks further without getting hurt | $65 |
+| **Conversy** High Tops | Sneakers: step straight up full blocks | $60 |
+| **Supremo** | Cap, hoodie, joggers | $45 / $120 / $90 |
+| **Old Navvy** | Bucket hat, tee, jeans | $12 / $10 / $25 |
+| **Under Amour** | Beanie, compression shirt, track shorts | $20 / $40 / $30 |
+| **The North Fase** | Beanie, puffer jacket, cargo pants | $25 / $150 / $55 |
 
 All 24 new foods are edible and most have an effect (speed, absorption, fire resistance, brain
 freeze, a food coma...). Supervisors' **Open Door Policy** and Upper Management's **Company Card**
@@ -509,8 +553,8 @@ a chud in chat. It's harmless; kill it and you get the stone back.
 
 ## Settings
 
-`config/freerun.json` is created on first launch. Every move can be switched off, plus:
-`wallRunTicks`, `wallClimbTicks`, `momentumBonus`, `rollFallReduction`, `cameraTilt`
+`config/freerun.json` is created on first launch. Every move can be switched off (including
+`freeClimb` and `ledgeLeaps`), plus: `wallRunTicks`, `wallClimbTicks`, `climbSpeed`, `momentumBonus`, `rollFallReduction`, `cameraTilt`
 (negative flips the lean), `cameraRollFlip`, `firstPersonArms`, `sprintArmPump`.
 
 ## Tuning the animations
