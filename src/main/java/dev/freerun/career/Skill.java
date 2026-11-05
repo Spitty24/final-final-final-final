@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
- * One node in a career's skill tree. Tiers 1-4 need levels 1, 5, 10 and 18, and each tier past the
+ * One node in a career's skill tree. Tiers 1-5 need levels 1, 3, 6, 9 and 12, and each tier past the
  * first needs at least one skill from the tier before it.
  *
  * @param mods        attribute bonuses, applied while the skill is owned
@@ -22,7 +22,7 @@ public record Skill(String id, Career career, int tier, String name, String desc
 
     public record Mod(Holder<Attribute> attribute, double amount, AttributeModifier.Operation op) {}
 
-    public static final int[] TIER_LEVEL = {1, 5, 10, 18};
+    public static final int[] TIER_LEVEL = {1, 3, 6, 9, 12};
 
     public int requiredLevel() {
         return TIER_LEVEL[tier - 1];

@@ -80,6 +80,7 @@ public final class Shops {
         if (index < 0 || index >= list.size() || clerk == null || player.distanceToSqr(clerk) > 10 * 10) return;
         Offer o = list.get(index);
         int each = price(o.price(), pricePercent(player.serverLevel(), clerk.blockPosition()));
+        each = Math.max(1, (int) Math.round(each * dev.freerun.career.Skills.shopDiscount(dev.freerun.career.Careers.get(player).skills())));
         int bought = 0;
         for (int i = 0; i < Math.max(1, Math.min(times, 16)); i++) {
             if (!Money.pay(player, each)) break;
@@ -106,7 +107,7 @@ public final class Shops {
         for (int i = 0; i < Math.max(1, Math.min(times, 64)); i++) {
             if (count(player, o.stack().getItem()) < o.stack().getCount()) break;
             remove(player, o.stack().getItem(), o.stack().getCount());
-            Money.give(player, o.price());
+            Money.give(player, dev.freerun.career.Careers.has(player, "quality_control") ? (int) Math.round(o.price() * 1.15) : o.price());
             sold++;
         }
         if (sold == 0) {

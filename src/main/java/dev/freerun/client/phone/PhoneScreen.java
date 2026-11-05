@@ -253,7 +253,7 @@ public class PhoneScreen extends Screen {
         g.fill(sx() + 4, y, sx() + 4 + (sw() - 8) * Math.min(need, CareerClientState.xp) / Math.max(1, need), y + 4, 0xFF000000 | c.color);
         y += 10;
         int stars = Integer.bitCount(CareerClientState.completed);
-        int pay = 15 + 3 * CareerClientState.level + 10 * stars;
+        int pay = dev.freerun.career.Skills.paycheck(CareerClientState.data(), 15 + 3 * CareerClientState.level + 10 * stars);
         y = line(g, y, "§7Paycheck: §a" + Money.fmt(pay) + " §7each break");
         int until = BreakTime.ticksUntilBreak(minecraft.level);
         y = line(g, y, BreakTime.isBreak(minecraft.level) ? "§aOn break now!"

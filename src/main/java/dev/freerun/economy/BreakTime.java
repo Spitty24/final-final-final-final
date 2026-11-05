@@ -55,7 +55,7 @@ public final class BreakTime {
                     "§e§l*BZZZZZT* §r§eBreak time! §7Two minutes. The crew's heading over to the Double Quick."), false);
             p.playNotifySound(ModSounds.BREAK_BUZZER, SoundSource.MASTER, 0.7f, 1.0f);
             CareerData d = Careers.get(p);
-            int pay = d.career() == 0 ? 10 : 15 + 3 * d.level() + 10 * d.prestigeCount();
+            int pay = d.career() == 0 ? 10 : dev.freerun.career.Skills.paycheck(d, 15 + 3 * d.level() + 10 * d.prestigeCount());
             Money.give(p, pay);
             p.displayClientMessage(Component.literal("§a💵 Payday! Direct deposit: " + Money.fmt(pay)
                     + " §7(balance " + Money.fmt(Money.balance(p)) + ")"), false);

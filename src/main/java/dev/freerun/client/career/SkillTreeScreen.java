@@ -19,17 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The skill tree (P). Four tiers left to right; click a glowing node to spend a skill point.
+ * The skill tree (P). Five tiers left to right; click a glowing node to spend a skill point.
  *   gold border   unlocked
  *   green border  available now
  *   gray          locked (level too low, or no skill in the tier before it yet)
  */
 public class SkillTreeScreen extends Screen {
-    private static final int COL_W = 96;
-    private static final int GAP = 16;
+    private static final int TIERS = Skill.TIER_LEVEL.length;
+    private static final int COL_W = 80;
+    private static final int GAP = 10;
     private static final int NODE_H = 40;
-    private static final int PANEL_W = 4 * COL_W + 3 * GAP + 20;
-    private static final int PANEL_H = 214;
+    private static final int PANEL_W = TIERS * COL_W + (TIERS - 1) * GAP + 20;
+    private static final int PANEL_H = 240;
 
     private record Node(Skill skill, int x, int y) {}
 
@@ -70,13 +71,13 @@ public class SkillTreeScreen extends Screen {
             tab.active = c != viewing;
             tabX += w + 4;
         }
-        for (int tier = 1; tier <= 4; tier++) {
+        for (int tier = 1; tier <= TIERS; tier++) {
             final int t = tier;
             List<Skill> inTier = Skills.forCareer(career).stream().filter(s -> s.tier() == t).toList();
             int colX = px + 10 + (tier - 1) * (COL_W + GAP);
             int top = py + 62;
             for (int i = 0; i < inTier.size(); i++) {
-                int y = inTier.size() == 1 ? top + 48 : top + i * 70 + 12;
+                int y = top + (3 - inTier.size()) * (NODE_H + 4) / 2 + i * (NODE_H + 4);
                 nodes.add(new Node(inTier.get(i), colX, y));
             }
         }
@@ -145,7 +146,7 @@ public class SkillTreeScreen extends Screen {
         }
 
         // Tier headings
-        for (int tier = 1; tier <= 4; tier++) {
+        for (int tier = 1; tier <= TIERS; tier++) {
             int colX = px + 10 + (tier - 1) * (COL_W + GAP);
             String h = "Tier " + tier + " · Lv " + Skill.TIER_LEVEL[tier - 1];
             g.drawString(font, h, colX + (COL_W - font.width(h)) / 2, py + 54, d.level() >= Skill.TIER_LEVEL[tier - 1] ? 0xCCCCCC : 0x666666, false);

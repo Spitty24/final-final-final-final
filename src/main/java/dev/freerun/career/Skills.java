@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 /**
- * Every career's skill tree: seven skills each, two per tier for tiers 1-3 and a capstone at tier 4.
+ * Every career's skill tree: thirteen skills each, three per tier for tiers 1-4 and a capstone at tier 5.
  *
  *   EMPLOYEE        hands-on: mining, toughness, forklifts, overtime, a packed lunch
  *   SUPERVISOR      running the floor: hitting hard, safety, speed, night vision, motivating others
@@ -75,9 +75,24 @@ public final class Skills {
         add("strong_back", c, 3, "Strong Back", "+2 hearts and 30% knockback resistance.", () -> Items.IRON_CHESTPLATE,
                 mods(mod(Attributes.MAX_HEALTH, 4, Operation.ADD_VALUE),
                         mod(Attributes.KNOCKBACK_RESISTANCE, 0.3, Operation.ADD_VALUE)), null);
-        add("employee_of_the_month", c, 4, "Employee of the Month", "Move 12% faster, mine another 15% faster, and earn 25% more XP.",
+        add("employee_of_the_month", c, 5, "Employee of the Month", "Move 12% faster, mine another 15% faster, and earn 25% more XP.",
                 () -> Items.GOLD_BLOCK, mods(mod(Attributes.MOVEMENT_SPEED, 0.12, Operation.ADD_MULTIPLIED_BASE),
                         mod(Attributes.BLOCK_BREAK_SPEED, 0.15, Operation.ADD_MULTIPLIED_BASE)), null);
+
+        add("union_card", c, 1, "Union Card", "Your paycheck is 20% bigger.", () -> Items.NAME_TAG, List.of(), null);
+        add("safety_glasses", c, 2, "Safety Glasses", "Blindness and Darkness wear off instantly.", () -> Items.GLASS_PANE,
+                List.of(), (p, s) -> {
+                    p.removeEffect(MobEffects.BLINDNESS);
+                    p.removeEffect(MobEffects.DARKNESS);
+                });
+        add("second_wind", c, 3, "Second Wind", "Below 4 hearts, you start regenerating.", () -> Items.GOLDEN_APPLE,
+                List.of(), (p, s) -> { if (p.getHealth() < 8.0f) keep(p, MobEffects.REGENERATION, 0, 60); });
+        add("ride_share", c, 4, "Ride Share", "Cars you drive have 20% more top speed and pick-up.", () -> dev.freerun.vehicle.VehicleRegistry.CAR_ITEM,
+                List.of(), null);
+        add("coffee_run", c, 4, "Coffee Run", "A fresh Cup of Coffee turns up every 6 minutes.", () -> FoodRegistry.CUP_OF_COFFEE,
+                List.of(), every(360, p -> give(p, new ItemStack(FoodRegistry.CUP_OF_COFFEE), "Coffee run: one cup, black.")));
+        add("shop_floor_legend", c, 4, "Shop Floor Legend", "+3 hearts.", () -> Items.TOTEM_OF_UNDYING,
+                mods(mod(Attributes.MAX_HEALTH, 6, Operation.ADD_VALUE)), null);
 
         c = Career.SUPERVISOR;
         add("clipboard", c, 1, "Clipboard", "+1 attack damage. Writing people up hits hard.", () -> Items.WRITABLE_BOOK,
@@ -94,12 +109,20 @@ public final class Skills {
         add("sick_and_tired", c, 3, "Sick and Tired", "+2 more attack damage and 20% faster attacks.", () -> Items.IRON_SWORD,
                 mods(mod(Attributes.ATTACK_DAMAGE, 2, Operation.ADD_VALUE),
                         mod(Attributes.ATTACK_SPEED, 0.2, Operation.ADD_MULTIPLIED_BASE)), null);
-        add("promotion_track", c, 4, "Promotion Track", "Earn 40% more XP, and players near you get Speed.", () -> Items.EXPERIENCE_BOTTLE,
+        add("promotion_track", c, 5, "Promotion Track", "Earn 40% more XP, and players near you get Speed.", () -> Items.EXPERIENCE_BOTTLE,
                 List.of(), (p, s) -> {
                     for (Player o : p.level().players()) {
                         if (o != p && o.distanceToSqr(p) < 12 * 12) keep(o, MobEffects.MOVEMENT_SPEED, 0, 60);
                     }
                 });
+
+        add("open_door_policy", c, 1, "Open Door Policy", "Shops give you 10% off.", () -> Items.OAK_DOOR, List.of(), null);
+        add("loss_prevention", c, 2, "Loss Prevention", "Stopping a crime pays double.", () -> Items.IRON_BARS, List.of(), null);
+        add("police_radio", c, 3, "Police Radio", "You hear every crime reported anywhere in the city.", () -> Items.NOTE_BLOCK, List.of(), null);
+        add("chain_of_command", c, 4, "Chain of Command", "+3 armor toughness.", () -> Items.CHAIN,
+                mods(mod(Attributes.ARMOR_TOUGHNESS, 3, Operation.ADD_VALUE)), null);
+        add("overtime_approved", c, 4, "Overtime Approved", "Your paycheck is 25% bigger.", () -> Items.GOLD_NUGGET, List.of(), null);
+        add("quality_control", c, 4, "Quality Control", "Stores pay you 15% more for what you sell.", () -> Items.EMERALD, List.of(), null);
 
         c = Career.SUPERINTENDENT;
         add("site_walk", c, 1, "Site Walk", "Move 10% faster.", () -> Items.COMPASS,
@@ -115,9 +138,19 @@ public final class Skills {
                 List.of(), (p, s) -> keep(p, MobEffects.FIRE_RESISTANCE, 0, 120));
         add("step_up", c, 3, "Step Up", "Walk straight up full blocks without jumping.", () -> Items.OAK_STAIRS,
                 mods(mod(Attributes.STEP_HEIGHT, 0.5, Operation.ADD_VALUE)), null);
-        add("shutdown_authority", c, 4, "Shutdown Authority", "Permanent Haste II and +2 hearts. The site runs on your say-so.",
+        add("shutdown_authority", c, 5, "Shutdown Authority", "Permanent Haste II and +2 hearts. The site runs on your say-so.",
                 () -> Items.BELL, mods(mod(Attributes.MAX_HEALTH, 4, Operation.ADD_VALUE)),
                 (p, s) -> keep(p, MobEffects.DIG_SPEED, 1, 120));
+
+        add("hard_hat", c, 1, "Hard Hat", "+2 armor.", () -> Items.GOLDEN_HELMET,
+                mods(mod(Attributes.ARMOR, 2, Operation.ADD_VALUE)), null);
+        add("site_radio", c, 2, "Site Radio", "Blackwire hacks use 30% less battery.", () -> EconomyAccess.phone(), List.of(), null);
+        add("road_crew", c, 3, "Road Crew", "Cars you drive accelerate harder and turn tighter.", () -> Items.ORANGE_CONCRETE, List.of(), null);
+        add("utility_access", c, 4, "Utility Access", "Hacking traffic lights and street lights costs no battery.", () -> Items.REDSTONE_TORCH,
+                List.of(), null);
+        add("scaffold_legs", c, 4, "Scaffold Legs", "Jump higher and fall 3 blocks further safely.", () -> Items.SCAFFOLDING,
+                mods(mod(Attributes.JUMP_STRENGTH, 0.12, Operation.ADD_VALUE), mod(Attributes.SAFE_FALL_DISTANCE, 3, Operation.ADD_VALUE)), null);
+        add("zoning_commissioner", c, 4, "Zoning Commissioner", "+$25 on every paycheck.", () -> Items.MAP, List.of(), null);
 
         c = Career.UPPER_MANAGEMENT;
         add("expense_account", c, 1, "Expense Account", "Collect 2 gold ingots every 10 minutes.", () -> Items.GOLD_INGOT,
@@ -132,10 +165,35 @@ public final class Skills {
                 List.of(), null);   // checked every tick in Careers
         add("quarterly_bonus", c, 3, "Quarterly Bonus", "Earn 50% more XP, plus a diamond every 30 minutes.", () -> Items.DIAMOND,
                 List.of(), every(1800, p -> give(p, new ItemStack(Items.DIAMOND), "Quarterly bonus: one diamond.")));
-        add("hostile_takeover", c, 4, "Hostile Takeover", "+4 attack damage, +4 armor, and slow constant regeneration.",
+        add("hostile_takeover", c, 5, "Hostile Takeover", "+4 attack damage, +4 armor, and slow constant regeneration.",
                 () -> Items.NETHERITE_SWORD, mods(mod(Attributes.ATTACK_DAMAGE, 4, Operation.ADD_VALUE),
                         mod(Attributes.ARMOR, 4, Operation.ADD_VALUE)),
                 (p, s) -> keep(p, MobEffects.REGENERATION, 0, 120));
+        add("company_card", c, 1, "Company Card", "Shops give you 15% off.", () -> Items.PAPER, List.of(), null);
+        add("insider_trading", c, 2, "Insider Trading", "Hacks that pay out cash pay 50% more.", () -> Items.ENDER_EYE, List.of(), null);
+        add("bodyguard_detail", c, 3, "Bodyguard Detail", "The police never come after you.", () -> Items.SHIELD, List.of(), null);
+        add("stock_options", c, 4, "Stock Options", "$5 lands in your account every 2 minutes.", () -> Items.GOLD_INGOT,
+                List.of(), every(120, p -> dev.freerun.economy.Money.give(p, 5)));
+        add("private_security", c, 4, "Private Security", "Permanent Resistance.", () -> Items.IRON_CHESTPLATE,
+                List.of(), (p, s) -> keep(p, MobEffects.DAMAGE_RESISTANCE, 0, 120));
+        add("board_seat", c, 4, "Board Seat", "Your paycheck is 40% bigger.", () -> Items.DIAMOND, List.of(), null);
+    }
+
+    /** Paycheck multiplier and flat bonus from skills. */
+    public static int paycheck(CareerData d, int base) {
+        double m = 1.0;
+        if (d.has("union_card")) m += 0.2;
+        if (d.has("overtime_approved")) m += 0.25;
+        if (d.has("board_seat")) m += 0.4;
+        return (int) Math.round(base * m) + (d.has("zoning_commissioner") ? 25 : 0);
+    }
+
+    /** Shop discount from skills (both sides; the client reads its own skills). */
+    public static double shopDiscount(java.util.Collection<String> skills) {
+        double m = 1.0;
+        if (skills.contains("open_door_policy")) m *= 0.9;
+        if (skills.contains("company_card")) m *= 0.85;
+        return m;
     }
 
     // ------------------------------------------------------------------ helpers

@@ -77,7 +77,9 @@ public class ShopScreen extends Screen {
             Shops.Offer o = list.get(idx);
             int x = gx + (i % COLS) * CELL, y = gy + (i / COLS) * CELL;
             boolean hover = mouseX >= x && mouseX < x + CELL - 2 && mouseY >= y && mouseY < y + CELL - 2;
-            int shown = selling ? o.price() : Shops.price(o.price(), pricePercent);
+            double disc = dev.freerun.career.Skills.shopDiscount(dev.freerun.career.CareerClientState.skills);
+            int shown = selling ? (dev.freerun.career.CareerClientState.skills.contains("quality_control") ? (int) Math.round(o.price() * 1.15) : o.price())
+                    : Math.max(1, (int) Math.round(Shops.price(o.price(), pricePercent) * disc));
             boolean afford = selling || bal >= shown;
             g.fill(x, y, x + CELL - 2, y + CELL - 2, hover ? 0xFF3C3C48 : 0xFF24242C);
             g.renderItem(o.stack(), x + 4, y + 1);
@@ -99,7 +101,8 @@ public class ShopScreen extends Screen {
             List<Component> tip = new java.util.ArrayList<>(getTooltipFromItem(minecraft, hovered.stack()));
             tip.add(Component.literal(selling
                     ? "§eSell " + hovered.stack().getCount() + " for §a" + Money.fmt(hovered.price())
-                    : "§ePrice: §a" + Money.fmt(Shops.price(hovered.price(), pricePercent))));
+                    : "§ePrice: §a" + Money.fmt(Math.max(1, (int) Math.round(Shops.price(hovered.price(), pricePercent)
+                            * dev.freerun.career.Skills.shopDiscount(dev.freerun.career.CareerClientState.skills))))));
             g.renderComponentTooltip(font, tip, mouseX, mouseY);
         }
     }

@@ -250,7 +250,16 @@ public class CarEntity extends LivingEntity {
         float throttle = 0.0f, steerIn = 0.0f;
         boolean handbrake = false;
         float steerLimit = 1.0f;
+        double topSpeed = MAX_FORWARD, engine = ENGINE, steerScale = 1.0;
         if (driver instanceof Player p) {
+            if (dev.freerun.career.Careers.has(p, "ride_share")) {
+                topSpeed *= 1.2;
+                engine *= 1.2;
+            }
+            if (dev.freerun.career.Careers.has(p, "road_crew")) {
+                engine *= 1.25;
+                steerScale = 1.25;
+            }
             throttle = p.zza;
             steerIn = p.xxa;
             handbrake = p.jumping;
@@ -270,7 +279,7 @@ public class CarEntity extends LivingEntity {
         if (grounded) {
             if (throttle > 0.0f) {
                 if (v < -0.01) v = Math.min(0.0, v + BRAKE);
-                else v += ENGINE * throttle * Math.max(0.0, 1.0 - (v / MAX_FORWARD) * (v / MAX_FORWARD));
+                else v += engine * throttle * Math.max(0.0, 1.0 - (v / topSpeed) * (v / topSpeed));
             } else if (throttle < 0.0f) {
                 if (v > 0.01) v = Math.max(0.0, v - BRAKE);
                 else v -= ENGINE * 0.6 * -throttle * Math.max(0.0, 1.0 - (v / MAX_REVERSE) * (v / MAX_REVERSE));
@@ -282,7 +291,7 @@ public class CarEntity extends LivingEntity {
         }
 
         // Bicycle-model yaw rate: tighter at low speed, wider at high speed.
-        double angle = Math.toRadians(MAX_STEER_DEG * steer) / (1.0 + Math.abs(v) * 1.1);
+        double angle = Math.toRadians(MAX_STEER_DEG * steer * steerScale) / (1.0 + Math.abs(v) * 1.1);
         double yawRate = Math.toDegrees(v * Math.tan(angle) / WHEELBASE);
         if (handbrake && Math.abs(v) > 0.25) yawRate *= 1.7;
         if (grounded) {

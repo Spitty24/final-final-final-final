@@ -66,6 +66,7 @@ public final class Hacking {
 
     private static boolean spend(ServerPlayer p, ItemStack phone, int cost) {
         if (p.getAbilities().instabuild) return true;
+        if (dev.freerun.career.Careers.has(p, "site_radio")) cost = (int) Math.ceil(cost * 0.7);
         float b = Amenities.Smartphone.battery(phone);
         if (b < cost) {
             say(p, "§cNot enough battery (" + (int) b + "% / " + cost + "% needed).");
@@ -121,6 +122,7 @@ public final class Hacking {
                 }
                 if (!spend(p, phone, 25)) return;
                 int amount = c.drain(10 + level.random.nextInt(51));
+            if (dev.freerun.career.Careers.has(p, "insider_trading")) amount = (int) Math.round(amount * 1.5);
                 if (amount <= 0) {
                     say(p, c.getName().getString() + " is completely broke. $0.");
                 } else {
@@ -171,7 +173,7 @@ public final class Hacking {
             }
             if (!spend(p, phone, 30)) return;
             CLERK_LOCK.put(n.getId(), now + 6000);
-            int amount = 10 + level.random.nextInt(31);
+            int amount = bonus(p, 10 + level.random.nextInt(31));
             Money.give(p, amount);
             say(p, "§aSkimmed " + Money.fmt(amount) + " from the register's card reader.");
             zap(level, at);
@@ -184,6 +186,10 @@ public final class Hacking {
         beep(p);
     }
 
+    private static int bonus(ServerPlayer p, int amount) {
+        return dev.freerun.career.Careers.has(p, "insider_trading") ? (int) Math.round(amount * 1.5) : amount;
+    }
+
     private static boolean locked(BlockPos pos, long now, int ticks) {
         Long until = BLOCK_LOCK.get(pos);
         if (until != null && now < until) return true;
@@ -194,13 +200,14 @@ public final class Hacking {
     private static void hackBlock(ServerPlayer p, ServerLevel level, ItemStack phone, BlockPos pos, BlockState state, boolean alt, long now) {
         Block b = state.getBlock();
         Vec3 at = pos.getCenter();
+        boolean utility = dev.freerun.career.Careers.has(p, "utility_access");
         if (b instanceof TrafficLightBlock) {
-            if (!spend(p, phone, 25)) return;
+            if (!spend(p, phone, utility ? 0 : 25)) return;
             BlockPos key = level.getBlockEntity(pos) instanceof CityLightBlockEntity be && be.intersection() != null ? be.intersection() : pos;
             TrafficSystem.force(level, key, alt ? TrafficSystem.Override.ALL_RED : TrafficSystem.Override.ALL_GREEN, 300);
             say(p, alt ? "Every light at this intersection is red. Gridlock." : "§eEvery direction is green. Stand back.");
         } else if (b instanceof StreetLampBlock) {
-            if (!spend(p, phone, 30)) return;
+            if (!spend(p, phone, utility ? 0 : 30)) return;
             TrafficSystem.blackout(level, pos, 40.0, 600);
             say(p, "Blacked out the block for 30 seconds.");
         } else if (state.is(EconomyRegistry.ATM)) {
@@ -209,7 +216,7 @@ public final class Hacking {
                 return;
             }
             if (!spend(p, phone, 35)) return;
-            int amount = 10 + level.random.nextInt(31);
+            int amount = bonus(p, 10 + level.random.nextInt(31));
             for (ItemStack bill : Money.bills(amount)) Block.popResource(level, pos.above(), bill);
             level.playSound(null, pos, dev.freerun.economy.ModSounds.CASH_REGISTER, SoundSource.BLOCKS, 1.0f, 1.2f);
             say(p, "§aThe ATM spits out " + Money.fmt(amount) + ".");
