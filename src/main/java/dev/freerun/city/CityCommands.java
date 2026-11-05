@@ -68,6 +68,26 @@ public final class CityCommands {
             src.sendSuccess(() -> Component.literal("You're in a city. Downtown (City Hall) is at " + c.getX() + " " + c.getZ() + "."), false);
             return 1;
         }
+        if (!CityWorld.surveyed(level, from, 2)) {
+            // the map's still being drawn up: check back in a moment, off the main thread
+            src.sendSuccess(() -> Component.literal("§7Checking the maps..."), false);
+            java.util.concurrent.CompletableFuture.runAsync(() -> {
+                long until = System.currentTimeMillis() + 30_000;
+                while (!CityWorld.surveyed(level, from, 2) && System.currentTimeMillis() < until) {
+                    try {
+                        Thread.sleep(250);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+                src.getServer().execute(() -> report(src, level, from));
+            });
+            return 1;
+        }
+        return report(src, level, from);
+    }
+
+    private static int report(CommandSourceStack src, ServerLevel level, BlockPos from) {
         BlockPos o = CityWorld.nearestCity(level, from, 2);
         if (o == null) {
             src.sendFailure(Component.literal("No city within a few kilometres. Use /city to found one."));

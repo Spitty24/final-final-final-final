@@ -46,7 +46,14 @@ public final class CityWorld {
     public static final int REGION = 2048;
     /** Terrain is sloped off for this many blocks around the city so it doesn't end in a cliff. */
     public static final int MARGIN = 14;
-    private static final int CHANCE = 70;
+    private static final int CHANCE = 80;
+    /** Working out a new region's site samples the terrain generator, so the game does it off the main thread. */
+    private static final java.util.concurrent.ExecutorService SURVEY = java.util.concurrent.Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "Freerun city survey");
+        t.setDaemon(true);
+        return t;
+    });
+    private static final java.util.Set<Long> SURVEYING = ConcurrentHashMap.newKeySet();
 
     private static final Map<Long, Optional<BlockPos>> SITES = new ConcurrentHashMap<>();
     private static volatile long sitesSeed = Long.MIN_VALUE;
@@ -78,7 +85,8 @@ public final class CityWorld {
                 }
             }
         }
-        long key = ((long) rx << 32) ^ (rz & 0xffffffffL);
+        if (gen == null) return null;   // just resetting for a new seed
+        long key = regionKey(rx, rz);
         return SITES.computeIfAbsent(key, k -> findSite(seed, rx, rz, gen, rs, heights)).orElse(null);
     }
 
@@ -86,31 +94,60 @@ public final class CityWorld {
         long h = mix(seed, rx, rz);
         if (Math.floorMod(h, 100L) >= CHANCE) return Optional.empty();
         int span = REGION - CityLayout.SIZE - 2 * (MARGIN + 16);
-        for (int attempt = 0; attempt < 3; attempt++) {
+        int n = 5;
+        for (int attempt = 0; attempt < 5; attempt++) {
             long a = mix(h, attempt, 7);
             int x0 = rx * REGION + MARGIN + 16 + (int) Math.floorMod(a, (long) span);
             int z0 = rz * REGION + MARGIN + 16 + (int) Math.floorMod(a >>> 24, (long) span);
-            int n = 7;
             int[] ground = new int[n * n];
             int wet = 0;
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     int x = x0 + i * (CityLayout.SIZE - 1) / (n - 1), z = z0 + j * (CityLayout.SIZE - 1) / (n - 1);
-                    int g = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, rs);
-                    int s = gen.getBaseHeight(x, z, Heightmap.Types.WORLD_SURFACE_WG, heights, rs);
-                    if (s > g + 1) wet++;
-                    ground[i * n + j] = g;
+                    var biome = gen.getBiomeSource().getNoiseBiome(net.minecraft.core.QuartPos.fromBlock(x),
+                            net.minecraft.core.QuartPos.fromBlock(gen.getSeaLevel()), net.minecraft.core.QuartPos.fromBlock(z), rs.sampler());
+                    if (biome.is(net.minecraft.tags.BiomeTags.IS_OCEAN) || biome.is(net.minecraft.tags.BiomeTags.IS_DEEP_OCEAN)
+                            || biome.is(net.minecraft.tags.BiomeTags.IS_RIVER)) wet++;
+                    ground[i * n + j] = gen.getBaseHeight(x, z, Heightmap.Types.OCEAN_FLOOR_WG, heights, rs);
                 }
             }
             int[] sorted = ground.clone();
             Arrays.sort(sorted);
             int median = sorted[sorted.length / 2];
             int spread = sorted[(int) (sorted.length * 0.9)] - sorted[(int) (sorted.length * 0.1)];
-            if (wet > 6 || spread > 40) continue;
-            if (median <= heights.getMinBuildHeight() + 10 || median > heights.getMaxBuildHeight() - 90) continue;
-            return Optional.of(new BlockPos(x0, median - 1, z0));
+            if (wet > 5 || spread > 56) continue;
+            if (median < gen.getSeaLevel() - 2 || median > heights.getMaxBuildHeight() - 90) continue;
+            return Optional.of(new BlockPos(x0, Math.max(median, gen.getSeaLevel() + 1) - 1, z0));
         }
         return Optional.empty();
+    }
+
+    private static long regionKey(int rx, int rz) {
+        return ((long) rx << 32) ^ (rz & 0xffffffffL);
+    }
+
+    /**
+     * The game's view of a region's site: whatever is already known, without waiting. A region
+     * nobody has asked about yet is surveyed in the background and reports "no city" until then.
+     */
+    private static Optional<BlockPos> knownSite(ServerLevel level, int rx, int rz) {
+        if (sitesSeed != level.getSeed()) naturalSite(level.getSeed(), Integer.MIN_VALUE / 2, 0, null, null, level);
+        long key = regionKey(rx, rz);
+        Optional<BlockPos> got = SITES.get(key);
+        if (got != null) return got;
+        if (SURVEYING.add(key)) {
+            ChunkGenerator gen = level.getChunkSource().getGenerator();
+            RandomState rs = level.getChunkSource().randomState();
+            long seed = level.getSeed();
+            SURVEY.execute(() -> {
+                try {
+                    naturalSite(seed, rx, rz, gen, rs, level);
+                } finally {
+                    SURVEYING.remove(key);
+                }
+            });
+        }
+        return null;
     }
 
     public static boolean inCity(BlockPos origin, double x, double z, int margin) {
@@ -121,7 +158,8 @@ public final class CityWorld {
     private static BlockPos naturalAt(ServerLevel level, double x, double z, int margin) {
         if (level.dimension() != Level.OVERWORLD) return null;
         int rx = Mth.floor(x / REGION), rz = Mth.floor(z / REGION);
-        BlockPos o = naturalSite(level.getSeed(), rx, rz, level.getChunkSource().getGenerator(), level.getChunkSource().randomState(), level);
+        Optional<BlockPos> site = knownSite(level, rx, rz);
+        BlockPos o = site == null ? null : site.orElse(null);
         return o != null && inCity(o, x, z, margin) ? o : null;
     }
 
@@ -170,7 +208,17 @@ public final class CityWorld {
         return cityAt(level, pos.getX() + 0.5, pos.getZ() + 0.5);
     }
 
-    /** Nearest city site (natural or manual) to a point, searching a few regions out. */
+    /** True once every region within {@code regions} of {@code from} has been surveyed. */
+    public static boolean surveyed(ServerLevel level, BlockPos from, int regions) {
+        int rx = Math.floorDiv(from.getX(), REGION), rz = Math.floorDiv(from.getZ(), REGION);
+        boolean all = true;
+        for (int dx = -regions; dx <= regions; dx++) for (int dz = -regions; dz <= regions; dz++) {
+            if (knownSite(level, rx + dx, rz + dz) == null) all = false;
+        }
+        return all;
+    }
+
+    /** Nearest known city site (natural or manual) to a point, searching a few regions out. */
     public static BlockPos nearestCity(ServerLevel level, BlockPos from, int regions) {
         BlockPos best = null;
         double bestD = Double.MAX_VALUE;
@@ -185,8 +233,8 @@ public final class CityWorld {
             int rx = Math.floorDiv(from.getX(), REGION), rz = Math.floorDiv(from.getZ(), REGION);
             for (int dx = -regions; dx <= regions; dx++) {
                 for (int dz = -regions; dz <= regions; dz++) {
-                    BlockPos o = naturalSite(level.getSeed(), rx + dx, rz + dz, level.getChunkSource().getGenerator(),
-                            level.getChunkSource().randomState(), level);
+                    Optional<BlockPos> site = knownSite(level, rx + dx, rz + dz);
+                    BlockPos o = site == null ? null : site.orElse(null);
                     if (o == null) continue;
                     double d = centre(o).distSqr(from);
                     if (d < bestD) {
