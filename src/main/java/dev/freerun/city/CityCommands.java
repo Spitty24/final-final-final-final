@@ -103,12 +103,13 @@ public final class CityCommands {
             src.sendFailure(Component.literal("City probe: no natural city site nearby."));
             return 0;
         }
-        BlockPos key = CityLayout.intersectionKey(o, 9, 9);
+        BlockPos city = o;
+        BlockPos key = CityLayout.intersectionKey(city, 9, 9);
         int cx = key.getX() >> 4, cz = key.getZ() >> 4;
         if (!check) {
             for (int x = cx - 2; x <= cx + 2; x++) for (int z = cz - 2; z <= cz + 2; z++) level.setChunkForced(x, z, true);
             src.sendSuccess(() -> Component.literal("City probe: forcing 25 chunks around " + key.getX() + " " + key.getZ()
-                    + " (downtown " + CityWorld.centre(o).getX() + " " + CityWorld.centre(o).getZ() + ")"), true);
+                    + " (downtown " + CityWorld.centre(city).getX() + " " + CityWorld.centre(city).getZ() + ")"), true);
             return 1;
         }
         boolean loaded = level.isLoaded(key);

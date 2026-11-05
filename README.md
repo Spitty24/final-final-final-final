@@ -68,59 +68,119 @@ mob +4 (a gangster +6), every 6 blocks mined +1, and +2 for every minute on the 
 needs 30 + 15×N XP to reach the next; the cap is level 20. Every level gives one skill point
 (you start with one). A small readout in the top-left corner shows XP as you earn it.
 
-**Trees:** seven skills per career in four tiers. Tiers need levels 1, 5, 10 and 18, and each
-tier past the first needs a skill from the tier before it.
+**Trees:** thirteen skills per career in five tiers. Tiers open at levels **1, 3, 6, 9 and 12**
+(so you reach the next tier much sooner than before), and each tier past the first needs a skill
+from the tier before it. The capstone sits alone in tier 5.
 
-| Career | Tier 1 (Lv 1) | Tier 2 (Lv 5) | Tier 3 (Lv 10) | Tier 4 (Lv 18) |
-|---|---|---|---|---|
-| Employee | Hard Worker (mine 15% faster) · Steel-Toed Boots (+2 armor, −25% fall damage) | Forklift Certified (forklifts 35% faster, forks 2× faster) · Overtime (double clock-in XP) | Packed Lunch (free boudin every 8 min) · Strong Back (+2 hearts, 30% knockback resistance) | Employee of the Month (+12% speed, +15% mining, +25% XP) |
-| Supervisor | Clipboard (+1 attack damage) · Safety First (−40% fall damage, +2 safe fall) | Walking the Floor (+8% speed) · Write-Up (extra knockback) | Eagle Eye (night vision) · Sick and Tired (+2 attack, +20% attack speed) | Promotion Track (+40% XP, nearby players get Speed) |
-| Superintendent | Site Walk (+10% speed) · Heavy Equipment (crane 60% faster, forks 2× faster) | Long Reach (+2 block reach, +1 entity reach) · Mining Operations (mine 25% faster) | Fire Watch (fire resistance) · Step Up (walk up full blocks) | Shutdown Authority (Haste II, +2 hearts) |
-| Upper Management | Expense Account (2 gold every 10 min) · Corner Office (+2 hearts) | Synergy (+2 luck) · Executive Presence (Hero of the Village) | Golden Parachute (float down instead of falling) · Quarterly Bonus (+50% XP, a diamond every 30 min) | Hostile Takeover (+4 attack, +4 armor, regeneration) |
+| Career | Tier 1 (Lv 1) | Tier 2 (Lv 3) | Tier 3 (Lv 6) | Tier 4 (Lv 9) | Tier 5 (Lv 12) |
+|---|---|---|---|---|---|
+| Employee | Hard Worker (Mine 15% faster) · Steel-Toed Boots (+2 armor, and 25% less fall damage) · Union Card (Your paycheck is 20% bigger) | Forklift Certified (Forklifts drive 35% faster and their forks lift twice as fast for you) · Overtime (Earn double XP just for being on the clock) · Safety Glasses (Blindness and Darkness wear off instantly) | Packed Lunch (A fresh link of boudin turns up in your lunchbox every 8 minutes) · Strong Back (+2 hearts and 30% knockback resistance) · Second Wind (Below 4 hearts, you start regenerating) | Ride Share (Cars you drive have 20% more top speed and pick-up) · Coffee Run (A fresh Cup of Coffee turns up every 6 minutes) · Shop Floor Legend (+3 hearts) | Employee of the Month (Move 12% faster, mine another 15% faster, and earn 25% more XP) |
+| Supervisor | Clipboard (+1 attack damage. Writing people up hits hard) · Safety First (40% less fall damage, and fall 2 blocks further before it hurts) · Open Door Policy (Shops give you 10% off) | Walking the Floor (Move 8% faster) · Write-Up (Your hits knock things much further back) · Loss Prevention (Stopping a crime pays double) | Eagle Eye (Permanent night vision. Nothing on the floor gets past you) · Sick and Tired (+2 more attack damage and 20% faster attacks) · Police Radio (You hear every crime reported anywhere in the city) | Chain of Command (+3 armor toughness) · Overtime Approved (Your paycheck is 25% bigger) · Quality Control (Stores pay you 15% more for what you sell) | Promotion Track (Earn 40% more XP, and players near you get Speed) |
+| Superintendent | Site Walk (Move 10% faster) · Heavy Equipment (Overhead cranes drive 60% faster for you, and forklift forks lift twice as fast) · Hard Hat (+2 armor) | Long Reach (Reach blocks 2 further and entities 1 further) · Mining Operations (Mine 25% faster) · Site Radio (Blackwire hacks use 30% less battery) | Fire Watch (Permanent fire resistance) · Step Up (Walk straight up full blocks without jumping) · Road Crew (Cars you drive accelerate harder and turn tighter) | Utility Access (Hacking traffic lights and street lights costs no battery) · Scaffold Legs (Jump higher and fall 3 blocks further safely) · Zoning Commissioner (+$25 on every paycheck) | Shutdown Authority (Permanent Haste II and +2 hearts. The site runs on your say-so) |
+| Upper Management | Expense Account (Collect 2 gold ingots every 10 minutes) · Corner Office (+2 hearts. The view is great for your health) · Company Card (Shops give you 15% off) | Synergy (+2 luck: better fishing and better loot) · Executive Presence (Permanent Hero of the Village: villagers give you discounts) · Insider Trading (Hacks that pay out cash pay 50% more) | Golden Parachute (Whenever you fall, you float gently down instead) · Quarterly Bonus (Earn 50% more XP, plus a diamond every 30 minutes) · Bodyguard Detail (The police never come after you) | Stock Options ($5 lands in your account every 2 minutes) · Private Security (Permanent Resistance) · Board Seat (Your paycheck is 40% bigger) | Hostile Takeover (+4 attack damage, +4 armor, and slow constant regeneration) |
 
 P is also vanilla's Social Interactions key; the skill tree reads the key directly so it opens
 either way. Rebind it under Controls → Freerun if you like.
 
 ## The city
 
-Everything now spawns together as one **city** (about 244 × 244 blocks) on flat-ish dry land:
-`/locate structure freerun:city`, or build one around you with **`/city`** (needs cheats; takes a
-few seconds). The old separate factory / Roadhouse / Double Quick spawns are gone.
+Cities are now about **20 times bigger: 1,084 × 1,084 blocks**, an 18 × 18 grid of city blocks
+(the old one was 244 × 244). Most 2,048-block regions of the overworld get one, on reasonably
+dry, reasonably flat land; hills are cut down, hollows and rivers filled in, and the edges sloped
+off. Type **`/findcity`** to get the nearest one's location and direction, or **`/city`** (needs
+cheats) to found one centred on you. A city that size is built chunk by chunk as you explore
+(the part around you goes up within seconds).
 
-| | | | |
-|---|---|---|---|
-| Suburbs | Suburbs | City Hall & park | Suburbs |
-| Suburbs | Downtown offices | Downtown office towers | Downtown offices |
-| Suburbs | Downtown offices | Texas Roadhouse + parking | General Store |
-| The Hood | The Hood | Welding factory | Double Quick + parking |
+![City layout](docs/city_layout.png)
 
-- **Streets:** two-lane roads (right-hand traffic) with sidewalks, curbs, dashed centre lines,
-  crosswalks at every intersection, street lamps that come on at night, hydrants and benches.
-  Downtown intersections have **traffic lights** on an 18-second cycle; the outer ring has
-  **stop signs**.
-- **Traffic:** residents drive the city's cars. They keep to their lane, slow for intersections,
-  stop at red lights, come to a full stop at stop signs and wait their turn, brake for anything in
-  front of them (and honk), and pick a random way to go at each intersection. Wrecked or stuck
-  cars get put back in their lane when nobody's looking.
-- **Downtown:** glass office towers 5–10 floors tall with lobbies, reception desks, open-plan
-  floors of desks and monitors, staircases, break corners, rooftop HVAC and the odd helipad.
-- **Suburbs:** four houses per block, each with a lawn, driveway and family car, a tree out back,
-  and a furnished inside (bed, kitchen with microwave and coffee maker, table, TV).
-- **The Hood:** four-storey brick apartment buildings with fire escapes, the Corner Mart (a shop),
-  a fenced basketball court, and a vacant lot that's Rust Rat and Chrome King turf (with shootouts).
-- **City Hall & the park:** columns, steps, flags, a council chamber; and a park with paths, a
-  fountain, trees, flower beds, benches and a statue of Big Boudin.
+- **Downtown:** office towers 5–10 floors tall around **City Hall** and the central park.
+- **The commercial ring:** two **MegaMart Supercenters**, two **Hargrove & Finch** department
+  stores, six strip malls, and plenty of **Big Bun Burgers**, **Cluck Shacks**, **Sugar Bayou
+  Sweets**, Double Quicks, General Stores and Texas Roadhouses, with **parking lots** joined up by
+  paved service lanes so you can drive from one lot to the next.
+- **The Hood** (south-west), with apartments, corner stores, community gardens, basketball courts
+  and the odd vacant lot that's Rust Rat / Chrome King turf.
+- **The welding factory** (south-east), ringed by parking.
+- **Suburbs** everywhere else, with parks, corner stores and **five police precincts** spread
+  through them.
 
-**Residents** each have a name, age, job, home and bank balance, and live a daily routine: commute
-to work (offices, the stores, the Roadhouse, the factory, City Hall), work until 4 PM and get paid,
-run errands and shop until evening, then go home and pay rent. Students, retirees and the
-between-jobs crowd keep their own hours. Right-click one to say hi. New residents move in (and new
-cars come onto the roads) to keep the city populated.
+### Stores
 
-**City economy:** a hub under the middle intersection keeps the books: wages paid, rent collected
-and what everyone spends in the shops. Store prices in town follow demand: a busy day pushes them
-up (to +30%), a slow one brings discounts (to −20%). The shop screen shows when prices are up or
-down, and the City app on your phone shows the numbers.
+| Store | What it is | Sells |
+|---|---|---|
+| **MegaMart Supercenter** | Big-box store with a huge lot, checkouts, a service desk, a pharmacy | Groceries, snacks and drinks in bulk, electronics, home & garden, sporting goods, ammo, clothes |
+| **Hargrove & Finch** | Two-storey department store with an Auto Center | Tools (iron and diamond), appliances, furniture, apparel and jewellery, a car; buys gold, gems and steel |
+| **Big Bun Burgers** | Burger joint with a drive-thru | Big Bun, Double Big Bun, Bacon Stacker, crinkle fries, onion rings, shakes, the Bun Buddy Meal |
+| **Cluck Shack** | Fried chicken with a drive-thru | Cluck Sandwich, Spicy Cluck, nuggets, hot wings, honey biscuits, red beans & rice, mac & cheese |
+| **Sugar Bayou Sweets** | Bakery and sno-ball stand (also in every strip mall) | Beignets, pralines, king cake (mind the baby), bread pudding, sno-balls, cupcakes, soft serve, pecan pie, brownies |
+| **Strip malls** | Six storefronts and a shared lot | Sugar Bayou Sweets, Crescent Hardware & Cellular, plus a laundromat, pawn shop, bookstore, nail salon, po'boy shop or dry cleaner |
+
+All 24 new foods are edible and most have an effect (speed, absorption, fire resistance, brain
+freeze, a food coma...). Supervisors' **Open Door Policy** and Upper Management's **Company Card**
+take 10% / 15% off everywhere.
+
+**Drive-thru:** at Big Bun Burgers and the Cluck Shack, drive into the lane down the side of the
+building, stop at the **menu board** on the back and **right-click it from your car**. The crew
+answers over the speaker and the menu opens; pay, then drive round to the **pickup window** and
+your bag is handed through as soon as you pull up beside it.
+
+### Streets and traffic
+
+Two-lane roads with sidewalks, crosswalks, street lamps, hydrants and benches. Every third street
+is an arterial with **traffic lights**; everywhere else has **stop signs**. Residents drive the
+city's cars: they keep to their lane, stop for red lights, come to a full stop at stop signs,
+brake for whatever's in front of them, and pick a way to go at each intersection.
+
+Fixes for cars getting stuck at intersections:
+- At a stop sign, drivers now **take turns**: one car holds the intersection at a time.
+- Drivers **don't pull into an intersection** unless there's room on the other side.
+- **Oncoming traffic** and cars waiting at the other stop lines no longer count as "in the way",
+  and pedestrians on the sidewalk don't make cars brake.
+- A car wedged for 8 seconds **ghosts** through other cars for a few seconds to get loose.
+- **Jam detection:** every 5 seconds the city looks for three or more cars stuck at the same
+  intersection and waves them all through ("Traffic control cleared a jam nearby").
+- As before, a car stuck for 20 seconds with nobody watching is put back in its lane, and
+  **`/cityclear`** (cheats) unjams everything within 256 blocks.
+
+### People
+
+The streets around you are always busy: around **34 people on the sidewalks** (14 at night),
+**13 cars** on the roads (7 at night) and a couple of **police cruisers** on patrol. New people
+step out a good way off, never right in front of you; anyone the city brought out is tidied away
+once no player is within 150 blocks. Residents each have a name, age, job, home and bank balance,
+and live a daily routine near home: work, errands at the nearby stores, then home and rent.
+They run from fights and crimes. Right-click one to say hi.
+
+### Police and crime
+
+**Police officers** patrol in black-and-white cruisers with roof light bars, and work out of the
+precincts. **Crime is rare:** for each player in a city, every 2½ to 5 minutes there's about a
+one-in-three chance something happens nearby:
+
+| Crime | What happens |
+|---|---|
+| Purse snatching | Someone grabs a resident's money and runs |
+| Armed mugging | A suspect holds a resident up at gunpoint, then runs (and shoots back if you start something) |
+| Car theft | A suspect pulls a driver out of their car and speeds off, running every light |
+
+It's called in on the radio to everyone within 200 blocks (Supervisors with **Police Radio** hear
+the whole city), and the nearest officer responds with **lights and siren**, drives straight
+there, and goes after the suspect on foot. **Stop it yourself:** take the suspect down until they
+put their hands up, then **right-click them to cuff them**. The city pays **$60–150** and career
+XP (Supervisors' **Loss Prevention** doubles it), and the victim gets their money back. Killing a
+suspect only pays a third. The phone's City app keeps count of crimes, how many were stopped,
+and how many by the police.
+
+**Wanted:** hurting residents makes you wanted (★ for a fight, ★★ for a killing, ★★★ for shooting
+at an officer) and the nearest officer comes for you. At one star they arrest you (a fine); at two
+or more they draw their weapons. Stay out of sight for a minute to lose them. Upper Management's
+**Bodyguard Detail** means the police never come after you.
+
+### City economy
+
+Each city keeps its books in the world's saved data: wages paid, rent collected and what everyone
+spends in the shops. Store prices follow demand: a busy day pushes them up (to +30%), a slow one
+brings discounts (to −20%). The City app on your phone shows the numbers.
 
 ## Smartphone
 
@@ -129,10 +189,10 @@ Right-click with the Smartphone to open it. Apps:
 | App | What it shows |
 |---|---|
 | Bank | Your balance, wallet, next paycheck, local price level |
-| Map | The city with every district, and where you are |
+| Map | The whole city, a district, or your street (scroll or +/- to zoom), store names, police (blue) and suspects (flashing red); outside a city, a compass to the nearest one |
 | Blackwire | Hacking: battery, settings, what you can hack |
 | Jobs | Your career, paycheck and the next break |
-| City | Population, jobs, savings, cars, today's wages/sales/rent, price index |
+| City | People about, jobs, savings, cars, today's wages/sales/rent, price index, crimes reported and stopped |
 | Messages | Texts, and a log of your hacks |
 
 **Blackwire** (hacking): hold the phone (or turn on "always" in the app) and whatever you look at
