@@ -1,0 +1,23 @@
+name: server smoke test
+on: [workflow_dispatch]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Run a dedicated server, build a city, let it tick
+        run: |
+          chmod +x gradlew
+          mkdir -p run && echo "eula=true" > run/eula.txt
+          printf 'level-type=minecraft\\:flat\nspawn-protection=0\nonline-mode=false\n' > run/server.properties
+          ( sleep 240; echo "city"; sleep 90; echo "time set 13000"; sleep 30; echo "factory"; echo "doublequick"; sleep 40; echo "stop" ) \
+            | timeout 900 ./gradlew runServer --no-daemon --console=plain 2>&1 | tee server.log || true
+      - name: Report
+        run: |
+          grep -nE "Exception|ERROR|Caused by|FATAL|Missing|Couldn't" server.log | grep -v "Failed to load properties" | head -80 || true
+          grep -n "City built" server.log || (echo "city command did not finish" && exit 1)

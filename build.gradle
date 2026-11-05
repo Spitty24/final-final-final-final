@@ -28,3 +28,6 @@ java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
 }
+
+// Let the server smoke test type commands into a dev server's console.
+tasks.matching { it.name == 'runServer' }.configureEach { standardInput = System.in }
