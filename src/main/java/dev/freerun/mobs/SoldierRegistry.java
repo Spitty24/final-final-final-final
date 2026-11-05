@@ -61,10 +61,10 @@ public final class SoldierRegistry {
 
         US_SOLDIER = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("us_soldier"),
                 EntityType.Builder.of(UsSoldierEntity::new, MobCategory.MONSTER)
-                        .sized(0.6f, 1.95f).clientTrackingRange(10).build("us_soldier"));
+                        .sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("us_soldier"));
         FRENCH_SOLDIER = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("french_soldier"),
                 EntityType.Builder.of(FrenchSoldierEntity::new, MobCategory.MONSTER)
-                        .sized(0.6f, 1.95f).clientTrackingRange(10).build("french_soldier"));
+                        .sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("french_soldier"));
 
         FabricDefaultAttributeRegistry.register(US_SOLDIER, SoldierEntity.createAttributes());
         FabricDefaultAttributeRegistry.register(FRENCH_SOLDIER, SoldierEntity.createAttributes());

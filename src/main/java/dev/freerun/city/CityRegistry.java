@@ -76,7 +76,7 @@ public final class CityRegistry {
                 BlockEntityType.Builder.of(CityLightBlockEntity::new, TRAFFIC_LIGHT, STREET_LAMP).build(null));
 
         CITIZEN = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("citizen"),
-                EntityType.Builder.of(CitizenEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).clientTrackingRange(10).build("citizen"));
+                EntityType.Builder.of(CitizenEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("citizen"));
         FabricDefaultAttributeRegistry.register(CITIZEN, CitizenEntity.createAttributes());
         CITY_HUB = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("city_hub"),
                 EntityType.Builder.<CityHubEntity>of(CityHubEntity::new, MobCategory.MISC).sized(0.5f, 0.5f)
@@ -84,10 +84,10 @@ public final class CityRegistry {
         CITIZEN_EGG = Registry.register(BuiltInRegistries.ITEM, Freerun.id("citizen_spawn_egg"),
                 new SpawnEggItem(CITIZEN, 0x3a5a8c, 0xd9b38c, new Item.Properties()));
         POLICE_OFFICER = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("police_officer"),
-                EntityType.Builder.of(PoliceOfficerEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).clientTrackingRange(10).build("police_officer"));
+                EntityType.Builder.of(PoliceOfficerEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("police_officer"));
         FabricDefaultAttributeRegistry.register(POLICE_OFFICER, PoliceOfficerEntity.createAttributes());
         CRIMINAL = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("criminal"),
-                EntityType.Builder.of(CriminalEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).clientTrackingRange(10).build("criminal"));
+                EntityType.Builder.of(CriminalEntity::new, MobCategory.CREATURE).sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("criminal"));
         FabricDefaultAttributeRegistry.register(CRIMINAL, CriminalEntity.createAttributes());
         POLICE_EGG = Registry.register(BuiltInRegistries.ITEM, Freerun.id("police_officer_spawn_egg"),
                 new SpawnEggItem(POLICE_OFFICER, 0x16213a, 0xe0c040, new Item.Properties()));

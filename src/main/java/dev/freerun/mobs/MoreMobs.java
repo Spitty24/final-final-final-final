@@ -40,12 +40,12 @@ public final class MoreMobs {
 
         ETHAN = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("ethan_james_patrick"),
                 EntityType.Builder.of(EthanEntity::new, MobCategory.CREATURE)
-                        .sized(0.6f, 2.9f).eyeHeight(2.55f).clientTrackingRange(10).build("ethan_james_patrick"));
+                        .sized(0.6f, 2.9f).eyeHeight(2.55f).ridingOffset(-1.2f).clientTrackingRange(10).build("ethan_james_patrick"));
         FabricDefaultAttributeRegistry.register(ETHAN, EthanEntity.createAttributes());
 
         GANGSTER = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("gangster"),
                 EntityType.Builder.of(GangsterEntity::new, MobCategory.MONSTER)
-                        .sized(0.6f, 1.95f).clientTrackingRange(10).build("gangster"));
+                        .sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("gangster"));
         FabricDefaultAttributeRegistry.register(GANGSTER, GangsterEntity.createAttributes());
 
         GANG_TURF = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("gang_turf"),
@@ -55,15 +55,15 @@ public final class MoreMobs {
 
         JOHNNY_SIM = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("johnny_sim"),
                 EntityType.Builder.<JohnnySimEntity>of(JohnnySimEntity::new, MobCategory.CREATURE)
-                        .sized(0.6f, 1.95f).clientTrackingRange(10).build("johnny_sim"));
+                        .sized(0.6f, 1.95f).ridingOffset(-0.65f).clientTrackingRange(10).build("johnny_sim"));
         FabricDefaultAttributeRegistry.register(JOHNNY_SIM, dev.freerun.factory.ForkliftDriverEntity.createAttributes());
         COOP = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("coop_student"),
                 EntityType.Builder.of(CoopEntity::new, MobCategory.CREATURE)
-                        .sized(0.6f, 1.9f).clientTrackingRange(10).build("coop_student"));
+                        .sized(0.6f, 1.9f).ridingOffset(-0.7f).clientTrackingRange(10).build("coop_student"));
         FabricDefaultAttributeRegistry.register(COOP, CoopEntity.createAttributes());
         JOHNNY_JAMES_PATRICK = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("johnny_james_patrick"),
                 EntityType.Builder.of(JohnnyJamesPatrickEntity::new, MobCategory.CREATURE)
-                        .sized(0.6f, 2.9f).eyeHeight(2.55f).clientTrackingRange(10).build("johnny_james_patrick"));
+                        .sized(0.6f, 2.9f).eyeHeight(2.55f).ridingOffset(-1.2f).clientTrackingRange(10).build("johnny_james_patrick"));
         FabricDefaultAttributeRegistry.register(JOHNNY_JAMES_PATRICK, JohnnyJamesPatrickEntity.createAttributes());
         BIG_BOUDIN = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("big_boudin"),
                 EntityType.Builder.of(BigBoudinEntity::new, MobCategory.MONSTER)

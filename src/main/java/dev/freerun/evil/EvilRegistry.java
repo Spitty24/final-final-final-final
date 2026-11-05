@@ -18,6 +18,7 @@ public final class EvilRegistry {
                 Freerun.id("pursuer"),
                 EntityType.Builder.of(PursuerEntity::new, MobCategory.MONSTER)
                         .sized(0.6f, 1.95f)
+                        .ridingOffset(-0.7f)
                         .clientTrackingRange(16)
                         .build("pursuer"));
     }
