@@ -103,6 +103,7 @@ public final class FreerunClient implements ClientModInitializer {
         net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(dev.freerun.laser.LaserRegistry.LASER_PART,
                 new dev.freerun.client.laser.LaserPartRenderer());
         EntityRendererRegistry.register(dev.freerun.laser.LaserRegistry.TARYN, dev.freerun.client.laser.TarynRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.laser.LaserRegistry.DR_GUILD, dev.freerun.client.laser.DrGuildRenderer::new);
         dev.freerun.laser.WorkPhoneItem.OPEN = () -> net.minecraft.client.Minecraft.getInstance()
                 .setScreen(new dev.freerun.client.laser.WorkPhoneScreen());
         ClientTickEvents.END_CLIENT_TICK.register(SecondPerson::tick);

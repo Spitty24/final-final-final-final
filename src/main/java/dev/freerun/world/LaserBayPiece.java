@@ -96,6 +96,7 @@ public class LaserBayPiece extends StructurePiece {
 
         buildMachine(level, box);
         buildSupport(level, box);
+        buildClinic(level, box);
         spawn(level, box);
     }
 
@@ -186,7 +187,54 @@ public class LaserBayPiece extends StructurePiece {
                 .setValue(HorizontalDirectionalBlock.FACING, Direction.SOUTH), 45, 2, 17);
     }
 
+    /**
+     * Occupational Health: Dr. Guild's office in the bay's south-east corner. Exam cot, desk with a
+     * computer and a stack of charts, diplomas on the wall, bookshelf, a fridge of diet cola.
+     */
+    private void buildClinic(WorldGenLevel level, BoundingBox box) {
+        int x0 = 49, z0 = 23, x1 = X1 - 1, z1 = Z1 - 1;
+        BlockState wall = Blocks.WHITE_CONCRETE.defaultBlockState(), air = Blocks.AIR.defaultBlockState();
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) {
+            put(level, box, Blocks.LIGHT_BLUE_TERRACOTTA.defaultBlockState(), x, 0, z);
+            boolean edge = x == x0 || z == z0;
+            for (int y = 1; y <= 4; y++) put(level, box, edge ? (y == 2 && x == x0 && z == 24 ? Blocks.GLASS_PANE.defaultBlockState() : wall) : air, x, y, z);
+            put(level, box, Blocks.SMOOTH_QUARTZ.defaultBlockState(), x, 5, z);
+        }
+        put(level, box, Blocks.SEA_LANTERN.defaultBlockState(), 53, 5, 26);
+        // the door (from the walkway)
+        put(level, box, air, x0, 1, 27);
+        put(level, box, air, x0, 2, 27);
+        sign(level, box, x0 - 1, 3, 27, Direction.WEST, "OCCUPATIONAL", "HEALTH", "Dr. Guild, MD", "$40 copay");
+        sign(level, box, x0 - 1, 2, 26, Direction.WEST, "", "Walk-ins", "tolerated", "");
+        // exam cot along the north wall
+        put(level, box, Blocks.WHITE_BED.defaultBlockState().setValue(net.minecraft.world.level.block.BedBlock.FACING, Direction.EAST)
+                .setValue(net.minecraft.world.level.block.BedBlock.PART, net.minecraft.world.level.block.state.properties.BedPart.FOOT), 51, 1, 24);
+        put(level, box, Blocks.WHITE_BED.defaultBlockState().setValue(net.minecraft.world.level.block.BedBlock.FACING, Direction.EAST)
+                .setValue(net.minecraft.world.level.block.BedBlock.PART, net.minecraft.world.level.block.state.properties.BedPart.HEAD), 52, 1, 24);
+        // desk with a computer, a lamp and charts; chair behind it
+        for (int z = 26; z <= 28; z++) put(level, box, Blocks.SPRUCE_PLANKS.defaultBlockState(), 55, 1, z);
+        put(level, box, dev.freerun.life.LifeRegistry.COMPUTER.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.EAST), 55, 2, 27);
+        put(level, box, Blocks.WHITE_CARPET.defaultBlockState(), 55, 2, 26);   // the charts
+        put(level, box, dev.freerun.life.LifeRegistry.OFFICE_CHAIR.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.WEST), x1, 1, 27);
+        // diplomas and a bookshelf on the back wall, a fridge of diet cola
+        sign(level, box, x1 - 1, 3, z0 + 1, Direction.SOUTH, "UNIVERSITY", "OF THE BAYOU", "Doctor of", "Medicine");
+        sign(level, box, x1, 3, z0 + 1, Direction.SOUTH, "BOARD", "CERTIFIED", "(barely)", "");
+        put(level, box, Blocks.BOOKSHELF.defaultBlockState(), x1, 1, z0 + 1);
+        put(level, box, Blocks.BOOKSHELF.defaultBlockState(), x1, 2, z0 + 1);
+        put(level, box, dev.freerun.life.LifeRegistry.FRIDGE.defaultBlockState().setValue(HorizontalDirectionalBlock.FACING, Direction.NORTH), 53, 1, z1);
+        fill(level, box, 53, 1, z1, new ItemStack(dev.freerun.economy.EconomyRegistry.FIZZ_COLA, 12),
+                new ItemStack(dev.freerun.economy.EconomyRegistry.BANDAGE, 4), new ItemStack(dev.freerun.economy.EconomyRegistry.PAINKILLERS, 2));
+        put(level, box, Blocks.BREWING_STAND.defaultBlockState(), 51, 1, z1);
+    }
+
     private void spawn(WorldGenLevel level, BoundingBox box) {
+        BlockPos doc = pos(54, 1, 27);
+        if (box.isInside(doc)) {
+            dev.freerun.laser.DrGuildEntity guild = new dev.freerun.laser.DrGuildEntity(LaserRegistry.DR_GUILD, level.getLevel());
+            guild.moveTo(doc.getX() + 0.5, doc.getY(), doc.getZ() + 0.5, 90.0f, 0.0f);
+            guild.setHome(doc);
+            level.addFreshEntity(guild);
+        }
         // sheets waiting on the shuttle table
         for (int i = 0; i < 3; i++) {
             BlockPos at = pos(CX + 5, 1, CZ);

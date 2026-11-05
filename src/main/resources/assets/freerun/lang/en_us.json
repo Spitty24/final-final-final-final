@@ -279,5 +279,7 @@
  "entity.freerun.taryn": "Taryn",
  "subtitles.freerun.laser_start": "Laser fires up",
  "subtitles.freerun.laser_cut": "Laser cuts",
- "subtitles.freerun.teams_ping": "Teams notification"
+ "subtitles.freerun.teams_ping": "Teams notification",
+ "entity.freerun.dr_guild": "Dr. Guild",
+ "item.freerun.dr_guild_spawn_egg": "Dr. Guild Spawn Egg"
 }

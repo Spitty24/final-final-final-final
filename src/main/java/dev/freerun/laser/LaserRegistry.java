@@ -23,6 +23,8 @@ public final class LaserRegistry {
     public static BlockEntityType<LaserCutterBlockEntity> LASER_CUTTER_BE;
     public static Item LASER_PART, WORK_PHONE, TARYN_EGG;
     public static EntityType<TarynEntity> TARYN;
+    public static EntityType<DrGuildEntity> DR_GUILD;
+    public static Item DR_GUILD_EGG;
     public static SoundEvent LASER_START, LASER_CUT, TEAMS_PING;
 
     private LaserRegistry() {}
@@ -41,6 +43,11 @@ public final class LaserRegistry {
                 EntityType.Builder.of(TarynEntity::new, MobCategory.CREATURE)
                         .sized(0.6f, 1.8f).ridingOffset(-0.7f).clientTrackingRange(10).build("taryn"));
         FabricDefaultAttributeRegistry.register(TARYN, TarynEntity.createAttributes());
+        DR_GUILD = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("dr_guild"),
+                EntityType.Builder.of(DrGuildEntity::new, MobCategory.CREATURE)
+                        .sized(0.6f, 1.95f).ridingOffset(-0.7f).clientTrackingRange(10).build("dr_guild"));
+        FabricDefaultAttributeRegistry.register(DR_GUILD, DrGuildEntity.createAttributes());
+        DR_GUILD_EGG = item("dr_guild_spawn_egg", new SpawnEggItem(DR_GUILD, 0x4a4a3a, 0x5a8ad0, new Item.Properties()));
         TARYN_EGG = item("taryn_spawn_egg", new SpawnEggItem(TARYN, 0x2a3f6e, 0x7cff5a, new Item.Properties()));
 
         LASER_START = sound("laser_start");
@@ -54,7 +61,10 @@ public final class LaserRegistry {
         });
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(e -> e.accept(WORK_PHONE));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS).register(e -> e.accept(LASER_PART));
-        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(e -> e.accept(TARYN_EGG));
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(e -> {
+            e.accept(TARYN_EGG);
+            e.accept(DR_GUILD_EGG);
+        });
     }
 
     private static SoundEvent sound(String name) {
