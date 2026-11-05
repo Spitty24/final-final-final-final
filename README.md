@@ -88,8 +88,9 @@ Cities are now about **20 times bigger: 1,084 × 1,084 blocks**, an 18 × 18 gri
 (the old one was 244 × 244). Most 2,048-block regions of the overworld get one (and there's
 almost always one within a couple of kilometres of spawn), on reasonably dry, reasonably flat land; hills are cut down, hollows and rivers filled in, and the edges sloped
 off. Type **`/findcity`** to get the nearest one's location and direction, or **`/city`** (needs
-cheats) to found one centred on you. A city that size is built chunk by chunk as you explore
-(the part around you goes up within seconds).
+cheats) to found one centred on you, at the height of the ground around you. A city that size is
+built chunk by chunk as you explore (the part around you goes up within seconds). If a chunk of
+a city ever comes out missing, it's filled in automatically the next time it loads.
 
 ![City layout](docs/city_layout.png)
 
@@ -97,7 +98,8 @@ cheats) to found one centred on you. A city that size is built chunk by chunk as
 - **The commercial ring:** two **MegaMart Supercenters**, two **Hargrove & Finch** department
   stores, six strip malls, and plenty of **Big Bun Burgers**, **Cluck Shacks**, **Sugar Bayou
   Sweets**, Double Quicks, General Stores and Texas Roadhouses, with **parking lots** joined up by
-  paved service lanes so you can drive from one lot to the next.
+  paved service lanes so you can drive from one lot to the next. Stores are spread out: you won't
+  find two of the same restaurant or shop within about 230 blocks of each other.
 - **The Hood** (south-west), with apartments, corner stores, community gardens, basketball courts
   and the odd vacant lot that's Rust Rat / Chrome King turf.
 - **The welding factory** (south-east), ringed by parking.

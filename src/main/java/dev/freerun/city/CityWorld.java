@@ -559,7 +559,7 @@ public final class CityWorld {
      */
     private static boolean needsRepair(ServerLevel level, BlockPos city, ChunkPos cp) {
         var chunk = level.getChunkSource().getChunkNow(cp.x, cp.z);
-        if (chunk == null || chunk.getInhabitedTime() > 20 * 60 * 30) return false;
+        if (chunk == null || chunk.getInhabitedTime() > 20 * 60 * 120) return false;
         if (unbuiltColumns(level, city, cp) < 4) return false;
         int[][] around = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
         for (int[] a : around) {
