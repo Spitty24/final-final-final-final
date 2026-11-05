@@ -103,6 +103,21 @@ public class LaserCutterBlockEntity extends BlockEntity {
 
     public static void serverTick(Level level, BlockPos pos, BlockState state, LaserCutterBlockEntity be) {
         if (be.shape == null || !(level instanceof ServerLevel sl)) return;
+        try {
+            tickJob(sl, pos, be);
+        } catch (RuntimeException e) {
+            // never take the server down over a cut: abandon the job and give the sheet back
+            dev.freerun.Freerun.LOGGER.error("Laser cutter at {} failed", pos, e);
+            be.shape = null;
+            be.path = null;
+            be.setChanged();
+            drop(sl, pos.above(), new ItemStack(dev.freerun.factory.FactoryRegistry.STEEL_SHEET));
+            sl.sendBlockUpdated(pos, be.getBlockState(), be.getBlockState(), 3);
+        }
+    }
+
+    private static void tickJob(ServerLevel sl, BlockPos pos, LaserCutterBlockEntity be) {
+        Level level = sl;
         long age = level.getGameTime() - be.start;
         if (age < 0 || age > be.duration + 200) age = be.duration;   // clock jumped (e.g. /time): just finish
         double t = age / (double) be.duration;

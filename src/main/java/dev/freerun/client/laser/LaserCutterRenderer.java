@@ -51,24 +51,28 @@ public class LaserCutterRenderer implements BlockEntityRenderer<LaserCutterBlock
         Boxes.box(ps, vc, wx - 0.13f, 0.98f, wz - 0.16f, wx + 0.13f, 1.48f, wz + 0.16f, 0xFF2A2E33, light);
         Boxes.box(ps, vc, wx - 0.05f, 0.86f, wz - 0.05f, wx + 0.05f, 0.98f, wz + 0.05f, 0xFFC08A3A, light);   // copper nozzle
 
-        if (be.busy()) {
-            // the sheet, and the kerf traced so far
-            Boxes.box(ps, vc, -1.0f, BED, -1.0f, 2.0f, BED + 0.03f, 2.0f, be.gas() == LaserCutterBlockEntity.NITROGEN ? steel : 0xFF9A9488, light);
-            int done = (int) (t * path.size());
-            float c = 3.0f / LaserShape.N;
-            VertexConsumer glow = buffers.getBuffer(Boxes.GLOW);
-            for (int i = 0; i < done && i < path.size(); i++) {
-                int[] p = path.get(i);
-                float x0 = -1 + p[0] * c, z0 = -1 + p[1] * c;
-                boolean hot = done - i < 12;   // the last stretch is still glowing
-                if (hot) Boxes.box(ps, glow, x0, BED + 0.031f, z0, x0 + c, BED + 0.034f, z0 + c, 0xFFFF7A20, 0xF000F0);
-                else Boxes.box(ps, vc, x0, BED + 0.031f, z0, x0 + c, BED + 0.033f, z0 + c, 0xFF1A1A1A, light);
-            }
-            if (cutting) {
-                int beam = be.gas() == LaserCutterBlockEntity.NITROGEN ? 0xDDB8E6FF : 0xDDFF5A1A;
-                Boxes.box(ps, glow, wx - 0.012f, BED + 0.03f, wz - 0.012f, wx + 0.012f, 0.86f, wz + 0.012f, beam, 0xF000F0);
-                Boxes.box(ps, glow, wx - 0.04f, BED + 0.035f, wz - 0.04f, wx + 0.04f, BED + 0.045f, wz + 0.04f, 0xFFFFF0B0, 0xF000F0);
-            }
+        if (!be.busy()) return;
+        // Solid parts first, then everything that glows. Fetching a second buffer from the
+        // buffer source ends the first one, so the two must never be interleaved.
+        Boxes.box(ps, vc, -1.0f, BED, -1.0f, 2.0f, BED + 0.03f, 2.0f, be.gas() == LaserCutterBlockEntity.NITROGEN ? steel : 0xFF9A9488, light);
+        int done = Math.min(path.size(), (int) (t * path.size()));
+        float c = 3.0f / LaserShape.N;
+        int hotFrom = Math.max(0, done - 12);   // the last stretch of the kerf is still glowing
+        for (int i = 0; i < hotFrom; i++) {
+            int[] p = path.get(i);
+            float x0 = -1 + p[0] * c, z0 = -1 + p[1] * c;
+            Boxes.box(ps, vc, x0, BED + 0.031f, z0, x0 + c, BED + 0.033f, z0 + c, 0xFF1A1A1A, light);
+        }
+        VertexConsumer glow = buffers.getBuffer(Boxes.GLOW);
+        for (int i = hotFrom; i < done; i++) {
+            int[] p = path.get(i);
+            float x0 = -1 + p[0] * c, z0 = -1 + p[1] * c;
+            Boxes.box(ps, glow, x0, BED + 0.031f, z0, x0 + c, BED + 0.034f, z0 + c, 0xFFFF7A20, 0xF000F0);
+        }
+        if (cutting) {
+            int beam = be.gas() == LaserCutterBlockEntity.NITROGEN ? 0xDDB8E6FF : 0xDDFF5A1A;
+            Boxes.box(ps, glow, wx - 0.012f, BED + 0.03f, wz - 0.012f, wx + 0.012f, 0.86f, wz + 0.012f, beam, 0xF000F0);
+            Boxes.box(ps, glow, wx - 0.04f, BED + 0.035f, wz - 0.04f, wx + 0.04f, BED + 0.045f, wz + 0.04f, 0xFFFFF0B0, 0xF000F0);
         }
     }
 
