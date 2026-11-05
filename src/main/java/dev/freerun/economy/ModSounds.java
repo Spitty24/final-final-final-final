@@ -14,6 +14,7 @@ public final class ModSounds {
     public static SoundEvent GUN_RELOAD;
     public static SoundEvent CAR_ENGINE;
     public static SoundEvent CAR_HORN;
+    public static SoundEvent SIREN, CUFFS;
     public static SoundEvent CAR_CRASH;
     public static SoundEvent CASH_REGISTER;
     public static SoundEvent BREAK_BUZZER;
@@ -28,6 +29,8 @@ public final class ModSounds {
         GUN_RELOAD = sound("gun_reload");
         CAR_ENGINE = sound("car_engine");
         CAR_HORN = sound("car_horn");
+        SIREN = sound("siren");
+        CUFFS = sound("cuffs");
         CAR_CRASH = sound("car_crash");
         CASH_REGISTER = sound("cash_register");
         BREAK_BUZZER = sound("break_buzzer");

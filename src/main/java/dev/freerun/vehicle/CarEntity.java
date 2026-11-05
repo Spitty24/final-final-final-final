@@ -60,6 +60,8 @@ public class CarEntity extends LivingEntity {
 
     private static final EntityDataAccessor<Integer> DATA_COLOR = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Float> DATA_FUEL = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<Boolean> DATA_POLICE = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Boolean> DATA_SIREN = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.BOOLEAN);
 
     private double speed;
     private float steer;
@@ -75,6 +77,10 @@ public class CarEntity extends LivingEntity {
     private net.minecraft.core.BlockPos city;
     private final dev.freerun.city.Autopilot autopilot = new dev.freerun.city.Autopilot();
     private double lastServerSpeed;
+    /** While positive the car passes through other cars (used to untangle traffic jams). */
+    private int ghost;
+    /** City traffic: tidied away (with its driver) once no player is near. */
+    private boolean ambient;
 
     public CarEntity(EntityType<? extends CarEntity> type, Level level) {
         super(type, level);
@@ -93,6 +99,8 @@ public class CarEntity extends LivingEntity {
         super.defineSynchedData(builder);
         builder.define(DATA_COLOR, PAINT[0]);
         builder.define(DATA_FUEL, 60.0f);
+        builder.define(DATA_POLICE, false);
+        builder.define(DATA_SIREN, false);
     }
 
     public int color() {
@@ -123,8 +131,54 @@ public class CarEntity extends LivingEntity {
         return city;
     }
 
+    /** A resident, an officer or a car thief at the wheel (anyone but a player). */
     public boolean npcDriven() {
-        return getFirstPassenger() instanceof dev.freerun.city.CitizenEntity;
+        Entity p = getFirstPassenger();
+        return p instanceof dev.freerun.city.CitizenEntity || p instanceof dev.freerun.city.PoliceOfficerEntity
+                || p instanceof dev.freerun.city.CriminalEntity;
+    }
+
+    public dev.freerun.city.Autopilot autopilot() {
+        return autopilot;
+    }
+
+    public boolean isPolice() {
+        return entityData.get(DATA_POLICE);
+    }
+
+    public void setPolice(boolean police) {
+        entityData.set(DATA_POLICE, police);
+        if (police) setColor(0x16213A);
+    }
+
+    public boolean sirenOn() {
+        return entityData.get(DATA_SIREN);
+    }
+
+    public void setSiren(boolean on) {
+        entityData.set(DATA_SIREN, on && isPolice());
+    }
+
+    public boolean ambient() {
+        return ambient;
+    }
+
+    public void setAmbient(boolean ambient) {
+        this.ambient = ambient;
+    }
+
+    public void ghost(int ticks) {
+        ghost = Math.max(ghost, ticks);
+    }
+
+    public boolean ghosting() {
+        return ghost > 0;
+    }
+
+    @Override
+    public boolean canCollideWith(Entity other) {
+        if (ghost > 0 && other instanceof CarEntity) return false;
+        return super.canCollideWith(other);
     }
 
     /** Forward speed in blocks per tick on the side simulating the car. */
@@ -197,6 +251,10 @@ public class CarEntity extends LivingEntity {
             steer += (guess - steer) * 0.3f;
         }
         if (level().isClientSide) return;
+        if (ghost > 0) ghost--;
+        if (sirenOn() && tickCount % 40 == 0) {
+            level().playSound(null, getX(), getY() + 1, getZ(), ModSounds.SIREN, SoundSource.NEUTRAL, 3.0f, 1.0f);
+        }
         if (hornCooldown > 0) hornCooldown--;
         if (crashCooldown > 0) crashCooldown--;
 
@@ -207,7 +265,7 @@ public class CarEntity extends LivingEntity {
         if (horiz > 3.0) horiz = 0.0;   // teleported, not driven
         if (horiz > 0.01 && getControllingPassenger() != null) addFuel((float) (-horiz * 0.045));
         if (horiz > 3.0 && npcDriven()) autopilot.reset();
-        if (horiz > 0.32) runOver(moved, horiz);
+        if (horiz > 0.32 && ghost <= 0) runOver(moved, horiz);
         // Went from speed to a dead stop in one tick: that was a wall.
         if (lastServerSpeed > 0.5 && horiz < lastServerSpeed * 0.3 && crashCooldown <= 0) {
             crashCooldown = 20;
@@ -406,6 +464,7 @@ public class CarEntity extends LivingEntity {
         if (player.isSecondaryUseActive()) return InteractionResult.PASS;
         if (!canAddPassenger(player)) return InteractionResult.PASS;
         if (!level().isClientSide && player.startRiding(this)) {
+            ambient = false;   // somebody's car now
             if (getControllingPassenger() == player) {
                 player.displayClientMessage(Component.literal("§eW/S §fgas & brake  §eA/D §fsteer  §eSpace §fhandbrake  §eR §fhorn"
                         + "  §7· Fuel " + Math.round(fuel()) + "%"), true);
@@ -454,7 +513,7 @@ public class CarEntity extends LivingEntity {
 
     @Override
     public boolean canBeCollidedWith() {
-        return isAlive();
+        return isAlive() && ghost <= 0;
     }
 
     @Override
@@ -496,6 +555,8 @@ public class CarEntity extends LivingEntity {
         super.addAdditionalSaveData(tag);
         tag.putInt("Color", color());
         tag.putFloat("Fuel", fuel());
+        tag.putBoolean("Police", isPolice());
+        tag.putBoolean("Ambient", ambient);
         if (city != null) {
             tag.putInt("CityX", city.getX());
             tag.putInt("CityY", city.getY());
@@ -508,6 +569,8 @@ public class CarEntity extends LivingEntity {
         super.readAdditionalSaveData(tag);
         if (tag.contains("Color")) setColor(tag.getInt("Color"));
         if (tag.contains("Fuel")) entityData.set(DATA_FUEL, Mth.clamp(tag.getFloat("Fuel"), 0.0f, MAX_FUEL));
+        if (tag.getBoolean("Police")) entityData.set(DATA_POLICE, true);
+        ambient = tag.getBoolean("Ambient");
         if (tag.contains("CityX")) city = new net.minecraft.core.BlockPos(tag.getInt("CityX"), tag.getInt("CityY"), tag.getInt("CityZ"));
     }
 }

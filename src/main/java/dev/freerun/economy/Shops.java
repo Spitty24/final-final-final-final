@@ -17,15 +17,26 @@ import java.util.List;
  */
 public final class Shops {
     public enum Shop {
-        DOUBLE_QUICK("Double Quick", 0xD8262E),
-        GENERAL_STORE("General Store", 0x8A5A2B);
+        DOUBLE_QUICK("Double Quick", 0xD8262E, "Double Quick Clerk", false),
+        GENERAL_STORE("General Store", 0x8A5A2B, "Shopkeeper", false),
+        MEGAMART("MegaMart Supercenter", 0x2E9E6B, "MegaMart Associate", false),
+        DEPARTMENT("Hargrove & Finch", 0x6A3FA0, "Hargrove & Finch Clerk", false),
+        DESSERT("Sugar Bayou Sweets", 0xF07AB8, "Sugar Bayou Baker", false),
+        BURGER("Big Bun Burgers", 0xE0601E, "Big Bun Crew", true),
+        CHICKEN("Cluck Shack", 0xC8402A, "Cluck Shack Crew", true);
 
         public final String title;
         public final int color;
+        /** What the person behind the register is called. */
+        public final String worker;
+        /** Has a drive-thru: orders placed from a car are handed out at the pickup window. */
+        public final boolean driveThru;
 
-        Shop(String title, int color) {
+        Shop(String title, int color, String worker, boolean driveThru) {
             this.title = title;
             this.color = color;
+            this.worker = worker;
+            this.driveThru = driveThru;
         }
 
         public static Shop byId(int id) {
@@ -50,13 +61,13 @@ public final class Shops {
         return SELL.isEmpty() ? List.of() : SELL.get(shop.ordinal());
     }
 
-    static void build(List<Offer> dqBuy, List<Offer> dqSell, List<Offer> gsBuy, List<Offer> gsSell) {
+    static void build(java.util.Map<Shop, List<Offer>> buy, java.util.Map<Shop, List<Offer>> sell) {
         BUY.clear();
         SELL.clear();
-        BUY.add(List.copyOf(dqBuy));
-        BUY.add(List.copyOf(gsBuy));
-        SELL.add(List.copyOf(dqSell));
-        SELL.add(List.copyOf(gsSell));
+        for (Shop s : Shop.values()) {
+            BUY.add(List.copyOf(buy.getOrDefault(s, List.of())));
+            SELL.add(List.copyOf(sell.getOrDefault(s, List.of())));
+        }
     }
 
     static Offer of(Item item, int count, int price) {
@@ -67,8 +78,7 @@ public final class Shops {
 
     /** Shops inside a city charge whatever local demand says (see the city hub); elsewhere, list price. */
     public static int pricePercent(net.minecraft.server.level.ServerLevel level, net.minecraft.core.BlockPos pos) {
-        dev.freerun.city.CityHubEntity hub = dev.freerun.city.CityHubEntity.nearest(level, pos);
-        return hub == null ? 100 : (int) Math.round(hub.priceMultiplier() * 100);
+        return dev.freerun.city.CityWorld.pricePercent(level, pos);
     }
 
     public static int price(int list, int percent) {
@@ -77,7 +87,9 @@ public final class Shops {
 
     public static void buy(ServerPlayer player, Entity clerk, Shop shop, int index, int times) {
         List<Offer> list = buys(shop);
-        if (index < 0 || index >= list.size() || clerk == null || player.distanceToSqr(clerk) > 10 * 10) return;
+        boolean drive = shop.driveThru && player.getVehicle() instanceof dev.freerun.vehicle.CarEntity;
+        double reach = drive ? DriveThru.REACH : 10;
+        if (index < 0 || index >= list.size() || clerk == null || player.distanceToSqr(clerk) > reach * reach) return;
         Offer o = list.get(index);
         int each = price(o.price(), pricePercent(player.serverLevel(), clerk.blockPosition()));
         each = Math.max(1, (int) Math.round(each * dev.freerun.career.Skills.shopDiscount(dev.freerun.career.Careers.get(player).skills())));
@@ -85,7 +97,8 @@ public final class Shops {
         for (int i = 0; i < Math.max(1, Math.min(times, 16)); i++) {
             if (!Money.pay(player, each)) break;
             ItemStack give = o.stack().copy();
-            if (!player.getInventory().add(give)) player.drop(give, false);
+            if (drive) DriveThru.queue(player, clerk, shop, give);
+            else if (!player.getInventory().add(give)) player.drop(give, false);
             bought++;
         }
         if (bought == 0) {
@@ -94,9 +107,10 @@ public final class Shops {
             return;
         }
         player.level().playSound(null, clerk.blockPosition(), ModSounds.CASH_REGISTER, SoundSource.NEUTRAL, 0.8f, 1.0f);
+        dev.freerun.city.CityWorld.recordSale(player.serverLevel(), clerk.blockPosition(), each * bought);
         player.displayClientMessage(Component.literal("§aBought " + (bought > 1 ? bought + "× " : "")
                 + o.stack().getHoverName().getString() + " for " + Money.fmt(each * bought) + ". §7Balance: "
-                + Money.fmt(Money.balance(player))), true);
+                + Money.fmt(Money.balance(player)) + (drive ? " §e— please pull around to the window." : "")), true);
     }
 
     public static void sell(ServerPlayer player, Entity clerk, Shop shop, int index, int times) {

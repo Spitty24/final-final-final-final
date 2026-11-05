@@ -2,6 +2,7 @@ package dev.freerun.economy;
 
 import dev.freerun.Freerun;
 import dev.freerun.food.FoodRegistry;
+import dev.freerun.world.BlockRegistry;
 import dev.freerun.item.ItemRegistry;
 import dev.freerun.net.ShopPayloads;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
@@ -45,6 +46,11 @@ public final class EconomyRegistry {
     public static Item POTATO_CHIPS, CHEESE_PUFFS, CANDY_BAR, GUMMY_WORMS, BEEF_JERKY, SUNFLOWER_SEEDS, BOILED_PEANUTS,
             PORK_CRACKLINS, HONEY_BUN, GLAZED_DONUT, FROZEN_BURRITO, HOT_BURRITO, INSTANT_RAMEN, ROLLER_HOT_DOG, CORN_DOG,
             PIZZA_SLICE, CHICKEN_TENDERS, NACHOS, SAUSAGE_BISCUIT, ICE_CREAM_SANDWICH, BIG_PICKLE;
+    // fast food and sweets
+    public static Item BIG_BUN_BURGER, DOUBLE_BIG_BUN, BACON_STACKER, CRINKLE_FRIES, ONION_RINGS, CHOCOLATE_SHAKE,
+            STRAWBERRY_SHAKE, BUN_BUDDY_MEAL, CLUCK_SANDWICH, SPICY_CLUCK, NUGGET_BOX, HOT_WINGS, HONEY_BISCUIT,
+            RED_BEANS_AND_RICE, MAC_AND_CHEESE, BEIGNETS, PRALINE, KING_CAKE_SLICE, BREAD_PUDDING, SNOBALL, CUPCAKE,
+            SOFT_SERVE, PECAN_PIE_SLICE, FUDGE_BROWNIE;
     // drinks
     public static Item FIZZ_COLA, LEMON_LIME_SODA, ROOT_BEER, ENERGY_DRINK, SPORTS_DRINK, BOTTLED_WATER, SWEET_TEA,
             CHOCOLATE_MILK, BLUE_SLUSHIE, CHERRY_SLUSHIE, ICED_COFFEE, EMPTY_CAN;
@@ -150,6 +156,65 @@ public final class EconomyRegistry {
                 (l, e) -> brainFreeze(e), eff(MobEffects.FIRE_RESISTANCE, 600, 0));
         ICED_COFFEE = snack("iced_coffee", 2, 0.2f, true, 32, "In a can. Shake well.", can, null, eff(MobEffects.DIG_SPEED, 1200, 0));
 
+        // ---- Big Bun Burgers
+        BIG_BUN_BURGER = snack("big_bun_burger", 8, 0.8f, false, 32, "Quarter pound, two pickles, a bun the size of a hubcap.", null, null);
+        DOUBLE_BIG_BUN = snack("double_big_bun", 12, 0.9f, false, 48, "Two patties. You will need a nap.", null,
+                (l, e) -> msg(e, "§6Food coma incoming..."), eff(MobEffects.MOVEMENT_SLOWDOWN, 200, 0), eff(MobEffects.ABSORPTION, 1200, 1));
+        BACON_STACKER = snack("bacon_stacker", 9, 0.8f, false, 36, "Bacon, cheese, bacon, a burger, more bacon.", null, null,
+                eff(MobEffects.DAMAGE_BOOST, 400, 0));
+        CRINKLE_FRIES = snack("crinkle_fries", 4, 0.4f, false, 24, "Crinkle cut, extra salt. Always one at the bottom of the bag.", null, null);
+        ONION_RINGS = snack("onion_rings", 4, 0.4f, false, 24, "Battered and fried. Dip in the comeback sauce.", null, null);
+        CHOCOLATE_SHAKE = snack("chocolate_shake", 4, 0.4f, true, 40, "Too thick for the straw. Worth it.", null,
+                (l, e) -> brainFreeze(e), eff(MobEffects.FIRE_RESISTANCE, 400, 0));
+        STRAWBERRY_SHAKE = snack("strawberry_shake", 4, 0.4f, true, 40, "Real strawberries. Allegedly.", null,
+                (l, e) -> brainFreeze(e), eff(MobEffects.REGENERATION, 100, 0));
+        BUN_BUDDY_MEAL = snack("bun_buddy_meal", 7, 0.6f, false, 32, "A small burger, small fries, apple slices and a toy.", null,
+                (l, e) -> {
+                    msg(e, "§eThere's a toy in the box! It's a little plastic bun with googly eyes.");
+                    e.addEffect(new MobEffectInstance(MobEffects.LUCK, 2400, 0));
+                });
+
+        // ---- Cluck Shack
+        CLUCK_SANDWICH = snack("cluck_sandwich", 8, 0.8f, false, 32, "Fried chicken breast, pickles, toasted brioche.", null, null);
+        SPICY_CLUCK = snack("spicy_cluck", 8, 0.8f, false, 32, "Cayenne, hot honey and regret.", null,
+                (l, e) -> {
+                    msg(e, "§c§lSPICY. §r§cYour ears are ringing.");
+                    e.clearFire();
+                }, eff(MobEffects.FIRE_RESISTANCE, 900, 0), eff(MobEffects.MOVEMENT_SPEED, 400, 0));
+        NUGGET_BOX = snack("nugget_box", 6, 0.6f, false, 28, "Ten nuggets and four sauces you'll fight over.", null, null);
+        HOT_WINGS = snack("hot_wings", 6, 0.6f, false, 32, "Six wings, extra wet. Napkins not optional.", null, null,
+                eff(MobEffects.DAMAGE_BOOST, 600, 0));
+        HONEY_BISCUIT = snack("honey_biscuit", 5, 0.5f, false, 24, "Buttermilk biscuit with a drizzle of honey.", null, null,
+                eff(MobEffects.ABSORPTION, 600, 0));
+        RED_BEANS_AND_RICE = snack("red_beans_and_rice", 7, 0.8f, false, 32, "Monday's tradition, served every day.", null, null,
+                eff(MobEffects.REGENERATION, 160, 0));
+        MAC_AND_CHEESE = snack("mac_and_cheese", 6, 0.6f, false, 28, "Baked, with the crispy bits on top.", null, null);
+
+        // ---- Sugar Bayou Sweets
+        BEIGNETS = snack("beignets", 5, 0.4f, false, 28, "Three hot beignets under a snowdrift of powdered sugar.", null,
+                (l, e) -> msg(e, "§fYou are now covered in powdered sugar."), eff(MobEffects.MOVEMENT_SPEED, 600, 0));
+        PRALINE = snack("praline", 3, 0.3f, false, 20, "Pecans, brown sugar, butter. Say it praw-leen.", null, null,
+                eff(MobEffects.ABSORPTION, 600, 0));
+        KING_CAKE_SLICE = snack("king_cake_slice", 5, 0.4f, false, 28, "Purple, green and gold sugar. Mind the baby.", null,
+                (l, e) -> {
+                    if (l.random.nextInt(8) == 0) {
+                        msg(e, "§d§lYou found the baby! §r§dYou're buying the next king cake.");
+                        e.addEffect(new MobEffectInstance(MobEffects.LUCK, 6000, 1));
+                    }
+                });
+        BREAD_PUDDING = snack("bread_pudding", 6, 0.6f, false, 32, "Warm, with whiskey-free caramel sauce.", null, null,
+                eff(MobEffects.REGENERATION, 120, 0));
+        SNOBALL = snack("snoball", 2, 0.1f, true, 32, "Shaved ice, nectar cream syrup, condensed milk on top.", null,
+                (l, e) -> brainFreeze(e), eff(MobEffects.FIRE_RESISTANCE, 1200, 0));
+        CUPCAKE = snack("cupcake", 3, 0.3f, false, 20, "More frosting than cake, as it should be.", null, null,
+                eff(MobEffects.JUMP, 400, 0));
+        SOFT_SERVE = snack("soft_serve", 3, 0.2f, false, 24, "Vanilla-chocolate swirl in a cone. Eat it fast.", null,
+                (l, e) -> brainFreeze(e), eff(MobEffects.FIRE_RESISTANCE, 600, 0));
+        PECAN_PIE_SLICE = snack("pecan_pie_slice", 6, 0.6f, false, 32, "Grandma's recipe. Probably somebody's grandma.", null, null,
+                eff(MobEffects.DAMAGE_RESISTANCE, 400, 0));
+        FUDGE_BROWNIE = snack("fudge_brownie", 4, 0.4f, false, 24, "Corner piece. You earned it.", null, null,
+                eff(MobEffects.DIG_SPEED, 800, 0));
+
         // ---- amenities
         SMARTPHONE = item("smartphone", new Amenities.Smartphone(new Item.Properties().stacksTo(1)));
         FLASHLIGHT = item("flashlight", new Amenities.Flashlight(new Item.Properties().stacksTo(1)));
@@ -248,10 +313,87 @@ public final class EconomyRegistry {
                 FoodRegistry.HUNTERS_SAUSAGE, FoodRegistry.SEAFOOD_SAUSAGE}) {
             gsSell.add(Shops.of(s, 1, 3));
         }
-        Shops.build(dq, dqSell, gs, gsSell);
+        java.util.Map<Shops.Shop, List<Shops.Offer>> buy = new java.util.EnumMap<>(Shops.Shop.class);
+        java.util.Map<Shops.Shop, List<Shops.Offer>> sell = new java.util.EnumMap<>(Shops.Shop.class);
+        buy.put(Shops.Shop.DOUBLE_QUICK, dq);
+        sell.put(Shops.Shop.DOUBLE_QUICK, dqSell);
+        buy.put(Shops.Shop.GENERAL_STORE, gs);
+        sell.put(Shops.Shop.GENERAL_STORE, gsSell);
+
+        buy.put(Shops.Shop.BURGER, offers(new Object[][]{
+                {BIG_BUN_BURGER, 1, 6}, {DOUBLE_BIG_BUN, 1, 9}, {BACON_STACKER, 1, 8}, {CRINKLE_FRIES, 1, 3}, {ONION_RINGS, 1, 3},
+                {CHOCOLATE_SHAKE, 1, 4}, {STRAWBERRY_SHAKE, 1, 4}, {BUN_BUDDY_MEAL, 1, 5}, {FIZZ_COLA, 1, 2}, {SWEET_TEA, 1, 2},
+                {ROOT_BEER, 1, 2}, {LEMON_LIME_SODA, 1, 2}, {ICED_COFFEE, 1, 3}, {SOFT_SERVE, 1, 2}}));
+        sell.put(Shops.Shop.BURGER, List.of(Shops.of(EMPTY_CAN, 4, 1)));
+        buy.put(Shops.Shop.CHICKEN, offers(new Object[][]{
+                {CLUCK_SANDWICH, 1, 6}, {SPICY_CLUCK, 1, 7}, {NUGGET_BOX, 1, 5}, {HOT_WINGS, 1, 7}, {HONEY_BISCUIT, 1, 2},
+                {RED_BEANS_AND_RICE, 1, 4}, {MAC_AND_CHEESE, 1, 3}, {CRINKLE_FRIES, 1, 3}, {SWEET_TEA, 1, 2}, {FIZZ_COLA, 1, 2},
+                {LEMON_LIME_SODA, 1, 2}, {BOTTLED_WATER, 1, 1}, {FoodRegistry.BOUDIN, 1, 5}}));
+        sell.put(Shops.Shop.CHICKEN, List.of(Shops.of(EMPTY_CAN, 4, 1), Shops.of(Items.CHICKEN, 2, 3), Shops.of(Items.EGG, 6, 2)));
+        buy.put(Shops.Shop.DESSERT, offers(new Object[][]{
+                {BEIGNETS, 1, 4}, {PRALINE, 1, 2}, {KING_CAKE_SLICE, 1, 4}, {BREAD_PUDDING, 1, 4}, {SNOBALL, 1, 3},
+                {CUPCAKE, 1, 3}, {SOFT_SERVE, 1, 2}, {PECAN_PIE_SLICE, 1, 4}, {FUDGE_BROWNIE, 1, 3}, {GLAZED_DONUT, 1, 1},
+                {Items.CAKE, 1, 15}, {Items.COOKIE, 4, 2}, {Items.PUMPKIN_PIE, 1, 4}, {FoodRegistry.CUP_OF_COFFEE, 1, 2},
+                {CHOCOLATE_MILK, 1, 2}}));
+        sell.put(Shops.Shop.DESSERT, List.of(Shops.of(Items.SUGAR_CANE, 8, 2), Shops.of(Items.EGG, 6, 2),
+                Shops.of(Items.MILK_BUCKET, 1, 3), Shops.of(Items.SWEET_BERRIES, 8, 2), Shops.of(Items.COCOA_BEANS, 8, 2)));
+        buy.put(Shops.Shop.MEGAMART, offers(new Object[][]{
+                // grocery
+                {Items.BREAD, 4, 2}, {Items.APPLE, 4, 2}, {Items.CARROT, 8, 2}, {Items.POTATO, 8, 2}, {Items.COOKED_BEEF, 4, 5},
+                {Items.COOKED_CHICKEN, 4, 4}, {Items.COOKED_PORKCHOP, 4, 5}, {Items.COOKED_SALMON, 4, 4}, {Items.MILK_BUCKET, 1, 3},
+                {Items.EGG, 12, 3}, {Items.SUGAR, 8, 2}, {Items.HONEY_BOTTLE, 2, 3}, {Items.MELON_SLICE, 8, 2},
+                {POTATO_CHIPS, 3, 4}, {CHEESE_PUFFS, 3, 4}, {INSTANT_RAMEN, 6, 3}, {FROZEN_BURRITO, 4, 6}, {BEEF_JERKY, 2, 8},
+                {FIZZ_COLA, 6, 7}, {BOTTLED_WATER, 12, 6}, {SPORTS_DRINK, 4, 7}, {ENERGY_DRINK, 4, 11}, {SWEET_TEA, 2, 3},
+                // pharmacy
+                {BANDAGE, 4, 12}, {PAINKILLERS, 2, 8}, {SUNGLASSES, 1, 12},
+                // electronics
+                {SMARTPHONE, 1, 129}, {TV.asItem(), 1, 99}, {FLASHLIGHT, 1, 9}, {FoodRegistry.MICROWAVE.asItem(), 1, 49},
+                {FoodRegistry.COFFEE_MAKER.asItem(), 1, 34},
+                // home & garden
+                {Items.WHITE_BED, 1, 25}, {Items.LANTERN, 4, 10}, {Items.TORCH, 32, 3}, {Items.FLOWER_POT, 2, 2},
+                {Items.OAK_SAPLING, 4, 4}, {Items.BONE_MEAL, 16, 4}, {Items.WHEAT_SEEDS, 16, 2}, {Items.BUCKET, 1, 3},
+                {Items.WHITE_CARPET, 8, 6}, {Items.GLASS, 16, 6}, {Items.OAK_PLANKS, 32, 8}, {Items.BRICKS, 16, 8},
+                // sporting goods & automotive
+                {Items.FISHING_ROD, 1, 5}, {Items.BOW, 1, 12}, {Items.ARROW, 16, 4}, {ItemRegistry.BULLET, 32, 18},
+                {ItemRegistry.SHOTGUN_SHELL, 16, 18}, {GAS_CAN, 1, 12}, {EMPTY_GAS_CAN, 1, 6}, {DUCT_TAPE, 2, 5},
+                {UMBRELLA, 1, 8}, {AIR_HORN, 1, 5}, {Items.LEATHER_HELMET, 1, 6}, {Items.LEATHER_CHESTPLATE, 1, 10},
+                {Items.LEATHER_LEGGINGS, 1, 8}, {Items.LEATHER_BOOTS, 1, 5}, {WALLET, 1, 8}, {SCRATCH_OFF, 3, 5}}));
+        sell.put(Shops.Shop.MEGAMART, List.of(Shops.of(EMPTY_CAN, 8, 2), Shops.of(Items.WHEAT, 8, 2), Shops.of(Items.CARROT, 8, 2),
+                Shops.of(Items.POTATO, 8, 2), Shops.of(Items.MELON_SLICE, 16, 2), Shops.of(Items.PUMPKIN, 4, 3),
+                Shops.of(Items.EGG, 12, 2), Shops.of(Items.LEATHER, 4, 3), Shops.of(Items.WHITE_WOOL, 8, 3),
+                Shops.of(Items.COD, 4, 2), Shops.of(Items.SALMON, 4, 3)));
+        buy.put(Shops.Shop.DEPARTMENT, offers(new Object[][]{
+                // tools (the good stuff, lifetime warranty)
+                {Items.IRON_PICKAXE, 1, 16}, {Items.IRON_AXE, 1, 14}, {Items.IRON_SHOVEL, 1, 9}, {Items.IRON_HOE, 1, 8},
+                {Items.DIAMOND_PICKAXE, 1, 120}, {Items.DIAMOND_AXE, 1, 110}, {Items.SHEARS, 1, 4}, {Items.ANVIL, 1, 45},
+                {Items.SMITHING_TABLE, 1, 12}, {Items.GRINDSTONE, 1, 10}, {Items.SHIELD, 1, 15}, {Items.IRON_SWORD, 1, 14},
+                // appliances
+                {FoodRegistry.MICROWAVE.asItem(), 1, 59}, {FoodRegistry.COFFEE_MAKER.asItem(), 1, 39}, {TV.asItem(), 1, 139},
+                {VENDING_MACHINE.asItem(), 1, 230}, {Items.FURNACE, 1, 15}, {Items.BLAST_FURNACE, 1, 40}, {Items.SMOKER, 1, 30},
+                // apparel & jewellery
+                {Items.CHAINMAIL_HELMET, 1, 25}, {Items.CHAINMAIL_CHESTPLATE, 1, 45}, {Items.CHAINMAIL_LEGGINGS, 1, 35},
+                {Items.CHAINMAIL_BOOTS, 1, 20}, {Items.IRON_CHESTPLATE, 1, 60}, {SUNGLASSES, 1, 18}, {UMBRELLA, 1, 12},
+                {WALLET, 1, 14}, {Items.GOLD_NUGGET, 9, 12}, {Items.CLOCK, 1, 20}, {Items.SPYGLASS, 1, 25},
+                // home
+                {BlockRegistry.CHAIR.asItem(), 2, 12}, {BlockRegistry.TABLE.asItem(), 1, 14}, {FoodRegistry.COUNTER.asItem(), 1, 18},
+                {Items.RED_BED, 1, 30}, {Items.BOOKSHELF, 1, 10}, {Items.PAINTING, 1, 8}, {Items.JUKEBOX, 1, 60},
+                {Items.CHEST, 2, 6}, {Items.BARREL, 2, 6},
+                // electronics and the auto centre
+                {SMARTPHONE, 1, 149}, {ATM.asItem(), 1, 280}, {dev.freerun.vehicle.VehicleRegistry.CAR_ITEM, 1, 520}}));
+        sell.put(Shops.Shop.DEPARTMENT, List.of(Shops.of(Items.IRON_INGOT, 1, 3), Shops.of(Items.GOLD_INGOT, 1, 10),
+                Shops.of(Items.DIAMOND, 1, 48), Shops.of(Items.EMERALD, 1, 12), Shops.of(Items.AMETHYST_SHARD, 4, 3),
+                Shops.of(Items.LAPIS_LAZULI, 8, 3), Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_SHEET, 1, 4),
+                Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_CHANNEL, 1, 6)));
+        Shops.build(buy, sell);
     }
 
     // ------------------------------------------------------------------ helpers
+
+    private static List<Shops.Offer> offers(Object[][] rows) {
+        List<Shops.Offer> out = new ArrayList<>();
+        for (Object[] o : rows) if (o[0] != null) out.add(Shops.of((Item) o[0], (Integer) o[1], (Integer) o[2]));
+        return out;
+    }
 
     private static MobEffectInstance eff(Holder<MobEffect> e, int ticks, int amp) {
         return new MobEffectInstance(e, ticks, amp);

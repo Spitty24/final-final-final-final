@@ -106,7 +106,12 @@ public class CitizenEntity extends PathfinderMob {
     private int stuck;
     private Vec3 lastPos = Vec3.ZERO;
     private boolean arrived;
+    private boolean errandAtShop;
     private long hackedUntil;
+    /** Brought out by the city manager to fill the streets; tidied away again when nobody's near. */
+    private boolean ambient;
+    /** Set while running from a crime or the police. */
+    private int fleeing;
 
     public CitizenEntity(EntityType<? extends CitizenEntity> type, Level level) {
         super(type, level);
@@ -168,13 +173,36 @@ public class CitizenEntity extends PathfinderMob {
         entityData.set(DATA_VARIANT, variant);
         setCustomName(Component.literal(FIRST[r.nextInt(FIRST.length)] + " " + LAST[r.nextInt(LAST.length)]));
         if (job.work != null && city != null) {
-            List<BlockPos> spots = CityLayout.spots(job.work);
+            List<BlockPos> spots = CityLayout.spotsNear(job.work, home.getX() - city.getX(), home.getZ() - city.getZ(), 180);
+            if (spots.isEmpty()) spots = CityLayout.spots(job.work);
             if (!spots.isEmpty()) work = city.offset(spots.get(r.nextInt(spots.size())));
         }
     }
 
     public BlockPos cityOrigin() {
         return city;
+    }
+
+    public BlockPos home() {
+        return home;
+    }
+
+    public boolean ambient() {
+        return ambient;
+    }
+
+    public void setAmbient(boolean ambient) {
+        this.ambient = ambient;
+    }
+
+    /** Run away from {@code from} for a few seconds (a crime, gunfire, a speeding car). */
+    public void flee(Vec3 from) {
+        if (isPassenger()) return;
+        fleeing = 100;
+        Vec3 away = position().subtract(from);
+        if (away.lengthSqr() < 0.01) away = new Vec3(1, 0, 0);
+        away = away.normalize().scale(14.0);
+        getNavigation().moveTo(getX() + away.x, getY(), getZ() + away.z, 1.5);
     }
 
     // ------------------------------------------------------------------ AI
@@ -192,9 +220,8 @@ public class CitizenEntity extends PathfinderMob {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType reason, SpawnGroupData data) {
         SpawnGroupData out = super.finalizeSpawn(level, difficulty, reason, data);
         if (home == null) {
-            CityHubEntity hub = CityHubEntity.nearest(level.getLevel(), blockPosition());
             Job[] jobs = Job.values();
-            setup(random, hub != null ? hub.origin() : null, blockPosition(), jobs[random.nextInt(jobs.length)]);
+            setup(random, CityWorld.cityAt(level.getLevel(), blockPosition()), blockPosition(), jobs[random.nextInt(jobs.length)]);
         }
         return out;
     }
@@ -213,6 +240,10 @@ public class CitizenEntity extends PathfinderMob {
     protected void customServerAiStep() {
         super.customServerAiStep();
         if (!(level() instanceof ServerLevel server) || isPassenger()) return;
+        if (fleeing > 0) {
+            fleeing--;
+            return;
+        }
         int distracted = entityData.get(DATA_DISTRACTED);
         if (distracted > 0) {
             entityData.set(DATA_DISTRACTED, distracted - 1);
@@ -233,8 +264,7 @@ public class CitizenEntity extends PathfinderMob {
             if (plan == Plan.WORK && !paidToday && job().wage > 0) {
                 paidToday = true;
                 setMoney(money() + job().wage);
-                CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
-                if (hub != null) hub.recordWages(job().wage);
+                CityWorld.recordWages(server, blockPosition(), job().wage);
             }
             plan = want;
             arrived = false;
@@ -260,31 +290,38 @@ public class CitizenEntity extends PathfinderMob {
         }
     }
 
+    private static final CityLayout.District[] STORES = {CityLayout.District.DOUBLE_QUICK, CityLayout.District.GENERAL_STORE,
+            CityLayout.District.MEGAMART, CityLayout.District.DEPARTMENT, CityLayout.District.STRIP_MALL, CityLayout.District.BURGER,
+            CityLayout.District.CHICKEN, CityLayout.District.DESSERT, CityLayout.District.ROADHOUSE};
+
     private BlockPos errandSpot(ServerLevel server) {
-        CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
-        if (hub == null) return home;
-        BlockPos shop = hub.randomShop(random);
-        if (shop != null && random.nextInt(3) != 0) return shop;
-        List<BlockPos> park = CityLayout.spots(job() == Job.UNEMPLOYED ? CityLayout.District.HOOD : CityLayout.District.PARK);
-        return park.isEmpty() || city == null ? home : city.offset(park.get(random.nextInt(park.size())));
+        errandAtShop = false;
+        if (city == null) return home;
+        double lx = getX() - city.getX(), lz = getZ() - city.getZ();
+        if (random.nextInt(3) != 0) {
+            List<BlockPos> shops = new java.util.ArrayList<>();
+            for (CityLayout.District d : STORES) shops.addAll(CityLayout.spotsNear(d, lx, lz, 150));
+            if (!shops.isEmpty()) {
+                errandAtShop = true;
+                return city.offset(shops.get(random.nextInt(shops.size())));
+            }
+        }
+        List<BlockPos> park = CityLayout.spotsNear(job() == Job.UNEMPLOYED ? CityLayout.District.HOOD : CityLayout.District.PARK, lx, lz, 160);
+        return park.isEmpty() ? home : city.offset(park.get(random.nextInt(park.size())));
     }
 
     private void onArrive(ServerLevel server) {
-        if (plan == Plan.ERRAND && !shoppedToday) {
-            CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
-            if (hub != null && hub.isShop(goal) && money() > 5) {
-                shoppedToday = true;
-                int spend = Math.min(money(), 5 + random.nextInt(26));
-                setMoney(money() - spend);
-                hub.recordSale(spend);
-            }
+        if (plan == Plan.ERRAND && !shoppedToday && errandAtShop && money() > 5) {
+            shoppedToday = true;
+            int spend = Math.min(money(), 5 + random.nextInt(26));
+            setMoney(money() - spend);
+            CityWorld.recordSale(server, blockPosition(), spend);
         }
         if (plan == Plan.HOME && !rentToday) {
             rentToday = true;
             int rent = Math.min(money(), 15 + random.nextInt(15));
             setMoney(money() - rent);
-            CityHubEntity hub = CityHubEntity.nearest(server, blockPosition());
-            if (hub != null) hub.recordRent(rent);
+            CityWorld.recordRent(server, blockPosition(), rent);
         }
     }
 
@@ -350,6 +387,10 @@ public class CitizenEntity extends PathfinderMob {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         boolean hurt = super.hurt(source, amount);
+        if (hurt && !level().isClientSide && source.getEntity() != null) {
+            flee(source.getEntity().position());
+            if (source.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) Police.reportAssault(sp, this);
+        }
         if (hurt && !level().isClientSide && random.nextInt(2) == 0) {
             String[] yells = {"HEY! What's your problem?!", "Somebody call the cops!", "Ow! Are you crazy?!", "HELP!"};
             Component msg = Component.literal("§f<" + getName().getString() + "> §c" + yells[random.nextInt(yells.length)]);
@@ -382,6 +423,7 @@ public class CitizenEntity extends PathfinderMob {
         put(tag, "Work", work);
         put(tag, "City", city);
         tag.putLong("HackedUntil", hackedUntil);
+        tag.putBoolean("Ambient", ambient);
     }
 
     @Override
@@ -396,6 +438,7 @@ public class CitizenEntity extends PathfinderMob {
         work = get(tag, "Work");
         city = get(tag, "City");
         hackedUntil = tag.getLong("HackedUntil");
+        ambient = tag.getBoolean("Ambient");
     }
 
     private static void put(CompoundTag tag, String k, BlockPos p) {

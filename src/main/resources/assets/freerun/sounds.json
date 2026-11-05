@@ -88,5 +88,22 @@
       }
     ],
     "subtitle": "subtitles.freerun.break_buzzer"
+  },
+  "siren": {
+    "sounds": [
+      {
+        "name": "freerun:siren",
+        "attenuation_distance": 64
+      }
+    ],
+    "subtitle": "subtitles.freerun.siren"
+  },
+  "cuffs": {
+    "sounds": [
+      {
+        "name": "freerun:cuffs"
+      }
+    ],
+    "subtitle": "subtitles.freerun.cuffs"
   }
 }

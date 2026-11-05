@@ -85,13 +85,17 @@ public class PhoneScreen extends Screen {
             for (int i = 0; i < sh(); i += 4) g.fill(sx(), sy() + i, sx() + sw(), sy() + i + 4, blend(0xFF1D4E72, 0xFF2A1B3D, i / (float) sh()));
         }
         statusBar(g);
+        if ((app == App.MAP || app == App.CITY) && minecraft.level.getGameTime() - lastRefresh > 40) {
+            lastRefresh = minecraft.level.getGameTime();
+            if (ClientPlayNetworking.canSend(PhonePayloads.Request.TYPE)) ClientPlayNetworking.send(new PhonePayloads.Request(0));
+        }
         if (app == null) home(g, mouseX, mouseY);
         else {
             g.fill(sx(), sy(), sx() + sw(), sy() + 14, app.color);
             g.drawString(font, "§l" + app.label, sx() + 4, sy() + 3, 0xFFFFFF);
             switch (app) {
                 case BANK -> bank(g);
-                case MAP -> map(g);
+                case MAP -> map(g, mouseX, mouseY);
                 case BLACKWIRE -> blackwire(g, mouseX, mouseY);
                 case JOBS -> jobs(g);
                 case CITY -> city(g);
@@ -174,48 +178,130 @@ public class PhoneScreen extends Screen {
         }
     }
 
-    private void map(GuiGraphics g) {
+    private static final int[] MAP_SPAN = {CityLayout.SIZE, 360, 130};
+    private static final String[] ZOOM_NAMES = {"City", "District", "Street"};
+    private long lastRefresh;
+
+    private void map(GuiGraphics g, int mouseX, int mouseY) {
         int size = sw() - 8;
-        int mx = sx() + 4, my = sy() + 20;
+        int mx = sx() + 4, my = sy() + 18;
+        CompoundTag c = PhoneState.city;
         if (!PhoneState.hasCity()) {
-            line(g, my, "§7No city signal nearby. Cities spawn out in the world; or build one with /city.");
+            int y = line(g, my, "§7No city signal here.");
+            if (c.contains("NX")) {
+                double dx = c.getInt("NX") - minecraft.player.getX(), dz = c.getInt("NZ") - minecraft.player.getZ();
+                int dist = (int) Math.sqrt(dx * dx + dz * dz);
+                y = line(g, y + 2, "§fNearest city: §e" + dist + " blocks " + dev.freerun.city.CityCommands.compass(dx, dz));
+                y = line(g, y, "§7Downtown at " + c.getInt("NX") + ", " + c.getInt("NZ"));
+                // a compass needle pointing the way
+                int cx = sx() + sw() / 2, cy = y + 34;
+                g.fill(cx - 26, cy - 26, cx + 26, cy + 26, 0xFF1A2430);
+                float rel = (float) (Math.atan2(dz, dx) - Math.toRadians(minecraft.player.getYRot() + 90.0));
+                for (int i = 0; i < 22; i++) {
+                    int px = cx + Math.round(Mth.cos(rel) * i), py = cy + Math.round(Mth.sin(rel) * i);
+                    g.fill(px - 1, py - 1, px + 1, py + 1, i > 16 ? 0xFFFF5050 : 0xFFE0E0E0);
+                }
+                g.drawCenteredString(font, "▲ you face up", cx, cy + 30, 0x8899AA);
+            } else {
+                line(g, y + 2, "§7Cities spawn out in the world; use §e/findcity§7, or found one with §e/city§7.");
+            }
             return;
         }
-        CompoundTag c = PhoneState.city;
+        int zoom = Mth.clamp(PhoneState.mapZoom, 0, MAP_SPAN.length - 1);
         double ox = c.getInt("OX"), oz = c.getInt("OZ");
-        float s = size / (float) CityLayout.SIZE;
-        g.fill(mx, my, mx + size, my + size, 0xFF2A2A2E);
-        for (int r = 0; r < CityLayout.rows(); r++) {
-            for (int col = 0; col < CityLayout.cols(); col++) {
-                CityLayout.District d = CityLayout.district(col, r);
-                int x0 = mx + Math.round(CityLayout.lotX(col) * s), z0 = my + Math.round(CityLayout.lotZ(r) * s);
-                int x1 = mx + Math.round((CityLayout.lotX(col) + CityLayout.lotW(col)) * s);
-                int z1 = my + Math.round((CityLayout.lotZ(r) + CityLayout.lotD(r)) * s);
-                g.fill(x0, z0, x1, z1, 0xFF000000 | d.color);
+        double px = minecraft.player.getX() - ox, pz = minecraft.player.getZ() - oz;
+        double span = MAP_SPAN[zoom];
+        double vx = zoom == 0 ? CityLayout.HALF : Mth.clamp(px, span / 2, CityLayout.SIZE - span / 2);
+        double vz = zoom == 0 ? CityLayout.HALF : Mth.clamp(pz, span / 2, CityLayout.SIZE - span / 2);
+        double minX = vx - span / 2, minZ = vz - span / 2;
+        float s = (float) (size / span);
+        g.enableScissor(mx, my, mx + size, my + size);
+        g.fill(mx, my, mx + size, my + size, 0xFF2E4A2E);
+        int cx0 = mx + Math.round((float) (-minX) * s), cz0 = my + Math.round((float) (-minZ) * s);
+        g.fill(cx0, cz0, cx0 + Math.round(CityLayout.SIZE * s), cz0 + Math.round(CityLayout.SIZE * s), 0xFF4A4A52);
+        for (CityLayout.Lot l : CityLayout.lots()) {
+            if (l.lx() + l.w() < minX || l.lz() + l.d() < minZ || l.lx() > minX + span || l.lz() > minZ + span) continue;
+            int x0 = mx + Math.round((float) (l.lx() - minX) * s), z0 = my + Math.round((float) (l.lz() - minZ) * s);
+            int x1 = mx + Math.round((float) (l.lx() + l.w() - minX) * s), z1 = my + Math.round((float) (l.lz() + l.d() - minZ) * s);
+            g.fill(x0, z0, Math.max(x1, x0 + 1), Math.max(z1, z0 + 1), 0xFF000000 | l.district().color);
+            if (zoom == 2 && l.district() == CityLayout.District.PARKING) {
+                for (int k = 2; k < l.d(); k += 6) g.fill(x0, z0 + Math.round(k * s), x1, z0 + Math.round(k * s) + 1, 0xFF6A6A72);
+            }
+        }
+        // the street centre lines when zoomed in
+        if (zoom == 2) {
+            for (int x : CityLayout.XS) {
+                int sxl = mx + Math.round((float) (x + 5 - minX) * s);
+                g.fill(sxl, cz0, sxl + 1, cz0 + Math.round(CityLayout.SIZE * s), 0x80D8C040);
+            }
+            for (int z : CityLayout.ZS) {
+                int szl = my + Math.round((float) (z + 5 - minZ) * s);
+                g.fill(cx0, szl, cx0 + Math.round(CityLayout.SIZE * s), szl + 1, 0x80D8C040);
             }
         }
         // labels for the landmarks
-        for (CityLayout.District d : CityLayout.District.values()) {
-            if (d == CityLayout.District.SUBURB || d == CityLayout.District.OFFICE || d == CityLayout.District.HOOD) continue;
-            for (var p : CityLayout.spots(d)) {
-                g.pose().pushPose();
-                g.pose().translate(mx + p.getX() * s, my + p.getZ() * s - 3, 0);
-                g.pose().scale(0.5f, 0.5f, 1);
-                g.drawCenteredString(font, d.title, 0, 0, 0xFFFFFF);
-                g.pose().popPose();
+        for (CityLayout.Lot l : CityLayout.lots()) {
+            CityLayout.District d = l.district();
+            if (!d.landmark()) continue;
+            if (zoom == 0 && l.w() < 80 && d != CityLayout.District.POLICE) continue;
+            double lx = l.lx() + l.w() / 2.0, lz = l.lz() + l.d() / 2.0;
+            if (lx < minX || lz < minZ || lx > minX + span || lz > minZ + span) continue;
+            g.pose().pushPose();
+            g.pose().translate(mx + (float) (lx - minX) * s, my + (float) (lz - minZ) * s - 2, 0);
+            float scale = zoom == 2 ? 0.6f : 0.45f;
+            g.pose().scale(scale, scale, 1);
+            String label = d == CityLayout.District.POLICE ? "★ Police" : d.title;
+            g.drawCenteredString(font, label, 0, 0, 0xFFFFFF);
+            g.pose().popPose();
+        }
+        // who's about: police (blue), suspects (flashing red), traffic (grey), other players (green)
+        boolean flash = (minecraft.level.getGameTime() / 6) % 2 == 0;
+        for (net.minecraft.world.entity.Entity e : minecraft.level.entitiesForRendering()) {
+            int color;
+            int r = 1;
+            if (e instanceof dev.freerun.city.CriminalEntity) {
+                color = flash ? 0xFFFF2020 : 0xFFFFFFFF;
+                r = 2;
+            } else if (e instanceof dev.freerun.city.PoliceOfficerEntity) {
+                color = 0xFF4080FF;
+                r = 2;
+            } else if (e instanceof dev.freerun.vehicle.CarEntity car && car.isPolice()) {
+                color = car.sirenOn() && flash ? 0xFFFF3030 : 0xFF3060FF;
+                r = 2;
+            } else if (e instanceof dev.freerun.vehicle.CarEntity && zoom > 0) {
+                color = 0xFFB0B0B0;
+            } else if (e instanceof net.minecraft.world.entity.player.Player pl && pl != minecraft.player) {
+                color = 0xFF40FF40;
+                r = 2;
+            } else if (e instanceof dev.freerun.city.CitizenEntity && zoom == 2) {
+                color = 0xFFE0C080;
+            } else {
+                continue;
             }
+            double ex = e.getX() - ox, ez = e.getZ() - oz;
+            if (ex < minX || ez < minZ || ex > minX + span || ez > minZ + span) continue;
+            int qx = mx + Math.round((float) (ex - minX) * s), qz = my + Math.round((float) (ez - minZ) * s);
+            g.fill(qx - r + 1, qz - r + 1, qx + r, qz + r, color);
         }
         // you
-        double px = minecraft.player.getX() - ox, pz = minecraft.player.getZ() - oz;
-        int dx = mx + (int) Mth.clamp(px * s, 0, size - 1), dz = my + (int) Mth.clamp(pz * s, 0, size - 1);
+        int dx = mx + (int) Mth.clamp((px - minX) * s, 0, size - 1), dz = my + (int) Mth.clamp((pz - minZ) * s, 0, size - 1);
         g.fill(dx - 2, dz - 2, dx + 2, dz + 2, 0xFFFFFFFF);
         float yaw = minecraft.player.getYRot() * Mth.DEG_TO_RAD;
         int ax = dx + Math.round(-Mth.sin(yaw) * 5), az = dz + Math.round(Mth.cos(yaw) * 5);
         g.fill(ax - 1, az - 1, ax + 1, az + 1, 0xFFFF4040);
-        int y = my + size + 4;
+        g.disableScissor();
+        // zoom buttons
+        int bx = mx + size - 22, by = my + 2;
+        g.fill(bx, by, bx + 10, by + 10, 0xC0000000);
+        g.fill(bx + 11, by, bx + 21, by + 10, 0xC0000000);
+        g.drawCenteredString(font, "-", bx + 5, by + 1, 0xFFFFFF);
+        g.drawCenteredString(font, "+", bx + 16, by + 1, 0xFFFFFF);
+        int y = my + size + 3;
         CityLayout.District here = CityLayout.districtAt(px, pz);
         boolean inside = px >= 0 && pz >= 0 && px < CityLayout.SIZE && pz < CityLayout.SIZE;
-        line(g, y, inside ? "§fYou're in: §e" + (here != null ? here.title : "the street") : "§7You're outside the city limits.");
+        y = line(g, y, inside ? "§fYou're in: §e" + (here != null ? here.title : CityLayout.onRoad(px, pz) ? "the street" : "an alley")
+                : "§7You're outside the city limits.");
+        line(g, y, "§8" + ZOOM_NAMES[zoom] + " view · scroll or +/- to zoom");
     }
 
     private void blackwire(GuiGraphics g, int mx, int my) {
@@ -269,7 +355,7 @@ public class PhoneScreen extends Screen {
             return;
         }
         CompoundTag c = PhoneState.city;
-        y = line(g, y, "§fPopulation: §b" + c.getInt("Population"));
+        y = line(g, y, "§fPeople out and about: §b" + c.getInt("Population"));
         y = line(g, y, "§fEmployed: §b" + c.getInt("Employed"));
         y = line(g, y, "§fAvg. savings: §a" + Money.fmt(c.getInt("AvgMoney")));
         y = line(g, y, "§fCars on the road: §b" + c.getInt("Cars"));
@@ -281,7 +367,12 @@ public class PhoneScreen extends Screen {
         y = line(g, y, "§fYesterday's sales: §a" + Money.fmt(c.getInt("SalesYesterday")));
         y += 4;
         int pi = c.getInt("PriceIndex");
-        line(g, y, "§fPrice index: " + (pi > 100 ? "§c" : pi < 100 ? "§a" : "§f") + pi + "%");
+        y = line(g, y, "§fPrice index: " + (pi > 100 ? "§c" : pi < 100 ? "§a" : "§f") + pi + "%");
+        y += 4;
+        y = line(g, y, "§7Public safety");
+        y = line(g, y, "§fOfficers nearby: §9" + c.getInt("Police"));
+        y = line(g, y, "§fCrimes reported: §c" + c.getInt("Crimes"));
+        line(g, y, "§fStopped: §a" + c.getInt("Stopped") + " §7(" + c.getInt("Arrests") + " by police)");
     }
 
     private void messages(GuiGraphics g) {
@@ -296,6 +387,15 @@ public class PhoneScreen extends Screen {
             y = line(g, y, "§7" + l);
         }
         if (PhoneState.LOG.isEmpty()) line(g, y, "§8(nothing yet)");
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (app == App.MAP && scrollY != 0) {
+            PhoneState.mapZoom = Mth.clamp(PhoneState.mapZoom + (scrollY > 0 ? 1 : -1), 0, MAP_SPAN.length - 1);
+            return true;
+        }
+        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
     }
 
     @Override
@@ -314,6 +414,18 @@ public class PhoneScreen extends Screen {
                     minecraft.getSoundManager().play(net.minecraft.client.resources.sounds.SimpleSoundInstance.forUI(
                             net.minecraft.sounds.SoundEvents.NOTE_BLOCK_HAT.value(), 1.8f));
                     if (ClientPlayNetworking.canSend(PhonePayloads.Request.TYPE)) ClientPlayNetworking.send(new PhonePayloads.Request(0));
+                    return true;
+                }
+            }
+        } else if (app == App.MAP && PhoneState.hasCity()) {
+            int size = sw() - 8, bx = sx() + 4 + size - 22, by = sy() + 18 + 2;
+            if (mouseY >= by && mouseY < by + 10) {
+                if (mouseX >= bx && mouseX < bx + 10) {
+                    PhoneState.mapZoom = Math.max(0, PhoneState.mapZoom - 1);
+                    return true;
+                }
+                if (mouseX >= bx + 11 && mouseX < bx + 21) {
+                    PhoneState.mapZoom = Math.min(MAP_SPAN.length - 1, PhoneState.mapZoom + 1);
                     return true;
                 }
             }

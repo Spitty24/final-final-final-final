@@ -15,8 +15,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 
 /**
  * Where two streets cross: corner sidewalks, zebra crosswalks on every side, and either a traffic
- * light on a pole for each direction (downtown) or a stop sign for each (the outer ring). The
- * middle intersection also gets the city's hub.
+ * light on a pole for each direction (downtown) or a stop sign for each (the outer ring).
  */
 public class IntersectionPiece extends CityPieceBase {
     private final int i, j;
@@ -79,16 +78,6 @@ public class IntersectionPiece extends CityPieceBase {
                 }
             } else {
                 put(level, box, CityRegistry.STOP_SIGN.defaultBlockState().setValue(StopSignBlock.FACING, f), x, 1, z);
-            }
-        }
-        // the city's hub lives under the middle intersection
-        if (i == 2 && j == 2) {
-            BlockPos c = at(5, 1, 5);
-            if (box.isInside(c)) {
-                CityHubEntity hub = new CityHubEntity(CityRegistry.CITY_HUB, server(level));
-                hub.moveTo(c.getX(), c.getY(), c.getZ(), 0.0f, 0.0f);
-                hub.setOrigin(city);
-                level.addFreshEntity(hub);
             }
         }
     }

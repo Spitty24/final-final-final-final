@@ -152,7 +152,7 @@ public class SuburbPiece extends CityPieceBase {
         hp(level, box, Blocks.POTTED_RED_TULIP.defaultBlockState(), 13, 2, 1);
         // the family car on the driveway, nose to the street
         BlockPos carAt = at(bx + 16, 1, zz(6));
-        if (box.isInside(carAt)) {
+        if (box.isInside(carAt) && seed % 3 != 0) {
             CarEntity car = new CarEntity(VehicleRegistry.CAR, server(level));
             float yaw = flip ? 0.0f : 180.0f;
             car.moveTo(carAt.getX() + 0.5, carAt.getY(), carAt.getZ() + 0.5, yaw, 0.0f);
@@ -162,18 +162,7 @@ public class SuburbPiece extends CityPieceBase {
             car.setCity(city);
             level.addFreshEntity(car);
         }
-        // the family
-        BlockPos home = at(bx + 8, 1, zz(9));
-        if (box.isInside(home)) {
-            int n = 1 + seed % 2;
-            for (int k = 0; k < n; k++) {
-                CitizenEntity c = new CitizenEntity(CityRegistry.CITIZEN, server(level));
-                CitizenEntity.Job[] jobs = CitizenEntity.Job.values();
-                c.setup(level.getRandom(), city, home, jobs[Math.floorMod(seed * 7 + k * 5, jobs.length)]);
-                c.moveTo(home.getX() + 0.5 + k, home.getY(), home.getZ() + 0.5, 0.0f, 0.0f);
-                level.addFreshEntity(c);
-            }
-        }
+        // the family lives here; the city brings them out when someone is around to see them
     }
 
     private void tree(WorldGenLevel level, BoundingBox box, int x, int z) {

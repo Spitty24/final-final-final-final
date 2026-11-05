@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/pickup_window",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "freerun:block/pickup_window",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "freerun:block/pickup_window"
+    },
+    "facing=west": {
+      "model": "freerun:block/pickup_window",
+      "y": 90
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "freerun:block/menu_board_side",
+    "side": "freerun:block/pickup_window"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "freerun:item/red_beans_and_rice"
+  }
+}

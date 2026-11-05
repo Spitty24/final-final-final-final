@@ -19,6 +19,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.LadderBlock;
@@ -29,18 +30,28 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 
 /**
- * The rough side of town (a 38 x 80 block): old four-storey brick apartment buildings with fire
+ * The rough side of town (two 38 x 38 halves): old four-storey brick apartment buildings with fire
  * escapes, a corner store, a fenced basketball court, and a vacant lot where the Rust Rats and the
  * Chrome Kings hang out (and, every few minutes, shoot it out). Ordinary residents live in the
  * apartments like anywhere else.
  */
 public class HoodPiece extends CityPieceBase {
-    public HoodPiece(BlockPos city, int lx, int lz, int w, int d) {
+    /** 0: apartments, the corner store and the court. 1: apartments and the vacant lot. */
+    private final int half;
+
+    public HoodPiece(BlockPos city, int lx, int lz, int w, int d, int half) {
         super(CityRegistry.HOOD_PIECE, city, lx, lz, w, 22, d);
+        this.half = half;
     }
 
     public HoodPiece(StructurePieceSerializationContext ctx, CompoundTag tag) {
         super(CityRegistry.HOOD_PIECE, tag);
+        half = tag.getInt("Half");
+    }
+
+    @Override
+    protected void save(CompoundTag tag) {
+        tag.putInt("Half", half);
     }
 
     @Override
@@ -51,13 +62,17 @@ public class HoodPiece extends CityPieceBase {
             if ((x * 7 + z * 13) % 11 == 0) put(level, box, Blocks.CRACKED_STONE_BRICKS, x, 0, z);
         }
         int seed = Math.floorMod(ox * 31 + oz * 7, 97);
-        apartment(level, box, 1, 2, seed, Blocks.BRICKS.defaultBlockState());
-        apartment(level, box, 20, 2, seed + 1, Blocks.RED_TERRACOTTA.defaultBlockState());
-        cornerStore(level, box, 1, 22);
-        court(level, box, 16, 21);
-        apartment(level, box, 1, 41, seed + 2, Blocks.BROWN_TERRACOTTA.defaultBlockState());
-        apartment(level, box, 20, 41, seed + 3, Blocks.BRICKS.defaultBlockState());
-        vacantLot(level, box, 1, 60);
+        if (half == 0) {
+            apartment(level, box, 1, 2, seed, Blocks.BRICKS.defaultBlockState());
+            apartment(level, box, 20, 2, seed + 1, Blocks.RED_TERRACOTTA.defaultBlockState());
+            cornerStore(level, box, 1, 22);
+            court(level, box, 16, 21);
+        } else {
+            apartment(level, box, 1, 1, seed + 2, Blocks.BROWN_TERRACOTTA.defaultBlockState());
+            apartment(level, box, 20, 1, seed + 3, Blocks.BRICKS.defaultBlockState());
+            if (Math.floorMod(ox * 7 + oz * 13, 3) == 0) vacantLot(level, box, 1, 18);
+            else garden(level, box, 1, 18);
+        }
     }
 
     // ------------------------------------------------------------------ apartments
@@ -118,17 +133,6 @@ public class HoodPiece extends CityPieceBase {
             put(level, box, Blocks.LADDER.defaultBlockState().setValue(LadderBlock.FACING, Direction.WEST), x0 - 1, y, z0 + 7);
         }
         sign(level, box, x0 + 10, 3, z0 - 1, Direction.NORTH, "", (seed % 2 == 0 ? "MAGNOLIA" : "CYPRESS") + " ARMS", "Apartments", "");
-        // residents
-        BlockPos home = at(x0 + 4, 1, z0 + 8);
-        if (box.isInside(home)) {
-            CitizenEntity.Job[] jobs = CitizenEntity.Job.values();
-            for (int k = 0; k < 3; k++) {
-                CitizenEntity c = new CitizenEntity(CityRegistry.CITIZEN, server(level));
-                c.setup(level.getRandom(), city, home, jobs[Math.floorMod(seed * 5 + k * 3, jobs.length)]);
-                c.moveTo(home.getX() + 0.5 + k, home.getY(), home.getZ() + 0.5, 0.0f, 0.0f);
-                level.addFreshEntity(c);
-            }
-        }
     }
 
     // ------------------------------------------------------------------ corner store
@@ -193,6 +197,37 @@ public class HoodPiece extends CityPieceBase {
                 put(level, box, fz, x1, y, z);
             }
         }
+    }
+
+    // ------------------------------------------------------------------ community garden
+
+    private void garden(WorldGenLevel level, BoundingBox box, int x0, int z0) {
+        int x1 = x0 + 35, z1 = z0 + 17;
+        for (int x = x0; x <= x1; x++) for (int z = z0; z <= z1; z++) put(level, box, Blocks.GRASS_BLOCK, x, 0, z);
+        Block[] crops = {Blocks.WHEAT, Blocks.CARROTS, Blocks.POTATOES, Blocks.BEETROOTS};
+        for (int bed = 0; bed < 6; bed++) {
+            int bx = x0 + 2 + bed * 6;
+            for (int x = bx; x < bx + 4; x++) for (int z = z0 + 2; z <= z0 + 9; z++) {
+                put(level, box, Blocks.FARMLAND.defaultBlockState().setValue(net.minecraft.world.level.block.FarmBlock.MOISTURE, 7), x, 0, z);
+                net.minecraft.world.level.block.CropBlock c = (net.minecraft.world.level.block.CropBlock) crops[bed % crops.length];
+                put(level, box, c.getStateForAge(Math.min(c.getMaxAge(), (x + z) % 4 + 2)), x, 1, z);
+            }
+            put(level, box, Blocks.WATER, bx + 4, 0, z0 + 5);
+        }
+        // a shed, a picnic table, a mural wall at the back
+        fill(level, box, Blocks.SPRUCE_PLANKS.defaultBlockState(), x1 - 5, 1, z1 - 5, x1 - 1, 3, z1 - 1);
+        fill(level, box, Blocks.AIR.defaultBlockState(), x1 - 4, 1, z1 - 4, x1 - 2, 2, z1 - 2);
+        put(level, box, Blocks.AIR, x1 - 3, 1, z1 - 5);
+        put(level, box, Blocks.AIR, x1 - 3, 2, z1 - 5);
+        put(level, box, Blocks.COMPOSTER, x1 - 2, 1, z1 - 2);
+        put(level, box, BlockRegistry.TABLE, x0 + 6, 1, z1 - 4);
+        put(level, box, facing(BlockRegistry.CHAIR, Direction.NORTH), x0 + 6, 1, z1 - 3);
+        put(level, box, facing(BlockRegistry.CHAIR, Direction.SOUTH), x0 + 6, 1, z1 - 5);
+        Block[] mural = {Blocks.YELLOW_CONCRETE, Blocks.ORANGE_CONCRETE, Blocks.LIME_CONCRETE, Blocks.LIGHT_BLUE_CONCRETE, Blocks.MAGENTA_CONCRETE};
+        for (int x = x0; x <= x1 - 7; x++) for (int y = 1; y <= 4; y++) {
+            put(level, box, mural[Math.floorMod(x / 3 + y, mural.length)], x, y, z1);
+        }
+        sign(level, box, x0 + 10, 2, z1 - 1, Direction.NORTH, "COMMUNITY", "GARDEN", "Take what you", "need. Plant more.");
     }
 
     // ------------------------------------------------------------------ the vacant lot (gang turf)

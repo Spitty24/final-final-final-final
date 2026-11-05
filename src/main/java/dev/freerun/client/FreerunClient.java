@@ -65,8 +65,11 @@ public final class FreerunClient implements ClientModInitializer {
 
         // The city: street furniture, residents, and the phone
         net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlocks(net.minecraft.client.renderer.RenderType.cutout(),
-                dev.freerun.city.CityRegistry.TRAFFIC_LIGHT, dev.freerun.city.CityRegistry.STOP_SIGN, dev.freerun.city.CityRegistry.STREET_LAMP);
+                dev.freerun.city.CityRegistry.TRAFFIC_LIGHT, dev.freerun.city.CityRegistry.STOP_SIGN, dev.freerun.city.CityRegistry.STREET_LAMP,
+                dev.freerun.city.CityRegistry.DRIVE_THRU_SPEAKER, dev.freerun.city.CityRegistry.PICKUP_WINDOW);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITIZEN, dev.freerun.client.city.CitizenRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.city.CityRegistry.POLICE_OFFICER, dev.freerun.client.city.PoliceRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CRIMINAL, dev.freerun.client.city.CriminalRenderer::new);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITY_HUB, net.minecraft.client.renderer.entity.NoopRenderer::new);
         hackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.hack", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.freerun"));
@@ -85,6 +88,8 @@ public final class FreerunClient implements ClientModInitializer {
         EntityRendererRegistry.register(dev.freerun.item.ItemRegistry.BULLET_ENTITY, dev.freerun.client.gun.BulletRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
                 dev.freerun.client.vehicle.CarModel.LAYER, dev.freerun.client.vehicle.CarModel::createLayer);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.vehicle.PoliceKitModel.LAYER, dev.freerun.client.vehicle.PoliceKitModel::createLayer);
         EntityRendererRegistry.register(dev.freerun.vehicle.VehicleRegistry.CAR, dev.freerun.client.vehicle.CarRenderer::new);
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
                 dev.freerun.client.mobs.BigBoudinModel.LAYER, dev.freerun.client.mobs.BigBoudinModel::createLayer);

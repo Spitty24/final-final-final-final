@@ -21,14 +21,17 @@ import net.minecraft.util.Mth;
  */
 public class CarRenderer extends EntityRenderer<CarEntity> {
     private static final ResourceLocation TEXTURE = Freerun.id("textures/entity/car.png");
+    private static final ResourceLocation POLICE = Freerun.id("textures/entity/police_kit.png");
     private static final float MAX_STEER = 34.0f * Mth.DEG_TO_RAD;
     private final CarModel model;
+    private final PoliceKitModel kit;
 
     public CarRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
         shadowRadius = 1.4f;
         shadowStrength = 0.8f;
         model = new CarModel(ctx.bakeLayer(CarModel.LAYER));
+        kit = new PoliceKitModel(ctx.bakeLayer(PoliceKitModel.LAYER));
     }
 
     @Override
@@ -52,6 +55,17 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         wheel(model.wheel_fr, spin, steer, pose, vc, light, overlay);
         wheel(model.wheel_rl, spin, 0.0f, pose, vc, light, overlay);
         wheel(model.wheel_rr, spin, 0.0f, pose, vc, light, overlay);
+
+        if (car.isPolice()) {
+            VertexConsumer pk = buffers.getBuffer(RenderType.entityCutoutNoCull(POLICE));
+            kit.base.render(pose, pk, light, overlay);
+            kit.doors.render(pose, pk, light, overlay);
+            // the light bar: alternating red and blue while the siren's on
+            boolean on = car.sirenOn();
+            long phase = (car.level().getGameTime() + car.getId()) / 4 % 2;
+            kit.red.render(pose, pk, on && phase == 0 ? LightTexture.FULL_BRIGHT : light, overlay, on && phase == 0 ? 0xFFFFFFFF : 0xFF707070);
+            kit.blue.render(pose, pk, on && phase == 1 ? LightTexture.FULL_BRIGHT : light, overlay, on && phase == 1 ? 0xFFFFFFFF : 0xFF707070);
+        }
 
         VertexConsumer glass = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
         model.glass.render(pose, glass, light, overlay);

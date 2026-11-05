@@ -15,8 +15,7 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
 
 /**
  * One block of street between two intersections: sidewalks with curbs on both sides, two
- * asphalt lanes with a dashed centre line, street lights every 16 blocks, and sometimes a car
- * already driving along it.
+ * asphalt lanes with a dashed centre line, and street lights every 16 blocks.
  */
 public class RoadPiece extends CityPieceBase {
     private final boolean alongX;
@@ -91,17 +90,6 @@ public class RoadPiece extends CityPieceBase {
             Direction faceRoad = alongX ? Direction.SOUTH : Direction.EAST;
             put(level, box, Blocks.SPRUCE_STAIRS.defaultBlockState()
                     .setValue(net.minecraft.world.level.block.StairBlock.FACING, faceRoad.getOpposite()), px(a - 6, 0), 1, pz(a - 6, 0));
-        }
-        // traffic already on the road
-        int mid = len / 2;
-        BlockPos spawn = at(px(mid, 5), 1, pz(mid, 5));
-        if (box.isInside(spawn) && random.nextInt(100) < 45) {
-            int h = alongX ? (random.nextBoolean() ? CityLayout.EAST : CityLayout.WEST)
-                    : (random.nextBoolean() ? CityLayout.SOUTH : CityLayout.NORTH);
-            double laneLocal = CityLayout.laneCoord(h, line);
-            double x = alongX ? ox + mid + 0.5 : city.getX() + laneLocal;
-            double z = alongX ? city.getZ() + laneLocal : oz + mid + 0.5;
-            CityHubEntity.spawnDrivenCar(level, city, x, oy + 1, z, h, random);
         }
     }
 }

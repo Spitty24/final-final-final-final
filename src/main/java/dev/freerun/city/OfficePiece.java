@@ -170,11 +170,6 @@ public class OfficePiece extends CityPieceBase {
         put(level, box, facing(FoodRegistry.COUNTER, Direction.NORTH), x0 + 2, y0 + 1, z1 - 1);
         put(level, box, facing(FoodRegistry.MICROWAVE, Direction.NORTH), x0 + 2, y0 + 2, z1 - 1);
         put(level, box, Blocks.POTTED_BAMBOO, x1 - 1, y0 + 1, z1 - 1);
-        // somebody working late
-        if (seed % 2 == 0) {
-            BlockPos p = at(x0 + 3, y0 + 1, z0 + 6);
-            if (box.isInside(p)) worker(level, p);
-        }
     }
 
     private void worker(WorldGenLevel level, BlockPos p) {

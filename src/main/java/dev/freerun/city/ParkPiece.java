@@ -22,20 +22,34 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSeriali
  * statue of the town's favourite sausage.
  */
 public class ParkPiece extends CityPieceBase {
-    public ParkPiece(BlockPos city, int lx, int lz, int w, int d) {
+    public static final int HALL_AND_PARK = 0, PARK_ONLY = 1;
+    private final int mode;
+
+    public ParkPiece(BlockPos city, int lx, int lz, int w, int d, int mode) {
         super(CityRegistry.PARK_PIECE, city, lx, lz, w, 20, d);
+        this.mode = mode;
     }
 
     public ParkPiece(StructurePieceSerializationContext ctx, CompoundTag tag) {
         super(CityRegistry.PARK_PIECE, tag);
+        mode = tag.getInt("Mode");
+    }
+
+    @Override
+    protected void save(CompoundTag tag) {
+        tag.putInt("Mode", mode);
     }
 
     @Override
     public void postProcess(WorldGenLevel level, StructureManager structureManager, ChunkGenerator generator,
                             RandomSource random, BoundingBox box, ChunkPos chunkPos, BlockPos pivot) {
         ground(level, box, Blocks.GRASS_BLOCK.defaultBlockState(), 20);
-        cityHall(level, box, 2, 5);
-        park(level, box, 40, 0);
+        if (mode == HALL_AND_PARK) {
+            cityHall(level, box, 2, 5);
+            park(level, box, 40, 0);
+        } else {
+            park(level, box, 0, 0);
+        }
     }
 
     private void cityHall(WorldGenLevel level, BoundingBox box, int x0, int z0) {

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "freerun:block/drive_thru_speaker",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "freerun:block/drive_thru_speaker",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "freerun:block/drive_thru_speaker"
+    },
+    "facing=west": {
+      "model": "freerun:block/drive_thru_speaker",
+      "y": 90
+    }
+  }
+}

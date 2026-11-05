@@ -51,6 +51,8 @@ public class RoadhouseNpcEntity extends PathfinderMob {
     /** Slater and Nick on a visit to the factory floor (not the office pair in the Roadhouse). */
     private static final EntityDataAccessor<Boolean> DATA_VISITOR =
             SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.BOOLEAN);
+    private static final EntityDataAccessor<Integer> DATA_SHOP =
+            SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Boolean> DATA_ON_BREAK =
             SynchedEntityData.defineId(RoadhouseNpcEntity.class, EntityDataSerializers.BOOLEAN);
 
@@ -133,6 +135,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         builder.define(DATA_VARIANT, 0);
         builder.define(DATA_VISITOR, false);
         builder.define(DATA_ON_BREAK, false);
+        builder.define(DATA_SHOP, -1);
     }
 
     /** Away from their station on a break (the model drops the work pose). */
@@ -157,11 +160,19 @@ public class RoadhouseNpcEntity extends PathfinderMob {
 
     /** The store this NPC runs the register at, if any. */
     public dev.freerun.economy.Shops.Shop shop() {
+        int own = entityData.get(DATA_SHOP);
+        if (own >= 0) return dev.freerun.economy.Shops.Shop.byId(own);
         return switch (getRole()) {
             case CLERK -> dev.freerun.economy.Shops.Shop.DOUBLE_QUICK;
             case SHOPKEEPER -> dev.freerun.economy.Shops.Shop.GENERAL_STORE;
             default -> null;
         };
+    }
+
+    /** Puts this worker behind a particular store's register (MegaMart, Big Bun Burgers, ...). */
+    public void setShop(dev.freerun.economy.Shops.Shop shop) {
+        entityData.set(DATA_SHOP, shop == null ? -1 : shop.ordinal());
+        if (shop != null) setCustomName(Component.literal(shop.worker));
     }
 
     /** Overheard lines (used by visits and robberies). */
@@ -476,6 +487,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         tag.putInt("Variant", getVariant());
         tag.putLong("LastGift", lastGiftTime);
         tag.putBoolean("Visitor", isVisitor());
+        tag.putInt("Shop", entityData.get(DATA_SHOP));
         breakTrip.save(tag, registryAccess());
     }
 
@@ -486,6 +498,7 @@ public class RoadhouseNpcEntity extends PathfinderMob {
         setRole(roles[Mth.clamp(tag.getInt("Role"), 0, roles.length - 1)], tag.getInt("Variant"));
         lastGiftTime = tag.getLong("LastGift");
         setVisitor(tag.getBoolean("Visitor"));
+        if (tag.contains("Shop") && tag.getInt("Shop") >= 0) setShop(dev.freerun.economy.Shops.Shop.byId(tag.getInt("Shop")));
         breakTrip.load(tag, registryAccess());
     }
 }
