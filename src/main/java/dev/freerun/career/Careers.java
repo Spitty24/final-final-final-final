@@ -183,6 +183,11 @@ public final class Careers {
         set(p, new CareerData(career.ordinal(), d.level(), d.xp(), kept, d.completed()));
         apply(p);
         sync(p, 0, "");
+        // you're employed now: here's your company phone. Dustin will be in touch.
+        if (dev.freerun.laser.WorkPhoneItem.find(p).isEmpty()) {
+            p.getInventory().placeItemBackInInventory(new net.minecraft.world.item.ItemStack(dev.freerun.laser.LaserRegistry.WORK_PHONE));
+            p.displayClientMessage(Component.literal("§5You've been issued a work phone. §7Teams is already installed."), false);
+        }
         p.displayClientMessage(Component.literal("§6You're now in " + career.title + "."
                 + (switching ? " §7Your unfinished skills were reset; you kept your level." : "")
                 + " §7Press §fP§7 to open your skill tree."), false);

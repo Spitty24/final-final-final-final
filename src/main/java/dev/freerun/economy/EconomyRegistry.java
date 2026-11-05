@@ -330,6 +330,8 @@ public final class EconomyRegistry {
                 FoodRegistry.HUNTERS_SAUSAGE, FoodRegistry.SEAFOOD_SAUSAGE}) {
             gsSell.add(Shops.of(s, 1, 3));
         }
+        gsSell.add(Shops.of(dev.freerun.laser.LaserRegistry.LASER_PART, 1, 6));
+        gs.add(Shops.of(dev.freerun.laser.LaserRegistry.WORK_PHONE, 1, 1));
         java.util.Map<Shops.Shop, List<Shops.Offer>> buy = new java.util.EnumMap<>(Shops.Shop.class);
         java.util.Map<Shops.Shop, List<Shops.Offer>> sell = new java.util.EnumMap<>(Shops.Shop.class);
         buy.put(Shops.Shop.DOUBLE_QUICK, dq);

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": ["PlayerMixin", "CraftingTableBlockMixin", "AbstractFurnaceBlockEntityMixin", "PlacedFeatureMixin"],
   "client": [
+    "client.CameraMixin",
     "client.GameRendererMixin",
     "client.ItemInHandRendererMixin",
     "client.PlayerModelMixin",

@@ -24,7 +24,8 @@ public final class CityAccess {
 
     /** The whole welding-factory complex; {@code origin} is the factory's own front-left corner (floor level). */
     public static List<StructurePiece> factory(BlockPos origin) {
-        return List.of(new FactoryPiece(origin), new ParkingLotPiece(origin), new BreakRoomPiece(origin), new ProcessingPiece(origin));
+        return List.of(new FactoryPiece(origin), new ParkingLotPiece(origin), new BreakRoomPiece(origin), new ProcessingPiece(origin),
+                new LaserBayPiece(origin));
     }
 
     public static StructurePiece roadhouse(BlockPos origin) {

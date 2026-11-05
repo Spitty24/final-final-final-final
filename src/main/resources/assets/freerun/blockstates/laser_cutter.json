@@ -1,0 +1,20 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "freerun:block/laser_cutter",
+   "y": 0
+  },
+  "facing=east": {
+   "model": "freerun:block/laser_cutter",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "freerun:block/laser_cutter",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "freerun:block/laser_cutter",
+   "y": 270
+  }
+ }
+}

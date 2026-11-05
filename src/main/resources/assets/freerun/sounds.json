@@ -105,5 +105,32 @@
       }
     ],
     "subtitle": "subtitles.freerun.cuffs"
+  },
+  "laser_start": {
+    "sounds": [
+      {
+        "name": "freerun:laser_start",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.laser_start"
+  },
+  "laser_cut": {
+    "sounds": [
+      {
+        "name": "freerun:laser_cut",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.laser_cut"
+  },
+  "teams_ping": {
+    "sounds": [
+      {
+        "name": "freerun:teams_ping",
+        "attenuation_distance": 8
+      }
+    ],
+    "subtitle": "subtitles.freerun.teams_ping"
   }
 }

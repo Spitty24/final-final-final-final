@@ -269,5 +269,15 @@
  "item.freerun.north_fase_beanie": "The North Fase Beanie",
  "item.freerun.north_fase_puffer": "The North Fase Puffer Jacket",
  "item.freerun.north_fase_cargos": "The North Fase Cargo Pants",
- "itemGroup.freerun.apparel": "Strip Mall Fashion"
+ "itemGroup.freerun.apparel": "Strip Mall Fashion",
+ "block.freerun.laser_cutter": "Laser Cutter",
+ "block.freerun.laser_table": "Laser Cutting Bed",
+ "block.freerun.cnc_terminal": "CNC Terminal",
+ "item.freerun.laser_cut_part": "Laser-Cut Part",
+ "item.freerun.work_phone": "Work Phone",
+ "item.freerun.taryn_spawn_egg": "Taryn Spawn Egg",
+ "entity.freerun.taryn": "Taryn",
+ "subtitles.freerun.laser_start": "Laser fires up",
+ "subtitles.freerun.laser_cut": "Laser cuts",
+ "subtitles.freerun.teams_ping": "Teams notification"
 }

@@ -85,11 +85,28 @@ public final class FreerunClient implements ClientModInitializer {
                     dev.freerun.life.LifeRegistry.BAR_STOOL, dev.freerun.life.LifeRegistry.BAR_TAP, dev.freerun.life.LifeRegistry.WATER_COOLER);
         }
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.registerGlobalReceiver(dev.freerun.life.LifePayloads.Open.TYPE,
-                (payload, context) -> context.client().execute(() -> context.client().setScreen(switch (payload.screen()) {
-                    case dev.freerun.life.LifePayloads.BOARD -> new dev.freerun.client.life.OfficeJobScreen(payload.data());
-                    case dev.freerun.life.LifePayloads.TASK -> new dev.freerun.client.life.OfficeTaskScreen(payload.data());
-                    default -> new dev.freerun.client.life.ArcadeScreen(payload.data());
-                })));
+                (payload, context) -> context.client().execute(() -> {
+                    if (payload.screen() == dev.freerun.life.LifePayloads.TEAMS_PING) {
+                        dev.freerun.client.laser.WorkPhoneScreen.ping(payload.data());
+                        return;
+                    }
+                    context.client().setScreen(switch (payload.screen()) {
+                        case dev.freerun.life.LifePayloads.BOARD -> new dev.freerun.client.life.OfficeJobScreen(payload.data());
+                        case dev.freerun.life.LifePayloads.TASK -> new dev.freerun.client.life.OfficeTaskScreen(payload.data());
+                        case dev.freerun.life.LifePayloads.CNC -> new dev.freerun.client.laser.CncScreen(payload.data());
+                        default -> new dev.freerun.client.life.ArcadeScreen(payload.data());
+                    });
+                }));
+        // the laser bay and the work phone
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(dev.freerun.laser.LaserRegistry.LASER_CUTTER_BE,
+                dev.freerun.client.laser.LaserCutterRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(dev.freerun.laser.LaserRegistry.LASER_PART,
+                new dev.freerun.client.laser.LaserPartRenderer());
+        EntityRendererRegistry.register(dev.freerun.laser.LaserRegistry.TARYN, dev.freerun.client.laser.TarynRenderer::new);
+        dev.freerun.laser.WorkPhoneItem.OPEN = () -> net.minecraft.client.Minecraft.getInstance()
+                .setScreen(new dev.freerun.client.laser.WorkPhoneScreen());
+        ClientTickEvents.END_CLIENT_TICK.register(SecondPerson::tick);
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> SecondPerson.hud(guiGraphics, net.minecraft.client.Minecraft.getInstance()));
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CRIMINAL, dev.freerun.client.city.CriminalRenderer::new);
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITY_HUB, net.minecraft.client.renderer.entity.NoopRenderer::new);
         hackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(

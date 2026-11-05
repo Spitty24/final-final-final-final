@@ -1,0 +1,43 @@
+{
+ "parent": "block/block",
+ "textures": {
+  "particle": "freerun:block/laser_cutter_side",
+  "top": "freerun:block/laser_cutter_top",
+  "side": "freerun:block/laser_cutter_side",
+  "plain": "freerun:block/laser_table_side"
+ },
+ "elements": [
+  {
+   "from": [
+    0,
+    0,
+    0
+   ],
+   "to": [
+    16,
+    12,
+    16
+   ],
+   "faces": {
+    "north": {
+     "texture": "#side"
+    },
+    "south": {
+     "texture": "#plain"
+    },
+    "east": {
+     "texture": "#plain"
+    },
+    "west": {
+     "texture": "#plain"
+    },
+    "up": {
+     "texture": "#top"
+    },
+    "down": {
+     "texture": "#plain"
+    }
+   }
+  }
+ ]
+}

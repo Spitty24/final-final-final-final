@@ -21,6 +21,7 @@ public final class StructureRegistry {
     public static StructureType<DoubleQuickStructure> DOUBLE_QUICK;
     public static StructurePieceType DOUBLE_QUICK_PIECE;
     public static StructurePieceType GENERAL_STORE_PIECE;
+    public static StructurePieceType LASER_BAY_PIECE;
 
     private StructureRegistry() {}
 
@@ -45,5 +46,7 @@ public final class StructureRegistry {
                 Freerun.id("double_quick"), DoubleQuickPiece::new);
         GENERAL_STORE_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
                 Freerun.id("general_store"), GeneralStorePiece::new);
+        LASER_BAY_PIECE = Registry.register(BuiltInRegistries.STRUCTURE_PIECE,
+                Freerun.id("factory_laser_bay"), LaserBayPiece::new);
     }
 }
