@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  " P ",
+  "PCP",
+  " C "
+ ],
+ "key": {
+  "P": {
+   "item": "freerun:steel_plate"
+  },
+  "C": {
+   "item": "freerun:steel_channel"
+  }
+ },
+ "result": {
+  "id": "freerun:car_steering",
+  "count": 1
+ }
+}

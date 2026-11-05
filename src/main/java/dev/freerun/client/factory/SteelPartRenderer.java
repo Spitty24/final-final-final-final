@@ -86,14 +86,54 @@ public class SteelPartRenderer extends EntityRenderer<SteelPartEntity> {
     public void render(SteelPartEntity entity, float entityYaw, float partialTick, PoseStack poseStack,
                        MultiBufferSource buffers, int packedLight) {
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
+        boolean lasers = false;
         for (SteelPartEntity.Part p : entity.getParts()) {
+            if (p.type() == PartType.LASER) {
+                lasers = true;
+                continue;
+            }
             poseStack.pushPose();
             poseStack.translate(p.dx(), p.dy(), p.dz());
             poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f * p.rot()));
             models[p.type().ordinal()].render(poseStack, vc, packedLight, OverlayTexture.NO_OVERLAY);
             poseStack.popPose();
         }
+        if (lasers) {
+            // laser-cut parts in a second pass: a different buffer, so never interleaved with the first
+            VertexConsumer lv = buffers.getBuffer(dev.freerun.client.laser.Boxes.SOLID);
+            for (SteelPartEntity.Part p : entity.getParts()) {
+                if (p.type() != PartType.LASER) continue;
+                poseStack.pushPose();
+                poseStack.translate(p.dx(), p.dy(), p.dz());
+                poseStack.mulPose(Axis.YP.rotationDegrees(-90.0f * p.rot()));
+                drawShape(poseStack, lv, p.shape(), p.gas(), packedLight);
+                poseStack.popPose();
+            }
+        }
         super.render(entity, entityYaw, partialTick, poseStack, buffers, packedLight);
+    }
+
+    /** A laser-cut part lying flat: one thin box per run of filled cells, centred on the origin. */
+    public static void drawShape(PoseStack ps, VertexConsumer vc, long[] shape, int gas, int light) {
+        int n = dev.freerun.laser.LaserShape.N;
+        float c = 1.0f / n, h = 1.0f / 16.0f;
+        int col = gas == dev.freerun.laser.LaserCutterBlockEntity.NITROGEN ? 0xFFC9D0D8 : 0xFF8E887E;
+        if (shape == null || dev.freerun.laser.LaserShape.empty(shape)) {
+            dev.freerun.client.laser.Boxes.box(ps, vc, -0.5f, 0, -0.5f, 0.5f, h, 0.5f, col, light);
+            return;
+        }
+        for (int y = 0; y < n; y++) {
+            int x = 0;
+            while (x < n) {
+                if (!dev.freerun.laser.LaserShape.get(shape, x, y)) {
+                    x++;
+                    continue;
+                }
+                int start = x;
+                while (x < n && dev.freerun.laser.LaserShape.get(shape, x, y)) x++;
+                dev.freerun.client.laser.Boxes.box(ps, vc, -0.5f + start * c, 0, -0.5f + y * c, -0.5f + x * c, h, -0.5f + (y + 1) * c, col, light);
+            }
+        }
     }
 
     @Override

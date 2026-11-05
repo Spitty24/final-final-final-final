@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "SSS"
+ ],
+ "key": {
+  "S": {
+   "item": "freerun:steel_sheet"
+  }
+ },
+ "result": {
+  "id": "freerun:runway",
+  "count": 6
+ }
+}

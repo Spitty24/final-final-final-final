@@ -39,7 +39,7 @@ public final class CityLayout {
         DEPARTMENT("Hargrove & Finch", 0x6A3FA0), STRIP_MALL("Strip Mall", 0xD9A441), BURGER("Big Bun Burgers", 0xE0601E),
         CHICKEN("Cluck Shack", 0xC8402A), DESSERT("Sugar Bayou Sweets", 0xF07AB8), POLICE("Police", 0x2F4FA8),
         PARKING("Parking", 0x505056), ARCADE("Pixel Bayou Arcade", 0x9A30E0), BAR("The Rusty Pelican", 0x3A6E8A),
-        FURNITURE("Bayou Home Furnishings", 0xB07A4A);
+        FURNITURE("Bayou Home Furnishings", 0xB07A4A), GARAGE("Bayou Auto & Alignment", 0xC8402A);
 
         public final String title;
         public final int color;
@@ -114,6 +114,7 @@ public final class CityLayout {
         int h = hash(c, r, sub) % 100;
         if ((c == 4 || c == 13) && (r == 4 || r == 13)) return District.POLICE;
         if (c == 8 && r == 11) return District.POLICE;
+        if (c == 13 && r == 12 && sub == 0) return District.GARAGE;   // across the road from the factory
         if (ring <= 2.5) return h < 8 ? District.PARKING : h < 12 ? District.DESSERT : District.OFFICE;
         if (c <= 7 && r >= 11) return h < 8 ? District.PARK : h < 13 ? District.DOUBLE_QUICK : h < 16 ? District.CHICKEN : District.HOOD;
         if (c >= 13 && r >= 13 && ring <= 6.5) return h < 50 ? District.PARKING : District.SUBURB;   // around the factory

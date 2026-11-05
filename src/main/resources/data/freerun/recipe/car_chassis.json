@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "CCC",
+  "B B",
+  "CCC"
+ ],
+ "key": {
+  "C": {
+   "item": "freerun:steel_channel"
+  },
+  "B": {
+   "item": "freerun:steel_bracket"
+  }
+ },
+ "result": {
+  "id": "freerun:car_chassis",
+  "count": 1
+ }
+}

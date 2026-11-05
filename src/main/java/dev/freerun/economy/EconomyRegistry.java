@@ -436,6 +436,9 @@ public final class EconomyRegistry {
         buy.put(Shops.Shop.CLOTHES, offers(Apparel.CLOTHES_PRICES.toArray(new Object[0][])));
         sell.put(Shops.Shop.SHOES, List.of(Shops.of(Items.LEATHER, 2, 1)));
         sell.put(Shops.Shop.CLOTHES, List.of(Shops.of(Items.WHITE_WOOL, 4, 1), Shops.of(Items.STRING, 8, 1)));
+        buy.put(Shops.Shop.AUTO_PARTS, offers(dev.freerun.garage.GarageRegistry.PARTS_PRICES.toArray(new Object[0][])));
+        sell.put(Shops.Shop.AUTO_PARTS, List.of(Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_SHEET, 4, 3),
+                Shops.of(Items.IRON_INGOT, 2, 3)));
         Shops.build(buy, sell);
     }
 

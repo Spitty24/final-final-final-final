@@ -49,7 +49,22 @@ public class SteelPartEntity extends Entity {
     public static final int MAX_PARTS = 32;
 
     /** One piece of the assembly: its shape, rotation (0..3, quarter turns) and offset from the origin. */
-    public record Part(PartType type, int rot, double dx, double dy, double dz) {
+    public record Part(PartType type, int rot, double dx, double dy, double dz, long[] shape, int gas) {
+        public Part(PartType type, int rot, double dx, double dy, double dz) {
+            this(type, rot, dx, dy, dz, null, 0);
+        }
+
+        /** The same part somewhere else / turned another way, keeping its laser-cut shape. */
+        public Part moved(int rot, double dx, double dy, double dz) {
+            return new Part(type, rot, dx, dy, dz, shape, gas);
+        }
+
+        /** This part as an item again (a laser-cut part keeps its shape). */
+        public ItemStack toItem() {
+            if (type == PartType.LASER) return dev.freerun.laser.LaserPartItem.make(shape, gas);
+            return new ItemStack(type.item());
+        }
+
         public AABB localBox() {
             double w = type.w;
             double d = type.d;
@@ -75,8 +90,13 @@ public class SteelPartEntity extends Entity {
 
     /** A brand new single part at the given position. Not yet added to the level. */
     public static SteelPartEntity single(Level level, PartType type, double x, double y, double z, int rot) {
+        return single(level, new Part(type, rot & 3, 0, 0, 0), x, y, z);
+    }
+
+    /** A brand new entity holding one given part (for laser-cut parts, with their shape). */
+    public static SteelPartEntity single(Level level, Part part, double x, double y, double z) {
         SteelPartEntity e = new SteelPartEntity(FactoryRegistry.STEEL_PART, level);
-        e.setParts(List.of(new Part(type, rot & 3, 0, 0, 0)));
+        e.setParts(List.of(part.moved(part.rot() & 3, 0, 0, 0)));
         e.moveTo(x, y, z, 0.0f, 0.0f);
         return e;
     }
@@ -129,6 +149,10 @@ public class SteelPartEntity extends Entity {
             t.putDouble("x", p.dx());
             t.putDouble("y", p.dy());
             t.putDouble("z", p.dz());
+            if (p.shape() != null) {
+                t.putLongArray("s", p.shape());
+                t.putInt("g", p.gas());
+            }
             list.add(t);
         }
         CompoundTag root = new CompoundTag();
@@ -143,7 +167,8 @@ public class SteelPartEntity extends Entity {
             for (int i = 0; i < list.size() && i < MAX_PARTS; i++) {
                 CompoundTag t = list.getCompound(i);
                 out.add(new Part(PartType.byId(t.getInt("t")), t.getInt("r") & 3,
-                        t.getDouble("x"), t.getDouble("y"), t.getDouble("z")));
+                        t.getDouble("x"), t.getDouble("y"), t.getDouble("z"),
+                        t.contains("s") ? dev.freerun.laser.LaserShape.copy(t.getLongArray("s")) : null, t.getInt("g")));
             }
         }
         // A part summoned with no data is a plain sheet.
@@ -292,7 +317,7 @@ public class SteelPartEntity extends Entity {
         double x = getX() + Math.round(hit.x * 2.0) / 2.0;    // snap to this assembly's half-block grid
         double z = getZ() + Math.round(hit.z * 2.0) / 2.0;
         double y = getBoundingBox().maxY;
-        SteelPartEntity part = single(level(), partItem.type(), x, y, z, PartItem.rotationFor(player));
+        SteelPartEntity part = single(level(), partItem.makePart(stack, PartItem.rotationFor(player)), x, y, z);
         if (!level().noCollision(part, part.getBoundingBox().deflate(1.0E-3))) {
             player.displayClientMessage(Component.literal("§cNo room for that part there."), true);
             return InteractionResult.CONSUME;
@@ -307,7 +332,7 @@ public class SteelPartEntity extends Entity {
         List<Part> rotated = new ArrayList<>();
         for (Part p : getParts()) {
             // A quarter turn about our origin: +X goes to +Z.
-            rotated.add(new Part(p.type(), (p.rot() + 1) & 3, -p.dz(), p.dy(), p.dx()));
+            rotated.add(p.moved((p.rot() + 1) & 3, -p.dz(), p.dy(), p.dx()));
         }
         AABB box = localBounds(rotated).move(getX(), getY(), getZ());
         if (!level().noCollision(this, box.deflate(1.0E-3))) {
@@ -320,7 +345,7 @@ public class SteelPartEntity extends Entity {
 
     private void pickUp(Player player) {
         for (Part p : getParts()) {
-            ItemStack item = new ItemStack(p.type().item());
+            ItemStack item = p.toItem();
             if (!player.getInventory().add(item)) player.drop(item, false);
         }
         level().playSound(null, getX(), getY(), getZ(), SoundEvents.ITEM_PICKUP, SoundSource.PLAYERS, 0.4f, 1.2f);
@@ -331,13 +356,16 @@ public class SteelPartEntity extends Entity {
 
     /** Fuses {@code other} into this assembly where they currently sit, then removes it. */
     public void weldWith(SteelPartEntity other) {
-        record World(PartType type, int rot, double x, double y, double z) {}
+        record World(Part part, double x, double y, double z) {
+            PartType type() { return part.type(); }
+            int rot() { return part.rot(); }
+        }
         List<World> all = new ArrayList<>();
         for (Part p : getParts()) {
-            all.add(new World(p.type(), p.rot(), getX() + p.dx(), getY() + p.dy(), getZ() + p.dz()));
+            all.add(new World(p, getX() + p.dx(), getY() + p.dy(), getZ() + p.dz()));
         }
         for (Part p : other.getParts()) {
-            all.add(new World(p.type(), p.rot(), other.getX() + p.dx(), other.getY() + p.dy(), other.getZ() + p.dz()));
+            all.add(new World(p, other.getX() + p.dx(), other.getY() + p.dy(), other.getZ() + p.dz()));
         }
         // New origin: centre of the bottom of the combined bounds.
         double minX = Double.MAX_VALUE, minY = Double.MAX_VALUE, minZ = Double.MAX_VALUE;
@@ -354,7 +382,7 @@ public class SteelPartEntity extends Entity {
         double oz = (minZ + maxZ) / 2.0;
         List<Part> parts = new ArrayList<>();
         for (World w : all) {
-            parts.add(new Part(w.type(), w.rot(), w.x() - ox, w.y() - minY, w.z() - oz));
+            parts.add(w.part().moved(w.rot(), w.x() - ox, w.y() - minY, w.z() - oz));
         }
         other.discard();
         setPosRaw(ox, minY, oz);
@@ -368,12 +396,12 @@ public class SteelPartEntity extends Entity {
         if (parts.size() <= 1) return;
         for (int i = 1; i < parts.size(); i++) {
             Part p = parts.get(i);
-            SteelPartEntity e = single(level(), p.type(), getX() + p.dx(), getY() + p.dy(), getZ() + p.dz(), p.rot());
+            SteelPartEntity e = single(level(), p, getX() + p.dx(), getY() + p.dy(), getZ() + p.dz());
             level().addFreshEntity(e);
         }
         Part first = parts.get(0);
         setPosRaw(getX() + first.dx(), getY() + first.dy(), getZ() + first.dz());
-        setParts(List.of(new Part(first.type(), first.rot(), 0, 0, 0)));
+        setParts(List.of(first.moved(first.rot(), 0, 0, 0)));
     }
 
     // ------------------------------------------------------------------ save

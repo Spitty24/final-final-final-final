@@ -94,6 +94,7 @@ public final class FreerunClient implements ClientModInitializer {
                         case dev.freerun.life.LifePayloads.BOARD -> new dev.freerun.client.life.OfficeJobScreen(payload.data());
                         case dev.freerun.life.LifePayloads.TASK -> new dev.freerun.client.life.OfficeTaskScreen(payload.data());
                         case dev.freerun.life.LifePayloads.CNC -> new dev.freerun.client.laser.CncScreen(payload.data());
+                        case dev.freerun.life.LifePayloads.ALIGN -> new dev.freerun.client.garage.AlignmentScreen(payload.data());
                         default -> new dev.freerun.client.life.ArcadeScreen(payload.data());
                     });
                 }));
@@ -104,6 +105,11 @@ public final class FreerunClient implements ClientModInitializer {
                 new dev.freerun.client.laser.LaserPartRenderer());
         EntityRendererRegistry.register(dev.freerun.laser.LaserRegistry.TARYN, dev.freerun.client.laser.TarynRenderer::new);
         EntityRendererRegistry.register(dev.freerun.laser.LaserRegistry.DR_GUILD, dev.freerun.client.laser.DrGuildRenderer::new);
+        EntityRendererRegistry.register(dev.freerun.garage.GarageRegistry.LIFT, dev.freerun.client.garage.LiftRenderer::new);
+        net.minecraft.client.renderer.blockentity.BlockEntityRenderers.register(dev.freerun.garage.GarageRegistry.ALIGNER_BE,
+                dev.freerun.client.garage.AlignerRenderer::new);
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(dev.freerun.garage.GarageRegistry.RUNWAY,
+                net.minecraft.client.renderer.RenderType.cutout());
         dev.freerun.laser.WorkPhoneItem.OPEN = () -> net.minecraft.client.Minecraft.getInstance()
                 .setScreen(new dev.freerun.client.laser.WorkPhoneScreen());
         ClientTickEvents.END_CLIENT_TICK.register(SecondPerson::tick);

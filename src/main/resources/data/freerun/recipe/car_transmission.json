@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "BCB",
+  "CRC",
+  "BCB"
+ ],
+ "key": {
+  "B": {
+   "item": "freerun:steel_bracket"
+  },
+  "C": {
+   "item": "freerun:steel_channel"
+  },
+  "R": {
+   "item": "minecraft:redstone"
+  }
+ },
+ "result": {
+  "id": "freerun:car_transmission",
+  "count": 1
+ }
+}

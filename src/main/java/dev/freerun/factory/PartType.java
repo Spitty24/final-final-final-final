@@ -17,7 +17,9 @@ public enum PartType {
     /** L-shaped angle: a sheet bent 90 degrees. */
     BRACKET(1.0, 0.5, 0.5),
     /** U-shaped channel: a plate bent twice. */
-    CHANNEL(1.0, 0.375, 0.375);
+    CHANNEL(1.0, 0.375, 0.375),
+    /** A part cut on the laser: a 1x1 sheet's footprint, carrying the shape that was drawn. */
+    LASER(1.0, 0.0625, 1.0);
 
     public final double w;
     public final double h;
@@ -35,6 +37,7 @@ public enum PartType {
             case PLATE -> FactoryRegistry.STEEL_PLATE;
             case BRACKET -> FactoryRegistry.STEEL_BRACKET;
             case CHANNEL -> FactoryRegistry.STEEL_CHANNEL;
+            case LASER -> dev.freerun.laser.LaserRegistry.LASER_PART;
         };
     }
 
@@ -44,6 +47,7 @@ public enum PartType {
             case PLATE -> "plate";
             case BRACKET -> "bracket";
             case CHANNEL -> "channel";
+            case LASER -> "laser-cut part";
         };
     }
 

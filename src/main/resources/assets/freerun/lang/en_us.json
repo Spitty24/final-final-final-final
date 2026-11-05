@@ -281,5 +281,20 @@
  "subtitles.freerun.laser_cut": "Laser cuts",
  "subtitles.freerun.teams_ping": "Teams notification",
  "entity.freerun.dr_guild": "Dr. Guild",
- "item.freerun.dr_guild_spawn_egg": "Dr. Guild Spawn Egg"
+ "item.freerun.dr_guild_spawn_egg": "Dr. Guild Spawn Egg",
+ "item.freerun.car_wheel": "Wheel",
+ "item.freerun.car_engine": "Engine Block",
+ "item.freerun.car_transmission": "Transmission",
+ "item.freerun.car_battery": "Car Battery",
+ "item.freerun.car_fuel_tank": "Fuel Tank",
+ "item.freerun.car_steering": "Steering Column",
+ "item.freerun.car_seats": "Car Seats",
+ "item.freerun.car_body_panels": "Body Panels",
+ "item.freerun.car_windows": "Car Windows",
+ "item.freerun.car_chassis": "Car Chassis",
+ "item.freerun.torque_wrench": "Torque Wrench",
+ "item.freerun.four_post_lift": "Four-Post Lift",
+ "block.freerun.runway": "Runway",
+ "block.freerun.hawksight_aligner": "Hunterra HawkSight Aligner",
+ "entity.freerun.four_post_lift": "Four-Post Lift"
 }

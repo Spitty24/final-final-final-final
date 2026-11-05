@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
  * arcade game) with its data, and the client answers with what the player did.
  */
 public final class LifePayloads {
-    public static final int BOARD = 0, TASK = 1, ARCADE = 2, CNC = 3, TEAMS_PING = 4, TEAMS = 5;
+    public static final int BOARD = 0, TASK = 1, ARCADE = 2, CNC = 3, TEAMS_PING = 4, TEAMS = 5, ALIGN = 6;
 
     private LifePayloads() {}
 
@@ -52,6 +52,7 @@ public final class LifePayloads {
                 case ARCADE -> Arcade.result(p, payload.data());
                 case CNC -> dev.freerun.laser.LaserJobs.cut(p, payload.data());
                 case TEAMS -> dev.freerun.laser.Dustin.action(p, payload.data());
+                case ALIGN -> dev.freerun.garage.AlignerBlockEntity.action(p, payload.data());
                 default -> {}
             }
         }));

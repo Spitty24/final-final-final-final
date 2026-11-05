@@ -1,0 +1,17 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "GGG",
+  "GGG"
+ ],
+ "key": {
+  "G": {
+   "item": "minecraft:glass"
+  }
+ },
+ "result": {
+  "id": "freerun:car_windows",
+  "count": 1
+ }
+}

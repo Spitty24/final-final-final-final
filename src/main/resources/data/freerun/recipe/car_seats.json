@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "L  ",
+  "LL ",
+  "BB "
+ ],
+ "key": {
+  "L": {
+   "item": "minecraft:leather"
+  },
+  "B": {
+   "item": "freerun:steel_bracket"
+  }
+ },
+ "result": {
+  "id": "freerun:car_seats",
+  "count": 1
+ }
+}

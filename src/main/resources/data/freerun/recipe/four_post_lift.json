@@ -1,0 +1,24 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "CPC",
+  "CRC",
+  "CPC"
+ ],
+ "key": {
+  "C": {
+   "item": "freerun:steel_channel"
+  },
+  "P": {
+   "item": "minecraft:piston"
+  },
+  "R": {
+   "item": "minecraft:redstone_block"
+  }
+ },
+ "result": {
+  "id": "freerun:four_post_lift",
+  "count": 1
+ }
+}

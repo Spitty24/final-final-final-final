@@ -60,7 +60,8 @@ public class CraneEntity extends Entity {
     private double minX, maxX, minZ, maxZ;
     private boolean boundsSet;
     private State state = State.IDLE;
-    private SteelPartEntity load;
+    private Entity load;
+    private int loadTicks;
     private double targetX, targetZ;
     private int driveTicks;
     private UUID operator;
@@ -247,34 +248,41 @@ public class CraneEntity extends Entity {
         setDrop(Math.min(maxDrop(), drop() + HOIST_SPEED));
         if (tickCount % 6 == 0) playSound(SoundEvents.CHAIN_STEP, 0.6f, 0.7f);
         Vec3 tip = hookTip();
-        AABB around = new AABB(tip.x - 1.5, tip.y - 0.5, tip.z - 1.5, tip.x + 1.5, tip.y + 0.3, tip.z + 1.5);
-        for (SteelPartEntity part : level().getEntitiesOfClass(SteelPartEntity.class, around, p -> !p.isHeld())) {
-            AABB bb = part.getBoundingBox();
-            boolean under = tip.x >= bb.minX - 0.3 && tip.x <= bb.maxX + 0.3 && tip.z >= bb.minZ - 0.3 && tip.z <= bb.maxZ + 0.3;
-            if (under && tip.y <= bb.maxY + 0.15 && tip.y >= bb.maxY - 0.4) {
-                load = part;
-                state = State.RAISE;
-                playSound(SoundEvents.CHAIN_PLACE, 1.0f, 0.8f);
-                playSound(SoundEvents.ANVIL_PLACE, 0.3f, 1.6f);
-                tell("§aHooked a " + (part.partCount() > 1 ? "welded assembly" : part.getParts().get(0).type().displayName()) + ".");
-                operatorXp(4);
-                return;
-            }
+        AABB around = new AABB(tip.x - 3.0, tip.y - 0.8, tip.z - 3.0, tip.x + 3.0, tip.y + 0.3, tip.z + 3.0);
+        Entity best = null;
+        for (Entity e : level().getEntities(this, around, e -> CraneLoad.liftable(e) && !(e instanceof SteelPartEntity p && p.isHeld()))) {
+            if (CraneLoad.underHook(e, tip) && (best == null || e.getBoundingBox().maxY > best.getBoundingBox().maxY)) best = e;
+        }
+        if (best != null) {
+            load = best;
+            loadTicks = 0;
+            state = State.RAISE;
+            playSound(SoundEvents.CHAIN_PLACE, 1.0f, 0.8f);
+            playSound(SoundEvents.ANVIL_PLACE, 0.3f, 1.6f);
+            String what = best instanceof SteelPartEntity part
+                    ? (part.partCount() > 1 ? "a welded assembly" : "a " + part.getParts().get(0).type().displayName())
+                    : CraneLoad.name(best);
+            tell("§aHooked " + what + ".");
+            if (!(best instanceof SteelPartEntity)) CraneLoad.grabbed(best);
+            operatorXp(4);
+            return;
         }
         if (drop() >= maxDrop() - 1.0E-3) {
             state = State.RAISE;
-            tell("§7Nothing under the hook to pick up. Steer it right over a steel part.");
+            tell("§7Nothing under the hook to pick up. Steer it right over something.");
         }
     }
 
     private void lowerToRelease() {
         if (load == null || !load.isAlive()) {
+            if (load != null) CraneLoad.released(load, operator);
             load = null;
             state = State.RAISE;
             return;
         }
         boolean touching = !level().noCollision(load, load.getBoundingBox().move(0.0, -0.12, 0.0));
         if (touching || drop() >= maxDrop() + 0.5) {
+            if (!(load instanceof SteelPartEntity)) CraneLoad.released(load, operator);
             load = null;
             state = State.RAISE;
             playSound(SoundEvents.CHAIN_BREAK, 0.8f, 1.0f);
@@ -296,16 +304,21 @@ public class CraneEntity extends Entity {
         Vec3 tip = hookTip();
         Vec3 target = new Vec3(tip.x, tip.y - load.getBbHeight(), tip.z);
         Vec3 delta = target.subtract(load.position());
-        if (delta.lengthSqr() > 3.5 * 3.5) {
+        if (delta.lengthSqr() > 3.5 * 3.5 || load.isPassenger()) {
+            if (!(load instanceof SteelPartEntity)) CraneLoad.released(load, operator);
             load = null;
             tell("§cThe load snagged and slipped off the hook!");
             return;
         }
-        Vec3 v = delta.scale(0.5);
-        if (v.length() > 1.2) v = v.normalize().scale(1.2);
-        load.setDeltaMovement(v);
-        load.hurtMarked = true;
-        load.hold();
+        if (load instanceof SteelPartEntity part) {
+            Vec3 v = delta.scale(0.5);
+            if (v.length() > 1.2) v = v.normalize().scale(1.2);
+            part.setDeltaMovement(v);
+            part.hurtMarked = true;
+            part.hold();
+        } else {
+            CraneLoad.carried(load, target, loadTicks++);
+        }
     }
 
     /** Red positioning laser: a dot on the floor straight under the hook. */
@@ -325,6 +338,12 @@ public class CraneEntity extends Entity {
     @Override
     public boolean hurt(DamageSource source, float amount) {
         return false;
+    }
+
+    @Override
+    public void remove(RemovalReason reason) {
+        if (load != null && !level().isClientSide && !(load instanceof SteelPartEntity)) CraneLoad.released(load, operator);
+        super.remove(reason);
     }
 
     @Override
@@ -350,6 +369,7 @@ public class CraneEntity extends Entity {
                     tag.getDouble("BeamMin"), tag.getDouble("BeamMax"));
         }
         setDrop(CARRY_DROP);   // any load was dropped when the world closed
+        load = null;
         state = State.IDLE;
     }
 

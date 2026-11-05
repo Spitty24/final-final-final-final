@@ -7,13 +7,13 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 
 /** Draws plain tinted boxes (a white texture, coloured per vertex) for the laser's moving parts. */
-final class Boxes {
-    static final RenderType SOLID = RenderType.entitySolid(ResourceLocation.withDefaultNamespace("textures/block/white_concrete.png"));
-    static final RenderType GLOW = RenderType.entityTranslucentEmissive(ResourceLocation.withDefaultNamespace("textures/block/white_concrete.png"));
+public final class Boxes {
+    public static final RenderType SOLID = RenderType.entitySolid(ResourceLocation.withDefaultNamespace("textures/block/white_concrete.png"));
+    public static final RenderType GLOW = RenderType.entityTranslucentEmissive(ResourceLocation.withDefaultNamespace("textures/block/white_concrete.png"));
 
     private Boxes() {}
 
-    static void box(PoseStack ps, VertexConsumer vc, float x0, float y0, float z0, float x1, float y1, float z1,
+    public static void box(PoseStack ps, VertexConsumer vc, float x0, float y0, float z0, float x1, float y1, float z1,
                     int argb, int light) {
         PoseStack.Pose p = ps.last();
         int a = argb >>> 24, r = argb >> 16 & 255, g = argb >> 8 & 255, b = argb & 255;

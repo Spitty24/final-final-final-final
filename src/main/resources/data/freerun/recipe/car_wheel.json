@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  " K ",
+  "KPK",
+  " K "
+ ],
+ "key": {
+  "K": {
+   "item": "minecraft:black_wool"
+  },
+  "P": {
+   "item": "freerun:steel_plate"
+  }
+ },
+ "result": {
+  "id": "freerun:car_wheel",
+  "count": 2
+ }
+}

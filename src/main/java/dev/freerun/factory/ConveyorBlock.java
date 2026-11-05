@@ -115,7 +115,7 @@ public class ConveyorBlock extends HorizontalDirectionalBlock {
             if (rest.isEmpty()) item.discard();
             else item.setItem(rest);
         } else if (entity instanceof SteelPartEntity part && part.partCount() == 1) {
-            ItemStack stack = new ItemStack(part.getParts().get(0).type().item());
+            ItemStack stack = part.getParts().get(0).toItem();
             ItemStack rest = HopperBlockEntity.addItem(null, container, stack, dir.getOpposite());
             if (rest.isEmpty()) part.discard();
         }

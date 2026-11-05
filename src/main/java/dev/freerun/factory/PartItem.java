@@ -32,6 +32,11 @@ public class PartItem extends Item {
         return type;
     }
 
+    /** The part this item becomes when placed (laser-cut parts override this to keep their shape). */
+    public SteelPartEntity.Part makePart(ItemStack stack, int rot) {
+        return new SteelPartEntity.Part(type, rot & 3, 0, 0, 0);
+    }
+
     /** Quarter-turn rotation matching the direction the player faces. */
     public static int rotationFor(Player player) {
         return player == null ? 0 : player.getDirection().get2DDataValue() & 3;
@@ -55,7 +60,7 @@ public class PartItem extends Item {
             z = p.getZ() + 0.5;
         }
         Player player = ctx.getPlayer();
-        SteelPartEntity part = SteelPartEntity.single(level, type, x, y, z, rotationFor(player));
+        SteelPartEntity part = SteelPartEntity.single(level, makePart(ctx.getItemInHand(), rotationFor(player)), x, y, z);
         if (!level.noCollision(part, part.getBoundingBox().deflate(1.0E-3))) {
             if (player != null) player.displayClientMessage(Component.literal("§cNo room for that part there."), true);
             return InteractionResult.FAIL;

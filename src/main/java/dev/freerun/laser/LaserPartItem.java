@@ -4,6 +4,9 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import dev.freerun.factory.PartItem;
+import dev.freerun.factory.PartType;
+import dev.freerun.factory.SteelPartEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -11,10 +14,18 @@ import net.minecraft.world.item.component.CustomData;
 
 import java.util.List;
 
-/** A part cut on the laser. It carries its own shape, which is how it's drawn in your hand. */
-public class LaserPartItem extends Item {
+/**
+ * A part cut on the laser. It carries its own shape, which is how it's drawn in your hand, and it
+ * works like any steel part: place it, stack it, weld it, rotate it, lift it with the crane.
+ */
+public class LaserPartItem extends PartItem {
     public LaserPartItem(Properties p) {
-        super(p);
+        super(PartType.LASER, p);
+    }
+
+    @Override
+    public SteelPartEntity.Part makePart(ItemStack stack, int rot) {
+        return new SteelPartEntity.Part(PartType.LASER, rot & 3, 0, 0, 0, shape(stack), gas(stack));
     }
 
     public static ItemStack make(long[] shape, int gas) {
@@ -47,6 +58,7 @@ public class LaserPartItem extends Item {
         }
         int pieces = LaserShape.pierces(s);
         lines.add(Component.literal(LaserShape.count(s) + " cells, " + pieces + (pieces == 1 ? " piece" : " pieces")).withStyle(ChatFormatting.GRAY));
+        lines.add(Component.literal("§7Place it, weld it, hook it on the crane.").withStyle(ChatFormatting.GRAY));
         lines.add(gas(stack) == LaserCutterBlockEntity.NITROGEN
                 ? Component.literal("Nitrogen cut: bright, oxide-free edge").withStyle(ChatFormatting.AQUA)
                 : Component.literal("Oxygen cut: dark oxide edge").withStyle(ChatFormatting.GOLD));

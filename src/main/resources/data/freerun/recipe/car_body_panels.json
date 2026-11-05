@@ -1,0 +1,18 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "PPP",
+  "P P",
+  "PPP"
+ ],
+ "key": {
+  "P": {
+   "item": "freerun:steel_plate"
+  }
+ },
+ "result": {
+  "id": "freerun:car_body_panels",
+  "count": 1
+ }
+}

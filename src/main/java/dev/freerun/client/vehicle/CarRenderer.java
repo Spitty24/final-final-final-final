@@ -41,20 +41,25 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
         int overlay = OverlayTexture.NO_OVERLAY;
         VertexConsumer vc = buffers.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
         int paint = 0xFF000000 | car.color();
-        model.body.render(pose, vc, light, overlay, paint);
-        model.trim.render(pose, vc, light, overlay);
-        model.interior.render(pose, vc, light, overlay);
+        // a car you're still building only shows the parts that are on it
+        boolean body = car.has(dev.freerun.garage.CarPart.BODY);
+        if (body) model.body.render(pose, vc, light, overlay, paint);
+        model.trim.render(pose, vc, light, overlay);   // the frame, bumpers and sills: the chassis itself
+        if (car.has(dev.freerun.garage.CarPart.SEATS)) model.interior.render(pose, vc, light, overlay);
         boolean running = car.isVehicle();
         int lamp = running ? LightTexture.FULL_BRIGHT : light;
-        model.lights_front.render(pose, vc, lamp, overlay);
-        model.lights_rear.render(pose, vc, lamp, overlay);
+        if (body) {
+            model.lights_front.render(pose, vc, lamp, overlay);
+            model.lights_rear.render(pose, vc, lamp, overlay);
+        }
 
         float spin = car.wheelSpin(partialTick);
         float steer = car.steer(partialTick) * MAX_STEER;
-        wheel(model.wheel_fl, spin, steer, pose, vc, light, overlay);
-        wheel(model.wheel_fr, spin, steer, pose, vc, light, overlay);
-        wheel(model.wheel_rl, spin, 0.0f, pose, vc, light, overlay);
-        wheel(model.wheel_rr, spin, 0.0f, pose, vc, light, overlay);
+        if (car.has(dev.freerun.garage.CarPart.WHEEL_FL)) wheel(model.wheel_fl, spin, steer, pose, vc, light, overlay);
+        if (car.has(dev.freerun.garage.CarPart.WHEEL_FR)) wheel(model.wheel_fr, spin, steer, pose, vc, light, overlay);
+        if (car.has(dev.freerun.garage.CarPart.WHEEL_RL)) wheel(model.wheel_rl, spin, 0.0f, pose, vc, light, overlay);
+        if (car.has(dev.freerun.garage.CarPart.WHEEL_RR)) wheel(model.wheel_rr, spin, 0.0f, pose, vc, light, overlay);
+        if (!body) bare(car, pose, buffers, light);
 
         if (car.isPolice()) {
             VertexConsumer pk = buffers.getBuffer(RenderType.entityCutoutNoCull(POLICE));
@@ -67,12 +72,37 @@ public class CarRenderer extends EntityRenderer<CarEntity> {
             kit.blue.render(pose, pk, on && phase == 1 ? LightTexture.FULL_BRIGHT : light, overlay, on && phase == 1 ? 0xFFFFFFFF : 0xFF707070);
         }
 
-        VertexConsumer glass = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
-        model.glass.render(pose, glass, light, overlay);
-        model.windshield.render(pose, glass, light, overlay);
-        model.rear_window.render(pose, glass, light, overlay);
+        if (body && car.has(dev.freerun.garage.CarPart.GLASS)) {
+            VertexConsumer glass = buffers.getBuffer(RenderType.entityTranslucent(TEXTURE));
+            model.glass.render(pose, glass, light, overlay);
+            model.windshield.render(pose, glass, light, overlay);
+            model.rear_window.render(pose, glass, light, overlay);
+        }
         pose.popPose();
         super.render(car, entityYaw, partialTick, pose, buffers, light);
+    }
+
+    /**
+     * With no body on, you can see the guts: the engine up front, the gearbox behind it, the
+     * battery, the tank at the back and the steering column. Drawn last, in their own buffer.
+     */
+    private static void bare(CarEntity car, PoseStack pose, MultiBufferSource buffers, int light) {
+        VertexConsumer b = buffers.getBuffer(dev.freerun.client.laser.Boxes.SOLID);
+        float px = 1 / 16f;
+        if (car.has(dev.freerun.garage.CarPart.ENGINE)) {
+            dev.freerun.client.laser.Boxes.box(pose, b, -8 * px, 4 * px, 20 * px, 8 * px, 13 * px, 32 * px, 0xFF4A4E54, light);
+            dev.freerun.client.laser.Boxes.box(pose, b, -6 * px, 13 * px, 21 * px, 6 * px, 15 * px, 31 * px, 0xFFB02020, light);   // valve cover
+        }
+        if (car.has(dev.freerun.garage.CarPart.TRANSMISSION))
+            dev.freerun.client.laser.Boxes.box(pose, b, -4 * px, 3 * px, 8 * px, 4 * px, 9 * px, 20 * px, 0xFF6A6E74, light);
+        if (car.has(dev.freerun.garage.CarPart.BATTERY))
+            dev.freerun.client.laser.Boxes.box(pose, b, 9 * px, 4 * px, 26 * px, 13 * px, 9 * px, 32 * px, 0xFF1A1A1A, light);
+        if (car.has(dev.freerun.garage.CarPart.FUEL_TANK))
+            dev.freerun.client.laser.Boxes.box(pose, b, -10 * px, 3 * px, -30 * px, 10 * px, 8 * px, -20 * px, 0xFF8A8E94, light);
+        if (car.has(dev.freerun.garage.CarPart.STEERING)) {
+            dev.freerun.client.laser.Boxes.box(pose, b, 6.5f * px, 9 * px, 4 * px, 7.5f * px, 16 * px, 14 * px, 0xFF2A2A2A, light);
+            dev.freerun.client.laser.Boxes.box(pose, b, 4 * px, 16 * px, 3 * px, 10 * px, 22 * px, 4 * px, 0xFF2A2A2A, light);
+        }
     }
 
     private static void wheel(ModelPart part, float spin, float steer, PoseStack pose, VertexConsumer vc, int light, int overlay) {

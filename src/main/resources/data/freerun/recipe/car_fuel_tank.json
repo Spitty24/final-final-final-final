@@ -1,0 +1,18 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "SSS",
+  "S S",
+  "SSS"
+ ],
+ "key": {
+  "S": {
+   "item": "freerun:steel_sheet"
+  }
+ },
+ "result": {
+  "id": "freerun:car_fuel_tank",
+  "count": 1
+ }
+}

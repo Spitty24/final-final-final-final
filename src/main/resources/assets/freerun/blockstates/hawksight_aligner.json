@@ -1,0 +1,20 @@
+{
+ "variants": {
+  "facing=north": {
+   "model": "freerun:block/hawksight_aligner",
+   "y": 0
+  },
+  "facing=east": {
+   "model": "freerun:block/hawksight_aligner",
+   "y": 90
+  },
+  "facing=south": {
+   "model": "freerun:block/hawksight_aligner",
+   "y": 180
+  },
+  "facing=west": {
+   "model": "freerun:block/hawksight_aligner",
+   "y": 270
+  }
+ }
+}

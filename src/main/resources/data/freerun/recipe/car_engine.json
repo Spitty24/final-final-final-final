@@ -1,0 +1,27 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "misc",
+ "pattern": [
+  "PRP",
+  "IBI",
+  "PPP"
+ ],
+ "key": {
+  "P": {
+   "item": "freerun:steel_plate"
+  },
+  "R": {
+   "item": "minecraft:redstone_block"
+  },
+  "I": {
+   "item": "minecraft:piston"
+  },
+  "B": {
+   "item": "minecraft:iron_block"
+  }
+ },
+ "result": {
+  "id": "freerun:car_engine",
+  "count": 1
+ }
+}

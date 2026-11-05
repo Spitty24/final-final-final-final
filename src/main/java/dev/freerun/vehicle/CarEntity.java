@@ -62,6 +62,11 @@ public class CarEntity extends LivingEntity {
     private static final EntityDataAccessor<Float> DATA_FUEL = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Boolean> DATA_POLICE = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.BOOLEAN);
     private static final EntityDataAccessor<Boolean> DATA_SIREN = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.BOOLEAN);
+    /** Which {@link dev.freerun.garage.CarPart}s are fitted (bought cars come complete). */
+    private static final EntityDataAccessor<Integer> DATA_BUILD = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.INT);
+    /** Top-speed tune set with the torque wrench (1.0 = stock). */
+    private static final EntityDataAccessor<Float> DATA_TUNE = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.FLOAT);
+    private static final EntityDataAccessor<CompoundTag> DATA_ALIGN = SynchedEntityData.defineId(CarEntity.class, EntityDataSerializers.COMPOUND_TAG);
 
     private double speed;
     private float steer;
@@ -101,6 +106,69 @@ public class CarEntity extends LivingEntity {
         builder.define(DATA_FUEL, 60.0f);
         builder.define(DATA_POLICE, false);
         builder.define(DATA_SIREN, false);
+        builder.define(DATA_BUILD, dev.freerun.garage.CarPart.ALL);
+        builder.define(DATA_TUNE, 1.0f);
+        builder.define(DATA_ALIGN, new CompoundTag());
+    }
+
+    // ------------------------------------------------------------------ garage: build, tune, alignment
+
+    public int build() {
+        return entityData.get(DATA_BUILD);
+    }
+
+    public void setBuild(int mask) {
+        entityData.set(DATA_BUILD, mask & dev.freerun.garage.CarPart.ALL);
+    }
+
+    public boolean has(dev.freerun.garage.CarPart part) {
+        return (build() & part.bit()) != 0;
+    }
+
+    /** Everything it needs to drive is bolted on. */
+    public boolean roadworthy() {
+        int need = dev.freerun.garage.CarPart.neededMask();
+        return (build() & need) == need;
+    }
+
+    public float tune() {
+        return entityData.get(DATA_TUNE);
+    }
+
+    public void setTune(float t) {
+        entityData.set(DATA_TUNE, Mth.clamp(t, 0.5f, 2.0f));
+    }
+
+    private dev.freerun.garage.Alignment alignCache;
+
+    public dev.freerun.garage.Alignment alignment() {
+        if (alignCache == null) {
+            CompoundTag t = entityData.get(DATA_ALIGN);
+            alignCache = t.isEmpty() ? null : dev.freerun.garage.Alignment.load(t);
+            if (alignCache == null) {
+                alignCache = dev.freerun.garage.Alignment.worn(random);
+                if (!level().isClientSide) entityData.set(DATA_ALIGN, alignCache.save());
+            }
+        }
+        return alignCache;
+    }
+
+    public void setAlignment(dev.freerun.garage.Alignment a) {
+        alignCache = null;
+        entityData.set(DATA_ALIGN, a.save());
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (DATA_ALIGN.equals(key)) alignCache = null;
+    }
+
+    /** Held on a crane hook or a lift: physics paused (the hook / lift moves it). */
+    private int suspended;
+
+    public void suspend() {
+        suspended = 3;
     }
 
     public int color() {
@@ -300,6 +368,10 @@ public class CarEntity extends LivingEntity {
 
     @Override
     public void travel(Vec3 input) {
+        if (suspended > 0) {
+            suspended--;
+            return;   // the crane hook or the lift is moving us
+        }
         if (!isControlledByLocalInstance()) {
             super.travel(input);
             return;
@@ -326,11 +398,15 @@ public class CarEntity extends LivingEntity {
             steerIn = autopilot.steer;
             steerLimit = 1.35f;
         }
+        topSpeed *= tune() * (1.0 - alignment().scrub());
+        engine *= 0.75 + 0.25 * tune();
         boolean grounded = onGround();
         if (fuel() <= 0.0f && throttle > 0.0f && speed >= -0.01) throttle = 0.0f;
+        if (!roadworthy()) throttle = 0.0f;
 
         // Steering eases toward the input and recentres on its own.
         float target = Mth.clamp(steerIn, -steerLimit, steerLimit);
+        if (driver instanceof Player && Math.abs(v) > 0.1) target += (float) (alignment().pull() * Math.min(1.0, Math.abs(v)));
         steer += Mth.clamp(target - steer, -0.09f, 0.09f);
 
         double v = speed;
@@ -452,6 +528,8 @@ public class CarEntity extends LivingEntity {
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
+        InteractionResult garage = dev.freerun.garage.Garage.interact(this, player, hand);
+        if (garage != InteractionResult.PASS) return garage;
         if (held.is(EconomyRegistry.GAS_CAN)) {
             if (!level().isClientSide) {
                 addFuel(40.0f);
@@ -463,6 +541,10 @@ public class CarEntity extends LivingEntity {
         }
         if (player.isSecondaryUseActive()) return InteractionResult.PASS;
         if (!canAddPassenger(player)) return InteractionResult.PASS;
+        if (!roadworthy()) {
+            if (!level().isClientSide) dev.freerun.garage.Garage.checklist(this, player);
+            return InteractionResult.sidedSuccess(level().isClientSide);
+        }
         if (!level().isClientSide && player.startRiding(this)) {
             ambient = false;   // somebody's car now
             if (getControllingPassenger() == player) {
@@ -488,8 +570,10 @@ public class CarEntity extends LivingEntity {
         if (level().isClientSide) return false;
         if (source.getEntity() instanceof Player player && source.getDirectEntity() == player
                 && player.isShiftKeyDown() && getPassengers().isEmpty()) {
-            ItemStack item = new ItemStack(VehicleRegistry.CAR_ITEM);
-            if (!player.getAbilities().instabuild) spawnAtLocation(item);
+            if (!player.getAbilities().instabuild) {
+                if (roadworthy() && has(dev.freerun.garage.CarPart.BODY)) spawnAtLocation(new ItemStack(VehicleRegistry.CAR_ITEM));
+                else for (ItemStack s : dev.freerun.garage.Garage.dismantle(this)) spawnAtLocation(s);
+            }
             playSound(SoundEvents.IRON_DOOR_CLOSE, 0.8f, 0.8f);
             discard();
             return true;
@@ -557,6 +641,9 @@ public class CarEntity extends LivingEntity {
         tag.putFloat("Fuel", fuel());
         tag.putBoolean("Police", isPolice());
         tag.putBoolean("Ambient", ambient);
+        tag.putInt("Build", build());
+        tag.putFloat("Tune", tune());
+        tag.put("Alignment", alignment().save());
         if (city != null) {
             tag.putInt("CityX", city.getX());
             tag.putInt("CityY", city.getY());
@@ -571,6 +658,9 @@ public class CarEntity extends LivingEntity {
         if (tag.contains("Fuel")) entityData.set(DATA_FUEL, Mth.clamp(tag.getFloat("Fuel"), 0.0f, MAX_FUEL));
         if (tag.getBoolean("Police")) entityData.set(DATA_POLICE, true);
         ambient = tag.getBoolean("Ambient");
+        if (tag.contains("Build")) setBuild(tag.getInt("Build"));
+        if (tag.contains("Tune")) setTune(tag.getFloat("Tune"));
+        if (tag.contains("Alignment")) setAlignment(dev.freerun.garage.Alignment.load(tag.getCompound("Alignment")));
         if (tag.contains("CityX")) city = new net.minecraft.core.BlockPos(tag.getInt("CityX"), tag.getInt("CityY"), tag.getInt("CityZ"));
     }
 }
