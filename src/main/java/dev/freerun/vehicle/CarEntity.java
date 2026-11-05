@@ -142,20 +142,22 @@ public class CarEntity extends LivingEntity {
     private dev.freerun.garage.Alignment alignCache;
 
     public dev.freerun.garage.Alignment alignment() {
-        if (alignCache == null) {
-            CompoundTag t = entityData.get(DATA_ALIGN);
-            alignCache = t.isEmpty() ? null : dev.freerun.garage.Alignment.load(t);
-            if (alignCache == null) {
-                alignCache = dev.freerun.garage.Alignment.worn(random);
-                if (!level().isClientSide) entityData.set(DATA_ALIGN, alignCache.save());
-            }
+        dev.freerun.garage.Alignment a = alignCache;
+        if (a != null) return a;
+        CompoundTag t = entityData.get(DATA_ALIGN);
+        if (t.isEmpty()) {
+            a = dev.freerun.garage.Alignment.worn(random);
+            if (!level().isClientSide) entityData.set(DATA_ALIGN, a.save());   // (this clears the cache, so set it after)
+        } else {
+            a = dev.freerun.garage.Alignment.load(t);
         }
-        return alignCache;
+        alignCache = a;
+        return a;
     }
 
     public void setAlignment(dev.freerun.garage.Alignment a) {
-        alignCache = null;
         entityData.set(DATA_ALIGN, a.save());
+        alignCache = a;
     }
 
     @Override
