@@ -51,6 +51,7 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Toggle mod | **K** (rebind in Controls → Freerun) |
 | Blackwire hack | **H** / **Shift+H** while holding your phone |
 | Skill tree | **P** |
+| Second-person view | **F5** a fourth time (after first person, behind, in front): you, as seen by whoever's nearest and can see you |
 
 **What can be climbed** is the block tag `freerun:climbable` (`data/freerun/tags/block/climbable.json`):
 bricks, all the stone bricks, cobblestone, deepslate bricks/tiles, mud and nether bricks,
@@ -327,6 +328,54 @@ phone battery, which recharges by itself.
 | Gangster | Overload their phone (zap) | Leak their location to the other crew |
 | Gas pump | Overload it (boom) | — |
 | Vending machine / TV | Free snack / change the channel | — |
+
+## The laser bay
+
+Through the door at the back of the welding department, the factory now has a **laser bay** built
+round a flatbed fiber laser cutter (the kind TRUMPF makes; ours is the *Trumf TruCut 3030 fiber*).
+
+**How a real one works, and how ours does:** a fiber laser makes its beam in a doped glass fiber
+and sends it down a cable to the cutting head, which rides a gantry over a slatted bed. The beam
+melts the steel and an **assist gas** blows the melt out of the cut (the kerf). Each separate
+piece needs its own **pierce** first, then the head traces every outline.
+
+- **Oxygen** burns the steel as it cuts, so it's faster, but leaves a dark oxide edge.
+- **Nitrogen** is inert, so it's slower but leaves a bright, weld-ready edge.
+
+In game:
+
+1. Stand at the **CNC terminal** by the machine and right-click it. Draw your part on the
+   32 × 32 sheet: pen, eraser, line, box, circle and fill tools, undo, and presets (bracket,
+   washer, gear, star, gusset). Left-click draws, right-click erases.
+2. Pick **O₂ or N₂**. The screen shows cut length, pierces and estimated time.
+3. Press **CUT**. One **Steel Sheet** from your inventory is loaded (the sheet rack by the door
+   has plenty). The gantry and head move over the bed tracing your outline, with the beam,
+   sparks (O₂) or blue-white glow (N₂), and the kerf glowing behind it.
+4. The finished **Laser-Cut Part** pops out on the bed: it's drawn in your hand as the exact
+   shape you cut, bright or oxide-dark depending on the gas. The leftover skeleton comes out as
+   iron nuggets. You get career XP, and General Stores buy parts for $6.
+
+The bay also has the enclosure with orange laser-safety windows, the shuttle table (pallet
+changer) with the next sheets waiting, the 12 kW laser source and its chiller, oxygen (green) and
+nitrogen (black) bottles, a deburr-and-sort table, and a scrap bin. You can build your own too:
+a **Laser Cutter** block surrounded by eight **Laser Cutting Bed** blocks, and a **CNC Terminal**
+within 6 blocks. All three can be crafted.
+
+**Taryn**, the laser tech, works the bay. Like Ethan, she has questions ("Is 12 kilowatts a
+lot? How many toasters is that?"). One time in ten she says something that's actually right
+about lasers. She also comments when you start or finish a cut.
+
+## The work phone
+
+Pick a career and you're issued a **work phone** (also $1 at the General Store, or craft one). It
+has one app, **Teams**, and one contact: your manager, **Dustin**.
+
+- Every 1 to 15 minutes, Dustin messages you to insult your intelligence. A pop-up and a chime let
+  you know.
+- Shortly after, he apologises: "Sorry. I'm working on myself."
+- Then he does it again.
+- Open the chat to read it all. IT has locked the keyboard, so you can only answer with quick
+  replies, and he has an answer for each.
 
 ## Welding factory
 
