@@ -5,7 +5,7 @@ with animated arms in first person and full-body animation in third person (visi
 players when the server has the mod too).
 
 > **Status:** builds cleanly on GitHub Actions against Minecraft 1.21.1. Newer features
-> (most recently the generated city, traffic, residents and the smartphone) haven't been play-tested yet, so expect
+> (most recently the 20× city, the new stores and drive-thrus, police and crime) haven't been play-tested yet, so expect
 > some tuning.
 
 ## Build the .jar
