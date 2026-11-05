@@ -92,10 +92,11 @@ public final class CityWorld {
 
     private static Optional<BlockPos> findSite(long seed, int rx, int rz, ChunkGenerator gen, RandomState rs, LevelHeightAccessor heights) {
         long h = mix(seed, rx, rz);
-        if (Math.floorMod(h, 100L) >= CHANCE) return Optional.empty();
+        boolean home = (rx == 0 || rx == -1) && (rz == 0 || rz == -1);   // always try hard to put one near spawn
+        if (!home && Math.floorMod(h, 100L) >= CHANCE) return Optional.empty();
         int span = REGION - CityLayout.SIZE - 2 * (MARGIN + 16);
         int n = 5;
-        for (int attempt = 0; attempt < 5; attempt++) {
+        for (int attempt = 0; attempt < (home ? 12 : 6); attempt++) {
             long a = mix(h, attempt, 7);
             int x0 = rx * REGION + MARGIN + 16 + (int) Math.floorMod(a, (long) span);
             int z0 = rz * REGION + MARGIN + 16 + (int) Math.floorMod(a >>> 24, (long) span);
@@ -115,7 +116,7 @@ public final class CityWorld {
             Arrays.sort(sorted);
             int median = sorted[sorted.length / 2];
             int spread = sorted[(int) (sorted.length * 0.9)] - sorted[(int) (sorted.length * 0.1)];
-            if (wet > 5 || spread > 56) continue;
+            if (wet > 7 || spread > 70) continue;
             if (median < gen.getSeaLevel() - 2 || median > heights.getMaxBuildHeight() - 90) continue;
             return Optional.of(new BlockPos(x0, Math.max(median, gen.getSeaLevel() + 1) - 1, z0));
         }

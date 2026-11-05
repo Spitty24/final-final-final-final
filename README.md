@@ -85,8 +85,8 @@ either way. Rebind it under Controls → Freerun if you like.
 ## The city
 
 Cities are now about **20 times bigger: 1,084 × 1,084 blocks**, an 18 × 18 grid of city blocks
-(the old one was 244 × 244). Most 2,048-block regions of the overworld get one, on reasonably
-dry, reasonably flat land; hills are cut down, hollows and rivers filled in, and the edges sloped
+(the old one was 244 × 244). Most 2,048-block regions of the overworld get one (and there's
+almost always one within a couple of kilometres of spawn), on reasonably dry, reasonably flat land; hills are cut down, hollows and rivers filled in, and the edges sloped
 off. Type **`/findcity`** to get the nearest one's location and direction, or **`/city`** (needs
 cheats) to found one centred on you. A city that size is built chunk by chunk as you explore
 (the part around you goes up within seconds).
