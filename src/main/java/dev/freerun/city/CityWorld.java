@@ -487,21 +487,87 @@ public final class CityWorld {
         return QUEUE.size();
     }
 
+    /** Chunks of a generated city just loaded, to be checked for holes. */
+    private static final LinkedHashSet<Long> CHECK = new LinkedHashSet<>();
+
     public static void register() {
         ServerChunkEvents.CHUNK_LOAD.register((world, chunk) -> {
             if (world.dimension() != Level.OVERWORLD) return;
-            Data d = data(world);
-            if (d.manual.isEmpty()) return;
             ChunkPos cp = chunk.getPos();
+            Data d = data(world);
             for (Manual m : d.manual) {
                 int idx = m.index(cp);
-                if (idx >= 0 && !m.built.get(idx)) QUEUE.add(cp.toLong());
+                if (idx >= 0 && !m.built.get(idx)) {
+                    QUEUE.add(cp.toLong());
+                    return;
+                }
             }
+            if (naturalFor(world, cp) != null) CHECK.add(cp.toLong());
         });
         ServerTickEvents.END_WORLD_TICK.register(level -> {
-            if (level.dimension() != Level.OVERWORLD || QUEUE.isEmpty()) return;
+            if (level.dimension() != Level.OVERWORLD) return;
+            for (int k = 0; k < 16 && !CHECK.isEmpty(); k++) {
+                long l = CHECK.iterator().next();
+                CHECK.remove(l);
+                ChunkPos cp = new ChunkPos(l);
+                BlockPos o = naturalFor(level, cp);
+                if (o != null && needsRepair(level, o, cp)) QUEUE.add(l);
+            }
             for (int k = 0; k < 2 && !QUEUE.isEmpty(); k++) buildNext(level);
         });
+    }
+
+    /** The generated city whose footprint this chunk overlaps (not counting the sloped margin), if its site is known. */
+    private static BlockPos naturalFor(ServerLevel level, ChunkPos cp) {
+        Optional<BlockPos> site = knownSite(level, Mth.floorDiv(cp.getMiddleBlockX(), REGION), Mth.floorDiv(cp.getMiddleBlockZ(), REGION));
+        BlockPos o = site == null ? null : site.orElse(null);
+        if (o == null) return null;
+        if (cp.getMaxBlockX() < o.getX() || cp.getMinBlockX() >= o.getX() + CityLayout.SIZE) return null;
+        if (cp.getMaxBlockZ() < o.getZ() || cp.getMinBlockZ() >= o.getZ() + CityLayout.SIZE) return null;
+        return o;
+    }
+
+    /**
+     * Does this chunk of the city look unbuilt? Inside a city every column has solid ground at
+     * street level and nothing natural piled on top. Checks 16 columns: a hole (air or water at
+     * street level) or untouched hillside (dirt and stone just above it) counts against it.
+     */
+    static int unbuiltColumns(ServerLevel level, BlockPos city, ChunkPos cp) {
+        int bad = 0, y = city.getY();
+        BlockPos.MutableBlockPos m = new BlockPos.MutableBlockPos();
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                int x = cp.getMinBlockX() + 2 + i * 4, z = cp.getMinBlockZ() + 2 + j * 4;
+                if (!inCity(city, x, z, 0)) continue;
+                var ground = level.getBlockState(m.set(x, y, z));
+                if (ground.isAir() || ground.liquid() || natural(level.getBlockState(m.set(x, y + 1, z))) && natural(level.getBlockState(m.set(x, y + 2, z)))) bad++;
+            }
+        }
+        return bad;
+    }
+
+    private static boolean natural(net.minecraft.world.level.block.state.BlockState s) {
+        return s.is(net.minecraft.tags.BlockTags.DIRT) || s.is(net.minecraft.tags.BlockTags.BASE_STONE_OVERWORLD)
+                || s.is(net.minecraft.tags.BlockTags.SAND) || s.is(Blocks.GRAVEL) || s.is(Blocks.SANDSTONE) || s.is(Blocks.SNOW_BLOCK)
+                || s.liquid();
+    }
+
+    /**
+     * A hole in a generated city: the chunk looks unbuilt, it's next to chunks that are built
+     * (so this isn't old, already-explored land that predates the city), and nobody has spent
+     * long in it.
+     */
+    private static boolean needsRepair(ServerLevel level, BlockPos city, ChunkPos cp) {
+        var chunk = level.getChunkSource().getChunkNow(cp.x, cp.z);
+        if (chunk == null || chunk.getInhabitedTime() > 20 * 60 * 30) return false;
+        if (unbuiltColumns(level, city, cp) < 4) return false;
+        int[][] around = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for (int[] a : around) {
+            ChunkPos n = new ChunkPos(cp.x + a[0], cp.z + a[1]);
+            if (naturalFor(level, n) == null || level.getChunkSource().getChunkNow(n.x, n.z) == null) continue;
+            if (unbuiltColumns(level, city, n) == 0) return true;
+        }
+        return false;
     }
 
     private static void buildNext(ServerLevel level) {
@@ -529,9 +595,25 @@ public final class CityWorld {
         for (Manual m : d.manual) {
             int idx = m.index(cp);
             if (idx < 0 || m.built.get(idx)) continue;
-            CityPlan.buildChunk(level, m.origin, cp, level.getChunkSource().getGenerator(), level.getRandom());
+            build(level, m.origin, cp);
             m.built.set(idx);
             d.setDirty();
+            return;
+        }
+        BlockPos o = naturalFor(level, cp);
+        if (o != null && needsRepair(level, o, cp)) {
+            build(level, o, cp);
+            dev.freerun.Freerun.LOGGER.info("Filled in a missing city chunk at {}", cp);
+            // its neighbours may have been waiting on it
+            for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) if (dx != 0 || dz != 0) CHECK.add(ChunkPos.asLong(cp.x + dx, cp.z + dz));
+        }
+    }
+
+    private static void build(ServerLevel level, BlockPos city, ChunkPos cp) {
+        try {
+            CityPlan.buildChunk(level, city, cp, level.getChunkSource().getGenerator(), level.getRandom());
+        } catch (RuntimeException e) {
+            dev.freerun.Freerun.LOGGER.error("Couldn't build city chunk {}", cp, e);
         }
     }
 }

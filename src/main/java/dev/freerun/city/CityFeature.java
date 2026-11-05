@@ -35,7 +35,12 @@ public class CityFeature extends Feature<NoneFeatureConfiguration> {
         int m = CityWorld.MARGIN;
         if (cp.getMaxBlockX() < city.getX() - m || cp.getMinBlockX() >= city.getX() + CityLayout.SIZE + m) return false;
         if (cp.getMaxBlockZ() < city.getZ() - m || cp.getMinBlockZ() >= city.getZ() + CityLayout.SIZE + m) return false;
-        CityPlan.buildChunk(level, city, cp, ctx.chunkGenerator(), ctx.random());
+        try {
+            CityPlan.buildChunk(level, city, cp, ctx.chunkGenerator(), ctx.random());
+        } catch (RuntimeException e) {
+            // never take world generation down with us; the hole gets filled in when the chunk loads
+            dev.freerun.Freerun.LOGGER.error("City generation failed in chunk {} (city at {})", cp, city, e);
+        }
         return true;
     }
 }

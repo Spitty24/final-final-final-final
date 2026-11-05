@@ -77,6 +77,8 @@ public final class CityLayout {
         SIZE = XS[CELLS] + ROAD;
         HALF = SIZE / 2;
         for (int r = 0; r < CELLS; r++) for (int c = 0; c < CELLS; c++) plan(c, r);
+        spreadOut();
+        for (List<Lot> cell : BY_CELL) LOTS.addAll(cell);
     }
 
     private CityLayout() {}
@@ -159,7 +161,66 @@ public final class CityLayout {
             }
         }
         BY_CELL[r * CELLS + c] = cell;
-        LOTS.addAll(cell);
+    }
+
+    /** Store types that shouldn't bunch up: no two of the same within this many blocks. */
+    private static final class Spread {   // a holder, so it exists before the static plan above runs
+        static final District[] TYPES = {District.BURGER, District.CHICKEN, District.DESSERT, District.DOUBLE_QUICK,
+                District.GENERAL_STORE, District.ROADHOUSE};
+    }
+    private static final int SPACING = 230;
+
+    /**
+     * Walks the plan and swaps any store that would sit too close to another of its kind for a
+     * different store that isn't nearby, or failing that for offices, parking or a park (in the
+     * commercial ring), apartments (in the hood) or houses (everywhere else).
+     */
+    private static void spreadOut() {
+        List<Lot> placed = new ArrayList<>();
+        for (int r = 0; r < CELLS; r++) {
+            for (int c = 0; c < CELLS; c++) {
+                List<Lot> cell = BY_CELL[r * CELLS + c];
+                for (int i = 0; i < cell.size(); i++) {
+                    Lot l = cell.get(i);
+                    int k = indexOf(l.district());
+                    if (k < 0) continue;
+                    District pick = null;
+                    int start = hash(c, r, i + 31) % Spread.TYPES.length;
+                    for (int n = -1; n < Spread.TYPES.length && pick == null; n++) {
+                        District cand = n < 0 ? l.district() : Spread.TYPES[(start + n) % Spread.TYPES.length];
+                        if (farFromOthers(placed, cand, l)) pick = cand;
+                    }
+                    if (pick == null) pick = filler(c, r, i);
+                    int variant = pick == District.HOOD ? ((l.lz() - lotZ(r)) / 42) % 2 : l.variant();
+                    Lot replaced = new Lot(l.lx(), l.lz(), l.w(), l.d(), pick, variant);
+                    cell.set(i, replaced);
+                    if (indexOf(pick) >= 0) placed.add(replaced);
+                }
+            }
+        }
+    }
+
+    private static int indexOf(District d) {
+        for (int k = 0; k < Spread.TYPES.length; k++) if (Spread.TYPES[k] == d) return k;
+        return -1;
+    }
+
+    private static boolean farFromOthers(List<Lot> placed, District d, Lot at) {
+        BlockPos c = at.centre();
+        for (Lot p : placed) {
+            if (p.district() != d) continue;
+            double dx = p.centre().getX() - c.getX(), dz = p.centre().getZ() - c.getZ();
+            if (dx * dx + dz * dz < (double) SPACING * SPACING) return false;
+        }
+        return true;
+    }
+
+    private static District filler(int c, int r, int i) {
+        double ring = Math.max(Math.abs(c - 8.5), Math.abs(r - 8.5));
+        int h = hash(c, r, i + 57) % 10;
+        if (c <= 7 && r >= 11) return h < 2 ? District.PARK : District.HOOD;
+        if (ring <= 4.5) return h < 4 ? District.OFFICE : h < 7 ? District.PARKING : District.PARK;
+        return h < 2 ? District.PARK : District.SUBURB;
     }
 
     public static List<Lot> lots() {

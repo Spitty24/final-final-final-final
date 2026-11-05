@@ -21,5 +21,5 @@ jobs:
       - name: Report
         run: |
           grep -nE "Exception|ERROR|Caused by|FATAL|Missing|Couldn't" server.log | grep -v "Failed to load properties" | head -80 || true
-          grep -nE "City probe|Nearest city|City founded|already|planned" server.log || true
+          grep -nE "City probe|Nearest city|City founded|already|planned|Filled in a missing|City generation failed" server.log || true
           grep -n "street found = true" server.log || (echo "the generated city was not found" && exit 1)

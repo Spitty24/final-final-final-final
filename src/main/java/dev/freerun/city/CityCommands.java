@@ -36,7 +36,20 @@ public final class CityCommands {
             return 0;
         }
         BlockPos feet = BlockPos.containing(src.getPosition());
-        BlockPos origin = feet.offset(-CityLayout.HALF, -1, -CityLayout.HALF);
+        // street level is the ground under you (the typical height across the city), not wherever you're flying
+        var gen = level.getChunkSource().getGenerator();
+        int[] h = new int[25];
+        for (int i = 0; i < 5; i++) for (int j = 0; j < 5; j++) {
+            int x = feet.getX() - CityLayout.HALF + i * (CityLayout.SIZE - 1) / 4, z = feet.getZ() - CityLayout.HALF + j * (CityLayout.SIZE - 1) / 4;
+            h[i * 5 + j] = level.hasChunk(x >> 4, z >> 4)
+                    ? level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, x, z)
+                    : gen.getBaseHeight(x, z, net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR_WG, level, level.getChunkSource().randomState());
+        }
+        java.util.Arrays.sort(h);
+        int ground = Math.max(h[12], gen.getSeaLevel() + 1);
+        int here = level.getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.OCEAN_FLOOR, feet.getX(), feet.getZ());
+        if (Math.abs(here - ground) <= 6) ground = Math.max(here, gen.getSeaLevel() + 1);   // flat-ish: match the ground you're on
+        BlockPos origin = new BlockPos(feet.getX() - CityLayout.HALF, ground - 1, feet.getZ() - CityLayout.HALF);
         if (CityWorld.cityAt(level, feet) != null) {
             src.sendFailure(Component.literal("You're already in a city."));
             return 0;
@@ -127,18 +140,28 @@ public final class CityCommands {
         BlockPos key = CityLayout.intersectionKey(city, 9, 9);
         int cx = key.getX() >> 4, cz = key.getZ() >> 4;
         if (!check) {
-            for (int x = cx - 2; x <= cx + 2; x++) for (int z = cz - 2; z <= cz + 2; z++) level.setChunkForced(x, z, true);
-            src.sendSuccess(() -> Component.literal("City probe: forcing 25 chunks around " + key.getX() + " " + key.getZ()
+            for (int x = cx - 3; x <= cx + 3; x++) for (int z = cz - 3; z <= cz + 3; z++) level.setChunkForced(x, z, true);
+            src.sendSuccess(() -> Component.literal("City probe: forcing 49 chunks around " + key.getX() + " " + key.getZ()
                     + " (downtown " + CityWorld.centre(city).getX() + " " + CityWorld.centre(city).getZ() + ")"), true);
             return 1;
         }
+        int holes = 0, checked = 0;
+        if (check) {
+            for (int x = cx - 3; x <= cx + 3; x++) for (int z = cz - 3; z <= cz + 3; z++) {
+                if (level.getChunkSource().getChunkNow(x, z) == null) continue;
+                checked++;
+                if (CityWorld.unbuiltColumns(level, city, new net.minecraft.world.level.ChunkPos(x, z)) >= 4) holes++;
+            }
+        }
+        int holeCount = holes, checkedCount = checked;
         boolean loaded = level.isLoaded(key);
         String block = loaded ? level.getBlockState(key).getBlock().getDescriptionId() : "(not loaded)";
         boolean street = loaded && level.getBlockState(key).is(net.minecraft.world.level.block.Blocks.BLACK_CONCRETE);
         int people = level.getEntitiesOfClass(net.minecraft.world.entity.LivingEntity.class, new net.minecraft.world.phys.AABB(key).inflate(48)).size();
         src.sendSuccess(() -> Component.literal("City probe: street found = " + street + " (" + block + "), "
-                + people + " mobs within 48, city here = " + (CityWorld.cityAt(level, key) != null)), true);
-        for (int x = cx - 2; x <= cx + 2; x++) for (int z = cz - 2; z <= cz + 2; z++) level.setChunkForced(x, z, false);
+                + people + " mobs within 48, city here = " + (CityWorld.cityAt(level, key) != null)
+                + ", holes = " + holeCount + " of " + checkedCount + " chunks"), true);
+        for (int x = cx - 3; x <= cx + 3; x++) for (int z = cz - 3; z <= cz + 3; z++) level.setChunkForced(x, z, false);
         return street ? 1 : 0;
     }
 
