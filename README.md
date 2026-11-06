@@ -385,6 +385,16 @@ one at the General Store for $900.
 - You stay transformed for **90 seconds**. The watch on your wrist blinks red and beeps over the
   last 10, then you morph back. It then needs **30 seconds** to recharge.
 - **G** is the creature's power; **Shift + G** or using the watch again turns you back early.
+- **The watch** is a 3D copper-and-teal model in your hand, and you wear it on your left wrist
+  whenever it's in your inventory (the dial pulses while it's charged). Transforming starts with
+  you raising your wrist and slapping the dial, in first and third person, before the light takes over.
+- **Every power leaves something you can see:** Root Snare grows a cage of twisting roots round
+  each target that holds for the snare and pulls back down after; Shell Slam leaves a cracked
+  crater with chunks of ground thrown along the shockwave; Arc is a forked lightning bolt
+  hopping between targets; Drain Bite pulls a stream of red back to the Skeeter; Pincer Snap
+  shows two huge claws clapping shut; Mist Dash leaves a fog trail; Stampede kicks up dust and
+  hoof marks; Scurry leaves glowing afterimages; Slag Spit is a molten glob; Splat is a wave of
+  gumbo with chunks in it, leaving a sticky puddle round everyone it caught.
 - You are rendered as the creature in third person (other players see it too), with its arms in
   first person, its own hitbox and eye height, and its own idle, walk and power animations. Dying
   turns you back.
