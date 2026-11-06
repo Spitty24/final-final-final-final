@@ -51,6 +51,7 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Toggle mod | **K** (rebind in Controls → Freerun) |
 | Blackwire hack | **H** / **Shift+H** while holding your phone |
 | Skill tree | **P** |
+| Swampwatch | **G**: open the dial / use the creature's power · **Shift + G**: turn back |
 | Second-person view | **F5** a fourth time (after first person, behind, in front): you, as seen by whoever's nearest and can see you |
 
 **What can be climbed** is the block tag `freerun:climbable` (`data/freerun/tags/block/climbable.json`):
@@ -371,6 +372,39 @@ never runs out, and a pistol "for liability reasons". He's very good at medicine
 people. Right-click him while you're hurt or poisoned and he heals you completely for a **$40
 copay**, with a lecture. If you're healthy he insults you, and if you can't pay he tells you to
 walk it off. Hit him and he shoots back, and he's a good shot.
+
+## The Swampwatch
+
+A copper-cased wristwatch with a teal dial that turns you into one of ten bayou creatures, each
+its own original design. Craft it (lily pad, two copper blocks, a clock, an amethyst shard) or buy
+one at the General Store for $900.
+
+- **Use the watch** (or press **G** with it in your inventory) to open the dial. Scroll or use the
+  arrow keys to turn it, click or press Enter to transform. You get a 26-tick morph with a twist
+  of teal-and-copper light, and the creature grows out of it.
+- You stay transformed for **90 seconds**. The watch on your wrist blinks red and beeps over the
+  last 10, then you morph back. It then needs **30 seconds** to recharge.
+- **G** is the creature's power; **Shift + G** or using the watch again turns you back early.
+- You are rendered as the creature in third person (other players see it too), with its arms in
+  first person, its own hitbox and eye height, and its own idle, walk and power animations. Dying
+  turns you back.
+
+| Creature | What it is | Passives | Power (G) |
+|---|---|---|---|
+| **Mossback** | Snapping-turtle bruiser, 1.7 tall | +20 hearts, 12 armour, immune to knockback, slow | **Shell Slam:** leap and slam down, 8 damage and knockback in 5 blocks |
+| **Skeeter** | Mosquito on the wing | Flight (fast, free), half your hearts, hits heal you | **Drain Bite:** 6 damage to what you're looking at, heals you 3 hearts |
+| **Mudbug** | Crawfish in armour | 14 armour, pincers hit for +4, breathes water, swims fast | **Pincer Snap:** 10 damage in a cone and 4 seconds of daze |
+| **Voltbelly** | Electric eel, upright | Swims fast, breathes water, shocks anything touching you in water | **Arc:** 8 lightning damage that chains to two more targets |
+| **Cypress** | Walking bald cypress, 3 blocks tall | 8 armour, +10 hearts, 2 extra reach, heals in rain and water | **Root Snare:** pins everything within 7 blocks for 5 seconds and heals you |
+| **Foglet** | A patch of fog | Half translucent, immune to arrows, bullets and falls | **Mist Dash:** 8 blocks forward through anything one block thick |
+| **Clockroach** | Factory cockroach, half a block tall | Fits through one-block gaps, climbs walls, runs at 1.6x, night vision | **Scurry:** 4 seconds of triple speed |
+| **Bayou Bull** | Swamp bull on two legs | +10 hearts, +6 damage, 6 armour, immune to knockback | **Stampede:** a 1.5-second charge that throws everything aside for 10 damage |
+| **Slagworm** | Worm of cooled furnace slag | Immune to fire and lava, sets anything within 2 blocks alight, hits burn | **Slag Spit:** a ball of molten slag |
+| **Gumbo** | A roux that got up and walked | No fall damage, jumps 2 blocks, sneak to squash through one-block gaps, hits slow | **Splat:** slows and weakens everything within 6 blocks for 6 seconds |
+
+The skins are 4x resolution, painted per material (shell, chitin, bark, fur, slag with glowing
+cracks, translucent mist and gumbo), and the rigs are generated from one spec file
+(`gen/aliens.py`) so the models and their textures always match.
 
 ## Bayou Auto & Alignment (the garage)
 
