@@ -5,7 +5,6 @@ import dev.freerun.alien.Form;
 import dev.freerun.client.alien.AlienRenderers;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Shadow;
 import dev.freerun.client.ThirdPersonAnimator;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -20,9 +19,6 @@ public abstract class PlayerRendererMixin {
     @Shadow
     protected abstract void renderNameTag(AbstractClientPlayer entity, Component displayName, PoseStack poseStack, MultiBufferSource buffer, int packedLight, float partialTick);
 
-    @Shadow
-    protected abstract boolean shouldShowName(AbstractClientPlayer entity);
-
     /** A player wearing a Swampwatch form is drawn as the creature instead. */
     @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At("HEAD"), cancellable = true)
@@ -31,7 +27,11 @@ public abstract class PlayerRendererMixin {
         Form f = AlienRenderers.formOf(player);
         if (f == null) return;
         AlienRenderers.render(player, f, partialTick, poseStack, buffer, packedLight);
-        if (shouldShowName(player)) renderNameTag(player, player.getDisplayName(), poseStack, buffer, packedLight, partialTick);
+        var mc = net.minecraft.client.Minecraft.getInstance();
+        boolean self = mc.getCameraEntity() == player && !mc.options.getCameraType().isFirstPerson();
+        boolean show = net.minecraft.client.Minecraft.renderNames() && player != mc.getCameraEntity() && !player.isInvisibleTo(mc.player)
+                && player.distanceToSqr(mc.getCameraEntity()) < 64 * 64;
+        if (show || self && dev.freerun.client.SecondPerson.active()) renderNameTag(player, player.getDisplayName(), poseStack, buffer, packedLight, partialTick);
         ci.cancel();
     }
 
