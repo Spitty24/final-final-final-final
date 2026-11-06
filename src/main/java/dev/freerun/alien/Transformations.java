@@ -273,7 +273,7 @@ public final class Transformations {
             }
         }
         if (p.getHealth() > p.getMaxHealth()) p.setHealth(p.getMaxHealth());
-        if (a == SKEETER && !p.isCreative() && !p.isSpectator()) {
+        if (a == Alien.SKEETER && !p.isCreative() && !p.isSpectator()) {
             p.getAbilities().mayfly = false;
             p.getAbilities().flying = false;
             p.getAbilities().setFlyingSpeed(0.05f);
@@ -304,7 +304,7 @@ public final class Transformations {
             case MUDBUG, VOLTBELLY -> {
                 hidden(p, MobEffects.WATER_BREATHING, 0);
                 hidden(p, MobEffects.DOLPHINS_GRACE, 0);
-                if (a == VOLTBELLY && p.isInWater() && now % 10 == 0) {
+                if (a == Alien.VOLTBELLY && p.isInWater() && now % 10 == 0) {
                     for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(1.2), e -> e != p && e.isInWater())) {
                         e.hurt(level.damageSources().lightningBolt(), 2.0f);
                         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, e.getX(), e.getY() + 1, e.getZ(), 6, 0.3, 0.4, 0.3, 0.1);

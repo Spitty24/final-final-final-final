@@ -189,7 +189,7 @@ public final class AlienAnimator {
                 rot(m.part("tail1"), s * 0.06f + walk * 0.08f, 0, Mth.sin(age * 0.12f) * 0.05f);
                 rot(body, s * 0.1f + walk * 0.12f, headYaw * Mth.DEG_TO_RAD * 0.3f, 0);
                 rot(head, -s * 0.12f + headPitch * Mth.DEG_TO_RAD * 0.5f, headYaw * Mth.DEG_TO_RAD * 0.5f, 0);
-                rot(m.part("jaw"), 0.1f + Mth.max(0, Mth.sin(age * 0.3f)) * 0.2f, 0, 0);
+                rot(m.part("jaw"), 0.1f + Math.max(0f, Mth.sin(age * 0.3f)) * 0.2f, 0, 0);
                 rot(armL, Mth.sin(age * 0.3f) * 0.2f, 0, -0.5f);
                 rot(armR, Mth.sin(age * 0.3f + 2) * 0.2f, 0, 0.5f);
                 if (ab > 0) {   // slag spit: rear back then lunge, jaw wide
@@ -213,7 +213,7 @@ public final class AlienAnimator {
                 move(body, 0, squash * 6.0f, 0);
                 move(head, 0, squash * 10.0f, 0);
                 move(m.part("bits"), 0, squash * 6.0f, 0);
-                move(m.part("drip"), 0, Mth.max(0, wobble) * 1.5f, 0);
+                move(m.part("drip"), 0, Math.max(0f, wobble) * 1.5f, 0);
                 if (ab > 0) {   // splat: squash flat and spread
                     body.yScale *= 1 - 0.5f * ab;
                     body.xScale *= 1 + 0.6f * ab;

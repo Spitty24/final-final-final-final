@@ -21,7 +21,7 @@ public abstract class PlayerRendererMixin {
     protected abstract void renderNameTag(AbstractClientPlayer entity, Component displayName, PoseStack poseStack, MultiBufferSource buffer, int packedLight, float partialTick);
 
     @Shadow
-    protected abstract boolean shouldShowName(LivingEntity entity);
+    protected abstract boolean shouldShowName(AbstractClientPlayer entity);
 
     /** A player wearing a Swampwatch form is drawn as the creature instead. */
     @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
