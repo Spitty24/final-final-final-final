@@ -71,8 +71,8 @@ ALIENS = [
  dict(id='voltbelly', name='Voltbelly', material='electric', w=0.7, h=2.2, eye=1.95,
       colours=dict(base='1e3a6e', dark='0e1e40', belly='e8e060', fin='78a8e8', eye='f0f080'),
       parts=[
-        P('head', (0, -4, 0), [(-3, -6, -6, 6, 6, 10), (-3.5, -3, -7, 7, 2, 2)], 'base'),
-        P('crest', (0, -9, 0), [(-0.5, -3, -5, 1, 3, 12)], 'fin'),
+        P('head', (0, 2, 0), [(-3, -6, -6, 6, 6, 10), (-3.5, -3, -7, 7, 2, 2)], 'base'),
+        P('crest', (0, -3, 0), [(-0.5, -3, -5, 1, 3, 12)], 'fin'),
         P('body', (0, 4, 0), [(-3, -2, -3, 6, 14, 6)], 'base'),
         P('belly', (0, 4, 0), [(-2, -1, -4, 4, 12, 1)], 'belly'),
         P('armL', (3.5, 0, 0), [(-0.5, 0, -2, 1, 9, 4)], 'fin'),
@@ -164,24 +164,24 @@ def pack(spec):
     """Assign texOffs to every box; returns layout (w, h) in model units."""
     items = []
     for part in spec['parts']:
-        for b in part['boxes']:
+        for bi, b in enumerate(part['boxes']):
             w, h, d = b[3], b[4], b[5]
-            W, H = int(math.ceil(2 * (w + d))), int(math.ceil(h + d))
-            items.append((part, b, W, H))
+            W, H = int(math.ceil(2 * (w + d))) + 1, int(math.ceil(h + d)) + 1   # +1: a gutter so faces never bleed
+            items.append((part, bi, W, H))
     items.sort(key=lambda it: -it[3])
     width = 128
     while True:
         x = y = rowH = 0; placed = []; ok = True
-        for part, b, W, H in items:
+        for part, bi, W, H in items:
             if x + W > width:
                 x = 0; y += rowH; rowH = 0
-            placed.append((part, b, x, y)); x += W; rowH = max(rowH, H)
+            placed.append((part, bi, x, y)); x += W; rowH = max(rowH, H)
         total = y + rowH
         if total <= width: break
         width *= 2
     layout = {}
-    for part, b, u, v in placed:
-        layout.setdefault(id(part), []).append((u, v))
+    for part, bi, u, v in placed:
+        layout[(id(part), bi)] = (u, v)
     return width, layout
 
 # ---------------------------------------------------------------- Java
@@ -212,9 +212,9 @@ def java_for(spec, width, layout):
              '        MeshDefinition mesh = new MeshDefinition();',
              '        PartDefinition root = mesh.getRoot();']
     for part in spec['parts']:
-        offs = layout[id(part)]
         cl = ['CubeListBuilder.create()']
-        for (u, v), b in zip(offs, part['boxes']):
+        for bi, b in enumerate(part['boxes']):
+            u, v = layout[(id(part), bi)]
             infl = b[6] if len(b) > 6 else 0
             cube = '.texOffs(%d, %d).addBox(%sf, %sf, %sf, %sf, %sf, %sf%s)' % (
                 u, v, b[0], b[1], b[2], b[3], b[4], b[5], ', new CubeDeformation(%sf)' % infl if infl else '')
@@ -252,17 +252,22 @@ def material(mat, col, w, h, seed, spec):
     img = np.zeros((h, w, 4), dtype=float)
     yy, xx = np.mgrid[0:h, 0:w]
     if mat == 'shell':
-        # mossy, lumpy skin with darker creases
-        f = 0.75 + 0.5 * n
-        crease = (np.sin(xx * 0.9 + n * 6) * np.sin(yy * 0.7 + n * 5)) > 0.85
-        f = np.where(crease, f * 0.7, f)
+        # pebbled reptile skin: small scales with dark gaps, moss in patches
+        cell = 6
+        cx = (xx % cell) - cell / 2 + (yy // cell % 2) * cell / 2 % cell
+        cy = (yy % cell) - cell / 2
+        scale_ = 1 - np.clip(np.sqrt(cx * cx + cy * cy) / (cell * 0.6), 0, 1) ** 2
+        f = 0.6 + 0.35 * scale_ + 0.3 * n
         img[..., :3] = base * f[..., None]
+        moss = noise(w, h, seed + 31, 3) > 0.62
+        img[..., :3] = np.where(moss[..., None], img[..., :3] * 0.5 + np.array([90, 130, 60]) * 0.5, img[..., :3])
     elif mat == 'chitin':
-        # glossy plates in bands with a highlight ridge
-        band = ((yy // 10) % 2 == 0)
-        f = 0.7 + 0.4 * n + np.where(band, 0.12, -0.05)
-        ridge = (yy % 10) < 2
-        f = np.where(ridge, f * 1.35, f)
+        # glossy overlapping plates: each band darkens toward its lower seam, a specular streak across
+        band = yy % 12
+        f = 0.65 + 0.35 * (1 - band / 12) + 0.18 * n
+        f = np.where(band < 1, f * 0.55, f)
+        spec_ = np.exp(-((xx - w * 0.35) / max(2, w * 0.08)) ** 2) * 0.35
+        f = f + spec_
         img[..., :3] = base * f[..., None]
     elif mat == 'electric':
         f = 0.6 + 0.5 * n
@@ -270,8 +275,11 @@ def material(mat, col, w, h, seed, spec):
         img[..., :3] = base * f[..., None]
         img[..., :3] = np.where(streak[..., None], np.array(hx(spec['colours']['eye'])) * 1.0, img[..., :3])
     elif mat == 'bark':
-        ridges = np.abs(np.sin(xx * 0.5 + n * 9)) ** 3
-        f = 0.55 + 0.6 * ridges + 0.2 * n
+        # deep vertical furrows, knots
+        ridges = np.abs(np.sin(xx * 0.45 + n * 7 + np.sin(yy * 0.05) * 2)) ** 2.5
+        f = 0.45 + 0.65 * ridges + 0.15 * n
+        knots = ((xx - w * 0.6) ** 2 / 9 + (yy - h * 0.4) ** 2 / 25) < (min(w, h) * 0.05) ** 2
+        f = np.where(knots, f * 0.5, f)
         img[..., :3] = base * f[..., None]
     elif mat == 'mist':
         f = 0.85 + 0.3 * n
@@ -280,8 +288,9 @@ def material(mat, col, w, h, seed, spec):
         img[..., 3] = np.clip(img[..., 3] * (0.7 + 0.6 * (1 - np.abs(yy / max(1, h - 1) - 0.5) * 2)), 0, 255)
         return np.clip(img, 0, 255).astype(np.uint8)
     elif mat == 'fur':
-        strands = (np.sin(yy * 1.2 + xx * 0.3 + n * 10) > 0.5)
-        f = 0.7 + 0.35 * n + np.where(strands, 0.15, -0.1) * rng.random((h, w))
+        # clumped strands flowing down
+        flow = np.sin(xx * 1.6 + n * 12 + yy * 0.15)
+        f = 0.62 + 0.25 * (flow > 0.2) + 0.25 * n + 0.08 * rng.random((h, w))
         img[..., :3] = base * f[..., None]
     elif mat == 'slag':
         # cooled crust with glowing cracks
@@ -306,6 +315,23 @@ def material(mat, col, w, h, seed, spec):
     img[..., :3] *= (1.08 - 0.16 * (yy / max(1, h - 1)))[..., None]
     return np.clip(img, 0, 255).astype(np.uint8)
 
+def bevel(face, name):
+    """Darken a face toward its edges and catch light along the top: reads as rounded, not flat."""
+    h, w = face.shape[:2]
+    if h < 3 or w < 3: return face
+    f = face.astype(float)
+    yy, xx = np.mgrid[0:h, 0:w]
+    edge = np.minimum(np.minimum(xx, w - 1 - xx), np.minimum(yy, h - 1 - yy))
+    k = np.clip(edge / max(2.0, min(w, h) * 0.18), 0, 1)
+    shade_ = 0.72 + 0.28 * k
+    if name != 'down':
+        rim = (yy < max(1, h // 12)) & (edge >= 1)
+        shade_ = np.where(rim, shade_ * 1.18, shade_)
+    outline = edge == 0
+    shade_ = np.where(outline, shade_ * 0.6, shade_)
+    f[..., :3] *= shade_[..., None]
+    return np.clip(f, 0, 255).astype(np.uint8)
+
 def faces(u, v, w, h, d):
     """Face rects in layout units: name -> (x, y, w, h), MC box layout."""
     return {'up': (u + d, v, w, d), 'down': (u + d + w, v, w, d),
@@ -322,17 +348,19 @@ def paint(spec, width, layout):
         if part['colour'] in ('belly', 'wing', 'horn', 'ring', 'leaf', 'moss', 'bit', 'claw', 'fin', 'crest', 'stripe'):
             mat = {'wing': 'mist', 'leaf': 'fur', 'moss': 'fur', 'belly': 'plain', 'horn': 'bark', 'ring': 'plain', 'bit': 'plain',
                    'claw': 'chitin', 'fin': 'mist', 'stripe': 'chitin'}.get(part['colour'], 'plain')
-        for (u, v), b in zip(layout[id(part)], part['boxes']):
+        for bi, b in enumerate(part['boxes']):
+            u, v = layout[(id(part), bi)]
             w, h, d = int(math.ceil(b[3])), int(math.ceil(b[4])), int(math.ceil(b[5]))
             for name, (fx, fy, fw, fh) in faces(u, v, w, h, d).items():
                 seed += 1
                 fw, fh = max(1, fw), max(1, fh)
                 face = material(mat, col, fw * S, fh * S, seed, spec)
+                face = bevel(face, name)
                 if name == 'down': face = (face.astype(float) * [0.6, 0.6, 0.6, 1]).astype(np.uint8)
                 if name in ('right', 'left'): face = (face.astype(float) * [0.85, 0.85, 0.85, 1]).astype(np.uint8)
                 if name == 'back': face = (face.astype(float) * [0.75, 0.75, 0.75, 1]).astype(np.uint8)
                 tex[fy * S:fy * S + fh * S, fx * S:fx * S + fw * S] = face
-            if part['name'] == 'head':
+            if part['name'] == 'head' and bi == 0:   # the main head box only, not the snout
                 eyes(spec, tex, u, v, w, h, d, b)
     im = Image.fromarray(tex, 'RGBA')
     return im

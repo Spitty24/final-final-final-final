@@ -136,6 +136,10 @@ public final class FreerunClient implements ClientModInitializer {
             }
         }));
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.alien.AlienHud.render(guiGraphics));
+        EntityRendererRegistry.register(dev.freerun.alien.AlienRegistry.FX, dev.freerun.client.alien.AbilityFxRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.EVENT.register((type, renderer, helper, ctx) -> {
+            if (renderer instanceof net.minecraft.client.renderer.entity.player.PlayerRenderer pr) helper.register(new dev.freerun.client.alien.WatchLayer(pr));
+        });
         net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
                 dev.freerun.alien.Transformations.CLIENT.clear());
         dev.freerun.economy.Amenities.OPEN_PHONE = () -> net.minecraft.client.Minecraft.getInstance()

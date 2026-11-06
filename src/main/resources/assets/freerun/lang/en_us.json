@@ -296,5 +296,6 @@
  "item.freerun.four_post_lift": "Four-Post Lift",
  "block.freerun.runway": "Runway",
  "block.freerun.hawksight_aligner": "Hunterra HawkSight Aligner",
- "entity.freerun.four_post_lift": "Four-Post Lift"
+ "entity.freerun.four_post_lift": "Four-Post Lift",
+ "entity.freerun.ability_fx": "Swampwatch Effect"
 }

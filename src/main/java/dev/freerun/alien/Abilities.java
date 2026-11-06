@@ -71,12 +71,14 @@ public final class Abilities {
                 }
                 t.hurt(level.damageSources().playerAttack(p), 6.0f);
                 p.heal(6.0f);
+                AbilityFx.spawn(level, AbilityFx.DRAIN, p.getEyePosition().subtract(0, 0.3, 0), t, t.getEyePosition(), 1, 16, 0);
                 level.sendParticles(ParticleTypes.DAMAGE_INDICATOR, t.getX(), t.getY() + t.getBbHeight() * 0.6, t.getZ(), 8, 0.2, 0.2, 0.2, 0.1);
                 level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BEE_STING, SoundSource.PLAYERS, 1.0f, 0.8f);
             }
             case MUDBUG -> {
                 Vec3 look = p.getViewVector(1.0f);
                 int hits = 0;
+                AbilityFx.spawn(level, AbilityFx.SNAP, pos, null, null, 1, 10, p.getYRot());
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(3.5), e -> e != p)) {
                     Vec3 d = e.position().subtract(pos).normalize();
                     if (d.dot(look) < 0.3) continue;
@@ -116,6 +118,8 @@ public final class Abilities {
                 for (LivingEntity e : chain) {
                     e.hurt(level.damageSources().lightningBolt(), 8.0f);
                     Vec3 a1 = e.position().add(0, e.getBbHeight() * 0.5, 0);
+                    AbilityFx.spawn(level, AbilityFx.ARC, a0, null, a1, 1, 9, 0);
+                    AbilityFx.spawn(level, AbilityFx.ARC, a0, null, a1, 1, 6, 0);   // a second fork, so it crackles
                     for (int i = 0; i <= 12; i++) {
                         Vec3 q = a0.lerp(a1, i / 12.0);
                         level.sendParticles(ParticleTypes.ELECTRIC_SPARK, q.x, q.y, q.z, 2, 0.1, 0.1, 0.1, 0.05);
@@ -126,7 +130,9 @@ public final class Abilities {
             }
             case CYPRESS -> {
                 int n = 0;
+                AbilityFx.spawn(level, AbilityFx.SHOCKWAVE, pos, null, null, 7.0f, 18, 0);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(7), e -> e != p)) {
+                    AbilityFx.spawn(level, AbilityFx.ROOTS, e.position(), e, null, 1, 100, 0);
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 100, 9));
                     e.addEffect(new MobEffectInstance(MobEffects.JUMP, 100, 128));   // can't jump out either
                     e.hurt(level.damageSources().cactus(), 3.0f);
@@ -148,6 +154,7 @@ public final class Abilities {
             }
             case CLOCKROACH -> {
                 p.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SPEED, 80, 3, false, true, true));
+                RUNNING.put(p.getUUID(), new int[]{3, 80});
                 level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.SILVERFISH_AMBIENT, SoundSource.PLAYERS, 1.0f, 1.6f);
             }
             case BAYOU_BULL -> {
@@ -159,10 +166,14 @@ public final class Abilities {
                 SmallFireball ball = new SmallFireball(level, p, look.scale(0.6));
                 ball.setPos(p.getEyePosition().add(look.scale(1.2)));
                 level.addFreshEntity(ball);
+                AbilityFx.spawn(level, AbilityFx.SLAG, ball.position(), ball, null, 1, 80, 0);
+                level.sendParticles(ParticleTypes.LAVA, ball.getX(), ball.getY(), ball.getZ(), 8, 0.2, 0.2, 0.2, 0.0);
                 level.playSound(null, pos.x, pos.y, pos.z, SoundEvents.BLAZE_SHOOT, SoundSource.PLAYERS, 0.8f, 0.8f);
             }
             case GUMBO -> {
+                AbilityFx.spawn(level, AbilityFx.SPLAT, pos, null, null, 6.0f, 26, 0);
                 for (LivingEntity e : level.getEntitiesOfClass(LivingEntity.class, p.getBoundingBox().inflate(6), e -> e != p)) {
+                    AbilityFx.spawn(level, AbilityFx.SPLAT, e.position(), e, null, Math.max(0.6f, e.getBbWidth() * 0.9f), 120, 0);
                     e.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 3));
                     e.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 0));
                     e.hurt(level.damageSources().playerAttack(p), 3.0f);
@@ -202,6 +213,9 @@ public final class Abilities {
                         e.hurtMarked = true;
                     }
                     level.sendParticles(ParticleTypes.EXPLOSION, p.getX(), p.getY() + 0.2, p.getZ(), 3, 1.5, 0.1, 1.5, 0.0);
+                    AbilityFx.spawn(level, AbilityFx.SHOCKWAVE, p.position(), null, null, 5.0f, 22, 0);
+                    level.sendParticles(new net.minecraft.core.particles.BlockParticleOption(ParticleTypes.BLOCK, level.getBlockState(p.blockPosition().below())),
+                            p.getX(), p.getY() + 0.2, p.getZ(), 60, 2.0, 0.3, 2.0, 0.3);
                     level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.PLAYERS, 0.7f, 0.9f);
                     level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.ANVIL_LAND, SoundSource.PLAYERS, 0.8f, 0.5f);
                 }
@@ -214,6 +228,7 @@ public final class Abilities {
                 p.connection.teleport(to.x, to.y, to.z, p.getYRot(), p.getXRot());
                 p.resetFallDistance();
                 level.sendParticles(ParticleTypes.CLOUD, to.x, to.y + 0.8, to.z, 6, 0.3, 0.5, 0.3, 0.02);
+                AbilityFx.spawn(level, AbilityFx.MIST, p.position(), null, null, 1, 24, 0);
                 if (r[1] <= 0) {
                     RUNNING.remove(p.getUUID());
                     // don't leave them inside a wall: back up until the body fits
@@ -237,10 +252,17 @@ public final class Abilities {
                 }
                 if (r[1] % 4 == 0) level.playSound(null, p.getX(), p.getY(), p.getZ(), SoundEvents.HORSE_GALLOP, SoundSource.PLAYERS, 1.0f, 0.7f);
                 level.sendParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, p.getX(), p.getY() + 0.3, p.getZ(), 2, 0.4, 0.1, 0.4, 0.01);
+                if (r[1] % 2 == 0) AbilityFx.spawn(level, AbilityFx.DUST, p.position(), null, null, 1, 18, 0);
                 if (r[1] <= 0) {
                     RUNNING.remove(p.getUUID());
                     for (Entity e : level.getEntities(p, p.getBoundingBox().inflate(16), e -> e.getTags().contains("bulled"))) e.removeTag("bulled");
                 }
+            }
+            case 3 -> {   // Clockroach: scurry afterimages
+                if (r[1] % 2 == 0 && p.getDeltaMovement().horizontalDistanceSqr() > 0.01) {
+                    AbilityFx.spawn(level, AbilityFx.AFTERIMAGE, p.position(), null, null, 1, 12, p.getYRot());
+                }
+                if (r[1] <= 0) RUNNING.remove(p.getUUID());
             }
             default -> RUNNING.remove(p.getUUID());
         }

@@ -18,5 +18,7 @@ public abstract class PlayerModelMixin {
                                  float netHeadYaw, float headPitch, CallbackInfo ci) {
         if (FirstPersonArms.renderingHands || !(entity instanceof Player player)) return;
         ThirdPersonAnimator.applyLimbs((PlayerModel<?>) (Object) this, player, ageInTicks - player.tickCount);
+        float slap = dev.freerun.client.alien.AlienRenderers.slap(player, ageInTicks - player.tickCount);
+        if (slap >= 0) dev.freerun.client.alien.WatchAnimation.slapPose((PlayerModel<?>) (Object) this, slap);
     }
 }

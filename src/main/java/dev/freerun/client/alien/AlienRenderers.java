@@ -55,7 +55,7 @@ public final class AlienRenderers {
         float t = now - f.phaseStart() + partial;
         float morph = 1.0f;   // 0 = no creature yet, 1 = fully formed
         boolean morphing = f.phase() != Form.ACTIVE;
-        if (f.phase() == Form.MORPH_IN) morph = Mth.clamp((t - 6) / (Form.MORPH_IN_TICKS - 6), 0, 1);
+        if (f.phase() == Form.MORPH_IN) morph = Mth.clamp((t - Form.SLAP_TICKS) / (Form.MORPH_IN_TICKS - Form.SLAP_TICKS - 4), 0, 1);
         else if (f.phase() == Form.MORPH_OUT) morph = 1 - Mth.clamp(t / (Form.MORPH_OUT_TICKS - 4), 0, 1);
         float bodyYaw = Mth.rotLerp(partial, p.yBodyRotO, p.yBodyRot);
         float headYaw = Mth.rotLerp(partial, p.yHeadRotO, p.yHeadRot) - bodyYaw;
@@ -73,7 +73,7 @@ public final class AlienRenderers {
         ps.mulPose(Axis.YP.rotationDegrees(180.0f - bodyYaw));
         if (morphing) {
             // twist of light the creature forms inside
-            column(ps, buffers, t, f.phase() == Form.MORPH_IN ? Mth.clamp(t / 8f, 0, 1) * (1 - morph * 0.7f) : (1 - morph) * 0.8f, a);
+            column(ps, buffers, t, f.phase() == Form.MORPH_IN ? Mth.clamp((t - Form.SLAP_TICKS + 3) / 6f, 0, 1) * (1 - morph * 0.7f) : (1 - morph) * 0.8f, a);
         }
         if (morph > 0) {
             float s = morphing ? 0.2f + 0.8f * ease(morph) : 1.0f;
@@ -188,9 +188,40 @@ public final class AlienRenderers {
         ps.popPose();
     }
 
-    /** Is this player drawn as a creature right now? */
+    /** Is this player drawn as a creature right now? (Not during the slap: they're still human then.) */
     public static Form formOf(Player p) {
         Form f = Transformations.form(p);
-        return f.transformed() ? f : null;
+        if (!f.transformed()) return null;
+        return f.slap(p.level().getGameTime(), 0) >= 0 ? null : f;
+    }
+
+    /** The light the dial throws while it's being slapped, 0 → 1. */
+    public static float slap(Player p, float partial) {
+        return Transformations.form(p).slap(p.level().getGameTime(), partial);
+    }
+
+    // ------------------------------------------------------------------ the watch on a human wrist
+
+    /**
+     * The Swampwatch worn on the left wrist, drawn in the arm's own space (pixels, y down from the
+     * shoulder). The dial glows, pulses brighter while charged, and flares open when slapped.
+     */
+    public static void watchOnArm(PoseStack ps, MultiBufferSource buffers, int light, float slap, boolean charged, float age) {
+        VertexConsumer vc = buffers.getBuffer(Boxes.SOLID);
+        float y = 8.5f;
+        Boxes.box(ps, vc, -2.25f, y - 1.0f, -2.25f, 2.25f, y + 1.0f, 2.25f, 0xFF2C3438, light);     // strap
+        Boxes.box(ps, vc, 2.1f, y - 1.4f, -1.4f, 2.9f, y + 1.4f, 1.4f, 0xFFB8692E, light);           // copper case
+        Boxes.box(ps, vc, 2.6f, y - 0.4f, 1.4f, 3.0f, y + 0.4f, 1.9f, 0xFFC87A3A, light);            // crown
+        VertexConsumer g = buffers.getBuffer(Boxes.GLOW);
+        float pulse = charged ? 0.55f + 0.25f * Mth.sin(age * 0.15f) : 0.25f;
+        float pop = slap >= 0 ? Mth.sin(Math.min(1, slap * 1.3f) * Mth.PI) : 0;
+        int a = (int) (255 * Math.min(1, pulse + pop));
+        float out = 2.9f + pop * 0.6f;
+        Boxes.box(ps, g, out, y - 1.0f, -1.0f, out + 0.15f, y + 1.0f, 1.0f, a << 24 | TEAL, 0xF000F0);
+        if (pop > 0.05f) {
+            // the dial springs up and throws light out of the wrist
+            Boxes.box(ps, g, out + 0.15f, y - 0.5f, -0.5f, out + 0.15f + pop * 5f, y + 0.5f, 0.5f, (int) (120 * pop) << 24 | TEAL, 0xF000F0);
+            Boxes.box(ps, g, out + 0.15f, y - 1.6f * pop, -1.6f * pop, out + 0.3f, y + 1.6f * pop, 1.6f * pop, (int) (200 * pop) << 24 | 0xE8FFF8, 0xF000F0);
+        }
     }
 }

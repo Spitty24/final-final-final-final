@@ -29,33 +29,33 @@ public final class AlienRigs {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("body", CubeListBuilder.create()
-                .texOffs(54, 0).addBox(-8f, -5f, -5f, 16f, 11f, 10f),
+                .texOffs(55, 0).addBox(-8f, -5f, -5f, 16f, 11f, 10f),
                 PartPose.offset(0f, 11f, 0f));
         root.addOrReplaceChild("belly", CubeListBuilder.create()
-                .texOffs(100, 22).addBox(-6f, -4f, -6f, 12f, 9f, 1f),
+                .texOffs(0, 42).addBox(-6f, -4f, -6f, 12f, 9f, 1f),
                 PartPose.offset(0f, 11f, 0f));
         root.addOrReplaceChild("shell", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-10f, -3f, 0f, 20f, 15f, 7f)
-                .texOffs(18, 40).addBox(-8f, -5f, 1f, 16f, 2f, 5f)
-                .texOffs(60, 40).addBox(-9f, 12f, 1f, 18f, 2f, 5f),
+                .texOffs(46, 42).addBox(-8f, -5f, 1f, 16f, 2f, 5f)
+                .texOffs(0, 53).addBox(-9f, 12f, 1f, 18f, 2f, 5f),
                 PartPose.offset(0f, 8f, 5f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(20, 22).addBox(-4f, -6f, -6f, 8f, 7f, 8f),
+                .texOffs(42, 23).addBox(-4f, -6f, -6f, 8f, 7f, 8f),
                 PartPose.offset(0f, 7f, -4f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(106, 0).addBox(-2.5f, -1f, -2.5f, 5f, 13f, 5f),
+                .texOffs(0, 23).addBox(-2.5f, -1f, -2.5f, 5f, 13f, 5f),
                 PartPose.offset(9f, 7f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(0, 22).addBox(-2.5f, -1f, -2.5f, 5f, 13f, 5f),
+                .texOffs(21, 23).addBox(-2.5f, -1f, -2.5f, 5f, 13f, 5f),
                 PartPose.offset(-9f, 7f, 0f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(52, 22).addBox(-3f, 0f, -3f, 6f, 7f, 6f),
+                .texOffs(75, 23).addBox(-3f, 0f, -3f, 6f, 7f, 6f),
                 PartPose.offset(4f, 17f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(76, 22).addBox(-3f, 0f, -3f, 6f, 7f, 6f),
+                .texOffs(100, 23).addBox(-3f, 0f, -3f, 6f, 7f, 6f),
                 PartPose.offset(-4f, 17f, 0f));
         root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(0, 40).addBox(-1.5f, -1f, 0f, 3f, 3f, 6f),
+                .texOffs(27, 42).addBox(-1.5f, -1f, 0f, 3f, 3f, 6f),
                 PartPose.offset(0f, 16f, 5f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -65,38 +65,38 @@ public final class AlienRigs {
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-2f, -4f, -2f, 4f, 9f, 4f)
-                .texOffs(74, 0).addBox(-2.5f, -6f, -2.5f, 5f, 3f, 5f),
+                .texOffs(83, 0).addBox(-2.5f, -6f, -2.5f, 5f, 3f, 5f),
                 PartPose.offset(0f, 12f, 0f));
         root.addOrReplaceChild("abdomen", CubeListBuilder.create()
-                .texOffs(24, 0).addBox(-2f, 0f, -1f, 4f, 7f, 3f),
+                .texOffs(27, 0).addBox(-2f, 0f, -1f, 4f, 7f, 3f),
                 PartPose.offset(0f, 17f, 1f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(38, 0).addBox(-2.5f, -4f, -3f, 5f, 5f, 5f)
-                .texOffs(94, 0).addBox(-0.5f, -1f, -9f, 1f, 1f, 6f),
+                .texOffs(42, 0).addBox(-2.5f, -4f, -3f, 5f, 5f, 5f)
+                .texOffs(104, 0).addBox(-0.5f, -1f, -9f, 1f, 1f, 6f),
                 PartPose.offset(0f, 6f, -1f));
         root.addOrReplaceChild("wingL", CubeListBuilder.create()
-                .texOffs(0, 13).addBox(0f, 0f, -2f, 11f, 1f, 5f),
+                .texOffs(0, 14).addBox(0f, 0f, -2f, 11f, 1f, 5f),
                 PartPose.offset(1f, 7f, 2f));
         root.addOrReplaceChild("wingR", CubeListBuilder.create()
-                .texOffs(32, 13).addBox(-11f, 0f, -2f, 11f, 1f, 5f),
+                .texOffs(33, 14).addBox(-11f, 0f, -2f, 11f, 1f, 5f),
                 PartPose.offset(-1f, 7f, 2f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(58, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
+                .texOffs(63, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
                 PartPose.offset(2.5f, 9f, -1f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(62, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
+                .texOffs(68, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
                 PartPose.offset(-2.5f, 9f, -1f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(66, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
+                .texOffs(73, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
                 PartPose.offset(1.5f, 16f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(70, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
+                .texOffs(78, 0).addBox(-0.5f, 0f, -0.5f, 1f, 8f, 1f),
                 PartPose.offset(-1.5f, 16f, 0f));
         root.addOrReplaceChild("legL2", CubeListBuilder.create()
-                .texOffs(16, 0).addBox(-0.5f, 0f, -0.5f, 1f, 10f, 1f),
+                .texOffs(17, 0).addBox(-0.5f, 0f, -0.5f, 1f, 10f, 1f),
                 PartPose.offset(2f, 14f, 1f));
         root.addOrReplaceChild("legR2", CubeListBuilder.create()
-                .texOffs(20, 0).addBox(-0.5f, 0f, -0.5f, 1f, 10f, 1f),
+                .texOffs(22, 0).addBox(-0.5f, 0f, -0.5f, 1f, 10f, 1f),
                 PartPose.offset(-2f, 14f, 1f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -106,55 +106,55 @@ public final class AlienRigs {
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-5f, -6f, -4f, 10f, 12f, 8f)
-                .texOffs(0, 42).addBox(-5.5f, -6f, -5f, 11f, 2f, 1f),
+                .texOffs(9, 45).addBox(-5.5f, -6f, -5f, 11f, 2f, 1f),
                 PartPose.offset(0f, 10f, 0f));
         root.addOrReplaceChild("belly", CubeListBuilder.create()
-                .texOffs(28, 20).addBox(-4f, -4f, -5f, 8f, 10f, 1f),
+                .texOffs(29, 21).addBox(-4f, -4f, -5f, 8f, 10f, 1f),
                 PartPose.offset(0f, 10f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(36, 0).addBox(-4f, -5f, -5f, 8f, 5f, 7f)
-                .texOffs(72, 32).addBox(3f, -9f, -3f, 1f, 5f, 1f)
-                .texOffs(76, 32).addBox(-4f, -9f, -3f, 1f, 5f, 1f)
-                .texOffs(110, 32).addBox(2.5f, -10f, -3.5f, 2f, 2f, 2f)
-                .texOffs(118, 32).addBox(-4.5f, -10f, -3.5f, 2f, 2f, 2f),
+                .texOffs(37, 0).addBox(-4f, -5f, -5f, 8f, 5f, 7f)
+                .texOffs(75, 34).addBox(3f, -9f, -3f, 1f, 5f, 1f)
+                .texOffs(80, 34).addBox(-4f, -9f, -3f, 1f, 5f, 1f)
+                .texOffs(116, 34).addBox(2.5f, -10f, -3.5f, 2f, 2f, 2f)
+                .texOffs(0, 45).addBox(-4.5f, -10f, -3.5f, 2f, 2f, 2f),
                 PartPose.offset(0f, 4f, -2f));
         root.addOrReplaceChild("antL", CubeListBuilder.create()
-                .texOffs(46, 20).addBox(-0.5f, -1f, -10f, 1f, 1f, 10f),
+                .texOffs(48, 21).addBox(-0.5f, -1f, -10f, 1f, 1f, 10f),
                 PartPose.offset(2f, 1f, -5f));
         root.addOrReplaceChild("antR", CubeListBuilder.create()
-                .texOffs(68, 20).addBox(-0.5f, -1f, -10f, 1f, 1f, 10f),
+                .texOffs(71, 21).addBox(-0.5f, -1f, -10f, 1f, 1f, 10f),
                 PartPose.offset(-2f, 1f, -5f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(66, 0).addBox(-1.5f, -1f, -1.5f, 3f, 9f, 3f),
+                .texOffs(68, 0).addBox(-1.5f, -1f, -1.5f, 3f, 9f, 3f),
                 PartPose.offset(6f, 6f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(78, 0).addBox(-1.5f, -1f, -1.5f, 3f, 9f, 3f),
+                .texOffs(81, 0).addBox(-1.5f, -1f, -1.5f, 3f, 9f, 3f),
                 PartPose.offset(-6f, 6f, 0f));
         root.addOrReplaceChild("pincerL", CubeListBuilder.create()
-                .texOffs(90, 0).addBox(-2.5f, 0f, -8f, 5f, 3f, 9f)
-                .texOffs(24, 32).addBox(-2.5f, 3f, -8f, 5f, 2f, 7f),
+                .texOffs(94, 0).addBox(-2.5f, 0f, -8f, 5f, 3f, 9f)
+                .texOffs(25, 34).addBox(-2.5f, 3f, -8f, 5f, 2f, 7f),
                 PartPose.offset(6f, 14f, 0f));
         root.addOrReplaceChild("pincerR", CubeListBuilder.create()
-                .texOffs(0, 20).addBox(-2.5f, 0f, -8f, 5f, 3f, 9f)
-                .texOffs(48, 32).addBox(-2.5f, 3f, -8f, 5f, 2f, 7f),
+                .texOffs(0, 21).addBox(-2.5f, 0f, -8f, 5f, 3f, 9f)
+                .texOffs(50, 34).addBox(-2.5f, 3f, -8f, 5f, 2f, 7f),
                 PartPose.offset(-6f, 14f, 0f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(90, 20).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f),
+                .texOffs(94, 21).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f),
                 PartPose.offset(3f, 16f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(102, 20).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f),
+                .texOffs(107, 21).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f),
                 PartPose.offset(-3f, 16f, 0f));
         root.addOrReplaceChild("sideL", CubeListBuilder.create()
-                .texOffs(24, 42).addBox(0f, 0f, -0.5f, 5f, 1f, 1f)
-                .texOffs(36, 42).addBox(0f, 0f, 2.5f, 5f, 1f, 1f),
+                .texOffs(34, 45).addBox(0f, 0f, -0.5f, 5f, 1f, 1f)
+                .texOffs(47, 45).addBox(0f, 0f, 2.5f, 5f, 1f, 1f),
                 PartPose.offset(5.5f, 12f, 2f));
         root.addOrReplaceChild("sideR", CubeListBuilder.create()
-                .texOffs(48, 42).addBox(-5f, 0f, -0.5f, 5f, 1f, 1f)
-                .texOffs(60, 42).addBox(-5f, 0f, 2.5f, 5f, 1f, 1f),
+                .texOffs(60, 45).addBox(-5f, 0f, -0.5f, 5f, 1f, 1f)
+                .texOffs(73, 45).addBox(-5f, 0f, 2.5f, 5f, 1f, 1f),
                 PartPose.offset(-5.5f, 12f, 2f));
         root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(0, 32).addBox(-3f, 0f, 0f, 6f, 4f, 6f)
-                .texOffs(80, 32).addBox(-5f, 3f, 5f, 10f, 1f, 5f),
+                .texOffs(0, 34).addBox(-3f, 0f, 0f, 6f, 4f, 6f)
+                .texOffs(85, 34).addBox(-5f, 3f, 5f, 10f, 1f, 5f),
                 PartPose.offset(0f, 15f, 4f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -163,32 +163,32 @@ public final class AlienRigs {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(32, 0).addBox(-3f, -6f, -6f, 6f, 6f, 10f)
-                .texOffs(84, 20).addBox(-3.5f, -3f, -7f, 7f, 2f, 2f),
-                PartPose.offset(0f, -4f, 0f));
+                .texOffs(34, 0).addBox(-3f, -6f, -6f, 6f, 6f, 10f)
+                .texOffs(89, 21).addBox(-3.5f, -3f, -7f, 7f, 2f, 2f),
+                PartPose.offset(0f, 2f, 0f));
         root.addOrReplaceChild("crest", CubeListBuilder.create()
-                .texOffs(0, 20).addBox(-0.5f, -3f, -5f, 1f, 3f, 12f),
-                PartPose.offset(0f, -9f, 0f));
+                .texOffs(0, 21).addBox(-0.5f, -3f, -5f, 1f, 3f, 12f),
+                PartPose.offset(0f, -3f, 0f));
         root.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-3f, -2f, -3f, 6f, 14f, 6f),
                 PartPose.offset(0f, 4f, 0f));
         root.addOrReplaceChild("belly", CubeListBuilder.create()
-                .texOffs(26, 20).addBox(-2f, -1f, -4f, 4f, 12f, 1f),
+                .texOffs(27, 21).addBox(-2f, -1f, -4f, 4f, 12f, 1f),
                 PartPose.offset(0f, 4f, 0f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(36, 20).addBox(-0.5f, 0f, -2f, 1f, 9f, 4f),
+                .texOffs(38, 21).addBox(-0.5f, 0f, -2f, 1f, 9f, 4f),
                 PartPose.offset(3.5f, 0f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(46, 20).addBox(-0.5f, 0f, -2f, 1f, 9f, 4f),
+                .texOffs(49, 21).addBox(-0.5f, 0f, -2f, 1f, 9f, 4f),
                 PartPose.offset(-3.5f, 0f, 0f));
         root.addOrReplaceChild("tail1", CubeListBuilder.create()
-                .texOffs(56, 20).addBox(-3.5f, 0f, -3.5f, 7f, 5f, 7f),
+                .texOffs(60, 21).addBox(-3.5f, 0f, -3.5f, 7f, 5f, 7f),
                 PartPose.offset(0f, 16f, 0f));
         root.addOrReplaceChild("tail2", CubeListBuilder.create()
-                .texOffs(64, 0).addBox(-5f, 0f, -6f, 10f, 4f, 12f),
+                .texOffs(67, 0).addBox(-5f, 0f, -6f, 10f, 4f, 12f),
                 PartPose.offset(0f, 20f, 2f));
         root.addOrReplaceChild("finBack", CubeListBuilder.create()
-                .texOffs(24, 0).addBox(-0.5f, 0f, 0f, 1f, 14f, 3f),
+                .texOffs(25, 0).addBox(-0.5f, 0f, 0f, 1f, 14f, 3f),
                 PartPose.offset(0f, 2f, 3f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -198,40 +198,40 @@ public final class AlienRigs {
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-4f, -8f, -4f, 8f, 22f, 8f)
-                .texOffs(0, 48).addBox(-5f, 4f, -5f, 10f, 4f, 10f),
+                .texOffs(21, 51).addBox(-5f, 4f, -5f, 10f, 4f, 10f),
                 PartPose.offset(0f, 0f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(0, 30).addBox(-5f, -8f, -5f, 10f, 8f, 10f),
+                .texOffs(13, 31).addBox(-5f, -8f, -5f, 10f, 8f, 10f),
                 PartPose.offset(0f, -8f, 0f));
         root.addOrReplaceChild("canopy", CubeListBuilder.create()
-                .texOffs(32, 0).addBox(-9f, -3f, -9f, 18f, 4f, 18f)
-                .texOffs(40, 30).addBox(-6f, -6f, -6f, 12f, 3f, 12f)
-                .texOffs(96, 48).addBox(-3f, -8f, -3f, 6f, 2f, 6f),
+                .texOffs(33, 0).addBox(-9f, -3f, -9f, 18f, 4f, 18f)
+                .texOffs(54, 31).addBox(-6f, -6f, -6f, 12f, 3f, 12f)
+                .texOffs(0, 67).addBox(-3f, -8f, -3f, 6f, 2f, 6f),
                 PartPose.offset(0f, -16f, 0f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(104, 0).addBox(-1.5f, -1f, -1.5f, 3f, 16f, 3f)
-                .texOffs(16, 62).addBox(0f, 10f, -1f, 6f, 2f, 2f),
+                .texOffs(106, 0).addBox(-1.5f, -1f, -1.5f, 3f, 16f, 3f)
+                .texOffs(52, 67).addBox(0f, 10f, -1f, 6f, 2f, 2f),
                 PartPose.offset(5f, -4f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(116, 0).addBox(-1.5f, -1f, -1.5f, 3f, 16f, 3f)
-                .texOffs(32, 62).addBox(-6f, 10f, -1f, 6f, 2f, 2f),
+                .texOffs(0, 31).addBox(-1.5f, -1f, -1.5f, 3f, 16f, 3f)
+                .texOffs(69, 67).addBox(-6f, 10f, -1f, 6f, 2f, 2f),
                 PartPose.offset(-5f, -4f, 0f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(88, 30).addBox(-2.5f, 0f, -2.5f, 5f, 10f, 5f)
-                .texOffs(40, 48).addBox(-3.5f, 8f, -3.5f, 7f, 2f, 7f),
+                .texOffs(103, 31).addBox(-2.5f, 0f, -2.5f, 5f, 10f, 5f)
+                .texOffs(62, 51).addBox(-3.5f, 8f, -3.5f, 7f, 2f, 7f),
                 PartPose.offset(3f, 14f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(108, 30).addBox(-2.5f, 0f, -2.5f, 5f, 10f, 5f)
-                .texOffs(68, 48).addBox(-3.5f, 8f, -3.5f, 7f, 2f, 7f),
+                .texOffs(0, 51).addBox(-2.5f, 0f, -2.5f, 5f, 10f, 5f)
+                .texOffs(91, 51).addBox(-3.5f, 8f, -3.5f, 7f, 2f, 7f),
                 PartPose.offset(-3f, 14f, 0f));
         root.addOrReplaceChild("kneeL", CubeListBuilder.create()
-                .texOffs(0, 62).addBox(-1f, 0f, -1f, 2f, 4f, 2f),
+                .texOffs(34, 67).addBox(-1f, 0f, -1f, 2f, 4f, 2f),
                 PartPose.offset(7f, 20f, -3f));
         root.addOrReplaceChild("kneeR", CubeListBuilder.create()
-                .texOffs(8, 62).addBox(-1f, 0f, -1f, 2f, 3f, 2f),
+                .texOffs(43, 67).addBox(-1f, 0f, -1f, 2f, 3f, 2f),
                 PartPose.offset(-7f, 21f, 2f));
         root.addOrReplaceChild("mossL", CubeListBuilder.create()
-                .texOffs(120, 48).addBox(0f, 0f, 0f, 3f, 6f, 1f),
+                .texOffs(25, 67).addBox(0f, 0f, 0f, 3f, 6f, 1f),
                 PartPose.offset(-5f, 2f, -4f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -241,23 +241,23 @@ public final class AlienRigs {
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("body", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-5f, -5f, -4f, 10f, 10f, 8f)
-                .texOffs(0, 18).addBox(-6f, -2f, -2f, 12f, 5f, 5f),
+                .texOffs(0, 19).addBox(-6f, -2f, -2f, 12f, 5f, 5f),
                 PartPose.offset(0f, 10f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(36, 0).addBox(-4f, -7f, -4f, 8f, 7f, 8f)
-                .texOffs(34, 18).addBox(-3f, -9f, -3f, 6f, 3f, 6f),
+                .texOffs(37, 0).addBox(-4f, -7f, -4f, 8f, 7f, 8f)
+                .texOffs(35, 19).addBox(-3f, -9f, -3f, 6f, 3f, 6f),
                 PartPose.offset(0f, 4f, 0f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(68, 0).addBox(-1.5f, 0f, -1.5f, 3f, 10f, 3f)
-                .texOffs(76, 18).addBox(-2f, 8f, -2f, 4f, 3f, 4f),
+                .texOffs(70, 0).addBox(-1.5f, 0f, -1.5f, 3f, 10f, 3f)
+                .texOffs(79, 19).addBox(-2f, 8f, -2f, 4f, 3f, 4f),
                 PartPose.offset(6f, 7f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(80, 0).addBox(-1.5f, 0f, -1.5f, 3f, 10f, 3f)
-                .texOffs(92, 18).addBox(-2f, 8f, -2f, 4f, 3f, 4f),
+                .texOffs(83, 0).addBox(-1.5f, 0f, -1.5f, 3f, 10f, 3f)
+                .texOffs(96, 19).addBox(-2f, 8f, -2f, 4f, 3f, 4f),
                 PartPose.offset(-6f, 7f, 0f));
         root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(92, 0).addBox(-4f, 0f, -3f, 8f, 6f, 6f)
-                .texOffs(58, 18).addBox(-2.5f, 5f, -2f, 5f, 4f, 4f),
+                .texOffs(96, 0).addBox(-4f, 0f, -3f, 8f, 6f, 6f)
+                .texOffs(60, 19).addBox(-2.5f, 5f, -2f, 5f, 4f, 4f),
                 PartPose.offset(0f, 15f, 0f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -269,40 +269,40 @@ public final class AlienRigs {
                 .texOffs(0, 0).addBox(-3f, -1f, -4f, 6f, 3f, 9f),
                 PartPose.offset(0f, 20f, 0f));
         root.addOrReplaceChild("shell", CubeListBuilder.create()
-                .texOffs(30, 0).addBox(-3.5f, -1f, -3f, 7f, 1f, 8f),
+                .texOffs(31, 0).addBox(-3.5f, -1f, -3f, 7f, 1f, 8f),
                 PartPose.offset(0f, 19f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(68, 0).addBox(-2f, -1f, -4f, 4f, 3f, 4f),
+                .texOffs(72, 0).addBox(-2f, -1f, -4f, 4f, 3f, 4f),
                 PartPose.offset(0f, 20f, -4f));
         root.addOrReplaceChild("antL", CubeListBuilder.create()
-                .texOffs(60, 0).addBox(-0.25f, -8f, -0.25f, 1f, 8f, 1f),
+                .texOffs(62, 0).addBox(-0.25f, -8f, -0.25f, 1f, 8f, 1f),
                 PartPose.offset(1f, 19f, -8f));
         root.addOrReplaceChild("antR", CubeListBuilder.create()
-                .texOffs(64, 0).addBox(-0.25f, -8f, -0.25f, 1f, 8f, 1f),
+                .texOffs(67, 0).addBox(-0.25f, -8f, -0.25f, 1f, 8f, 1f),
                 PartPose.offset(-1f, 19f, -8f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(84, 0).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(108, 0).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(0, 13).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(89, 0).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(3f, 21f, -2f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(88, 0).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(118, 0).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(11, 13).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(94, 0).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(-3f, 21f, -2f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(92, 0).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(0, 12).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(22, 13).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(99, 0).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(3f, 21f, 1f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(96, 0).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(10, 12).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(33, 13).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(104, 0).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(-3f, 21f, 1f));
         root.addOrReplaceChild("legL2", CubeListBuilder.create()
-                .texOffs(100, 0).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(20, 12).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(44, 13).addBox(0f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(109, 0).addBox(3f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(3f, 21f, 4f));
         root.addOrReplaceChild("legR2", CubeListBuilder.create()
-                .texOffs(104, 0).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
-                .texOffs(30, 12).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
+                .texOffs(55, 13).addBox(-4f, 0f, -0.5f, 4f, 1f, 1f)
+                .texOffs(114, 0).addBox(-4f, 0f, -0.5f, 1f, 3f, 1f),
                 PartPose.offset(-3f, 21f, 4f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -314,39 +314,39 @@ public final class AlienRigs {
                 .texOffs(0, 0).addBox(-9f, -2f, -5f, 18f, 14f, 10f),
                 PartPose.offset(0f, 0f, 0f));
         root.addOrReplaceChild("belly", CubeListBuilder.create()
-                .texOffs(94, 24).addBox(-7f, 2f, -6f, 14f, 9f, 1f),
+                .texOffs(0, 44).addBox(-7f, 2f, -6f, 14f, 9f, 1f),
                 PartPose.offset(0f, 0f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(0, 24).addBox(-5f, -9f, -7f, 10f, 9f, 9f)
-                .texOffs(56, 42).addBox(-3f, -3f, -10f, 6f, 4f, 3f),
+                .texOffs(0, 25).addBox(-5f, -9f, -7f, 10f, 9f, 9f)
+                .texOffs(89, 44).addBox(-3f, -3f, -10f, 6f, 4f, 3f),
                 PartPose.offset(0f, -2f, -4f));
         root.addOrReplaceChild("hornL", CubeListBuilder.create()
-                .texOffs(74, 42).addBox(0f, -1f, -1f, 7f, 2f, 2f)
-                .texOffs(90, 42).addBox(6f, -5f, -1f, 2f, 5f, 2f),
+                .texOffs(0, 55).addBox(0f, -1f, -1f, 7f, 2f, 2f)
+                .texOffs(108, 44).addBox(6f, -5f, -1f, 2f, 5f, 2f),
                 PartPose.offset(5f, -9f, -4f));
         root.addOrReplaceChild("hornR", CubeListBuilder.create()
-                .texOffs(82, 42).addBox(-7f, -1f, -1f, 7f, 2f, 2f)
-                .texOffs(108, 42).addBox(-8f, -5f, -1f, 2f, 5f, 2f),
+                .texOffs(19, 55).addBox(-7f, -1f, -1f, 7f, 2f, 2f)
+                .texOffs(117, 44).addBox(-8f, -5f, -1f, 2f, 5f, 2f),
                 PartPose.offset(-5f, -9f, -4f));
         root.addOrReplaceChild("ring", CubeListBuilder.create()
-                .texOffs(0, 52).addBox(-1.5f, 0f, -1f, 3f, 3f, 1f),
+                .texOffs(38, 55).addBox(-1.5f, 0f, -1f, 3f, 3f, 1f),
                 PartPose.offset(0f, -1f, -10f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(56, 0).addBox(-3.5f, -1f, -3.5f, 7f, 14f, 7f),
+                .texOffs(57, 0).addBox(-3.5f, -1f, -3.5f, 7f, 14f, 7f),
                 PartPose.offset(11f, 0f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(84, 0).addBox(-3.5f, -1f, -3.5f, 7f, 14f, 7f),
+                .texOffs(86, 0).addBox(-3.5f, -1f, -3.5f, 7f, 14f, 7f),
                 PartPose.offset(-11f, 0f, 0f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(38, 24).addBox(-3f, 0f, -3f, 6f, 12f, 6f)
-                .texOffs(0, 42).addBox(-3.5f, 9f, -3.5f, 7f, 3f, 7f),
+                .texOffs(39, 25).addBox(-3f, 0f, -3f, 6f, 12f, 6f)
+                .texOffs(31, 44).addBox(-3.5f, 9f, -3.5f, 7f, 3f, 7f),
                 PartPose.offset(5f, 12f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(62, 24).addBox(-3f, 0f, -3f, 6f, 12f, 6f)
-                .texOffs(28, 42).addBox(-3.5f, 9f, -3.5f, 7f, 3f, 7f),
+                .texOffs(64, 25).addBox(-3f, 0f, -3f, 6f, 12f, 6f)
+                .texOffs(60, 44).addBox(-3.5f, 9f, -3.5f, 7f, 3f, 7f),
                 PartPose.offset(-5f, 12f, 0f));
         root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(86, 24).addBox(-1f, 0f, 0f, 2f, 12f, 2f),
+                .texOffs(89, 25).addBox(-1f, 0f, 0f, 2f, 12f, 2f),
                 PartPose.offset(0f, 2f, 5f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -355,26 +355,26 @@ public final class AlienRigs {
         MeshDefinition mesh = new MeshDefinition();
         PartDefinition root = mesh.getRoot();
         root.addOrReplaceChild("tail", CubeListBuilder.create()
-                .texOffs(42, 0).addBox(-6f, -6f, -6f, 12f, 6f, 12f),
+                .texOffs(43, 0).addBox(-6f, -6f, -6f, 12f, 6f, 12f),
                 PartPose.offset(0f, 24f, 0f));
         root.addOrReplaceChild("tail1", CubeListBuilder.create()
-                .texOffs(0, 19).addBox(-5f, -6f, -5f, 10f, 6f, 10f),
+                .texOffs(37, 20).addBox(-5f, -6f, -5f, 10f, 6f, 10f),
                 PartPose.offset(0f, 18f, 0f));
         root.addOrReplaceChild("body", CubeListBuilder.create()
-                .texOffs(90, 0).addBox(-4.5f, -8f, -4.5f, 9f, 8f, 9f),
+                .texOffs(0, 20).addBox(-4.5f, -8f, -4.5f, 9f, 8f, 9f),
                 PartPose.offset(0f, 12f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
                 .texOffs(0, 0).addBox(-5f, -8f, -6f, 10f, 8f, 11f)
-                .texOffs(84, 19).addBox(-4.5f, -2f, -9f, 9f, 2f, 4f),
+                .texOffs(0, 38).addBox(-4.5f, -2f, -9f, 9f, 2f, 4f),
                 PartPose.offset(0f, 4f, 0f));
         root.addOrReplaceChild("jaw", CubeListBuilder.create()
-                .texOffs(40, 19).addBox(-4f, 0f, -5f, 8f, 2f, 6f),
+                .texOffs(78, 20).addBox(-4f, 0f, -5f, 8f, 2f, 6f),
                 PartPose.offset(0f, 1f, -4f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(68, 19).addBox(-1f, 0f, -1f, 2f, 6f, 2f),
+                .texOffs(107, 20).addBox(-1f, 0f, -1f, 2f, 6f, 2f),
                 PartPose.offset(5f, 6f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(76, 19).addBox(-1f, 0f, -1f, 2f, 6f, 2f),
+                .texOffs(116, 20).addBox(-1f, 0f, -1f, 2f, 6f, 2f),
                 PartPose.offset(-5f, 6f, 0f));
         return LayerDefinition.create(mesh, 128, 128);
     }
@@ -386,30 +386,30 @@ public final class AlienRigs {
                 .texOffs(0, 0).addBox(-6f, -5f, -5f, 12f, 11f, 10f, new CubeDeformation(1f)),
                 PartPose.offset(0f, 12f, 0f));
         root.addOrReplaceChild("bits", CubeListBuilder.create()
-                .texOffs(28, 21).addBox(-5f, -3f, -6f, 2f, 2f, 1f)
-                .texOffs(50, 21).addBox(2f, 1f, -6f, 3f, 2f, 1f)
-                .texOffs(56, 21).addBox(-7f, 2f, -2f, 1f, 3f, 2f)
-                .texOffs(62, 21).addBox(6f, -2f, 0f, 1f, 2f, 2f),
+                .texOffs(62, 22).addBox(-5f, -3f, -6f, 2f, 2f, 1f)
+                .texOffs(69, 22).addBox(2f, 1f, -6f, 3f, 2f, 1f)
+                .texOffs(30, 22).addBox(-7f, 2f, -2f, 1f, 3f, 2f)
+                .texOffs(55, 22).addBox(6f, -2f, 0f, 1f, 2f, 2f),
                 PartPose.offset(0f, 12f, 0f));
         root.addOrReplaceChild("head", CubeListBuilder.create()
-                .texOffs(44, 0).addBox(-4f, -6f, -4f, 8f, 6f, 8f, new CubeDeformation(0.5f)),
+                .texOffs(45, 0).addBox(-4f, -6f, -4f, 8f, 6f, 8f, new CubeDeformation(0.5f)),
                 PartPose.offset(0f, 7f, 0f));
         root.addOrReplaceChild("armL", CubeListBuilder.create()
-                .texOffs(76, 0).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f)
-                .texOffs(34, 21).addBox(-1f, 7f, -1f, 2f, 3f, 2f),
+                .texOffs(78, 0).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f)
+                .texOffs(37, 22).addBox(-1f, 7f, -1f, 2f, 3f, 2f),
                 PartPose.offset(7f, 10f, 0f));
         root.addOrReplaceChild("armR", CubeListBuilder.create()
-                .texOffs(88, 0).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f)
-                .texOffs(42, 21).addBox(-1f, 7f, -1f, 2f, 3f, 2f),
+                .texOffs(91, 0).addBox(-1.5f, 0f, -1.5f, 3f, 8f, 3f)
+                .texOffs(46, 22).addBox(-1f, 7f, -1f, 2f, 3f, 2f),
                 PartPose.offset(-7f, 10f, 0f));
         root.addOrReplaceChild("legL", CubeListBuilder.create()
-                .texOffs(100, 0).addBox(-2.5f, 0f, -2.5f, 5f, 6f, 5f),
+                .texOffs(104, 0).addBox(-2.5f, 0f, -2.5f, 5f, 6f, 5f),
                 PartPose.offset(3f, 18f, 0f));
         root.addOrReplaceChild("legR", CubeListBuilder.create()
-                .texOffs(0, 21).addBox(-2.5f, 0f, -2.5f, 5f, 6f, 5f),
+                .texOffs(0, 22).addBox(-2.5f, 0f, -2.5f, 5f, 6f, 5f),
                 PartPose.offset(-3f, 18f, 0f));
         root.addOrReplaceChild("drip", CubeListBuilder.create()
-                .texOffs(20, 21).addBox(-1f, 0f, -1f, 2f, 5f, 2f),
+                .texOffs(21, 22).addBox(-1f, 0f, -1f, 2f, 5f, 2f),
                 PartPose.offset(-4f, 17f, -3f));
         return LayerDefinition.create(mesh, 128, 128);
     }

@@ -13,6 +13,7 @@ import net.minecraft.world.item.Rarity;
 public final class AlienRegistry {
     public static Item SWAMPWATCH;
     public static SoundEvent TRANSFORM, REVERT, BEEP;
+    public static net.minecraft.world.entity.EntityType<AbilityFx> FX;
 
     private AlienRegistry() {}
 
@@ -22,6 +23,9 @@ public final class AlienRegistry {
         TRANSFORM = sound("swampwatch_transform");
         REVERT = sound("swampwatch_revert");
         BEEP = sound("swampwatch_beep");
+        FX = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("ability_fx"),
+                net.minecraft.world.entity.EntityType.Builder.<AbilityFx>of(AbilityFx::new, net.minecraft.world.entity.MobCategory.MISC)
+                        .sized(0.5f, 0.5f).clientTrackingRange(8).updateInterval(1).noSave().fireImmune().build("ability_fx"));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(e -> e.accept(SWAMPWATCH));
         Transformations.register();
     }
