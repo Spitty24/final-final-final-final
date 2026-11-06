@@ -17,6 +17,13 @@ public abstract class ItemInHandRendererMixin {
     private void freerun$parkourArms(float partialTicks, PoseStack poseStack, MultiBufferSource.BufferSource buffer,
                                      LocalPlayer player, int light, CallbackInfo ci) {
         FirstPersonArms.renderingHands = true;
+        dev.freerun.alien.Alien form = dev.freerun.alien.Transformations.alienOf(player);
+        if (form != null) {
+            dev.freerun.client.alien.AlienRenderers.renderFirstPerson(form, poseStack, buffer, player, light, partialTicks);
+            FirstPersonArms.renderingHands = false;
+            ci.cancel();
+            return;
+        }
         if (FirstPersonArms.render(poseStack, buffer, player, light, partialTicks)) {
             FirstPersonArms.renderingHands = false;
             ci.cancel();

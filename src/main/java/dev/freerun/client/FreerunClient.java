@@ -32,6 +32,7 @@ public final class FreerunClient implements ClientModInitializer {
     private static boolean skillsKeyWasDown;
     private static boolean hornWasDown;
     private static KeyMapping hackKey;
+    public static KeyMapping abilityKey;
     private static boolean pickerPending;
 
     /** Whether a key event is the skill tree key (used to close the screen with the same key). */
@@ -118,6 +119,25 @@ public final class FreerunClient implements ClientModInitializer {
         EntityRendererRegistry.register(dev.freerun.city.CityRegistry.CITY_HUB, net.minecraft.client.renderer.entity.NoopRenderer::new);
         hackKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.hack", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.categories.freerun"));
+        abilityKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.ability", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_G, "key.categories.freerun"));
+        // the Swampwatch
+        for (dev.freerun.alien.Alien a : dev.freerun.alien.Alien.values()) {
+            net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                    dev.freerun.client.alien.AlienModel.layer(a), () -> dev.freerun.client.alien.AlienRigs.rig(a));
+        }
+        dev.freerun.alien.SwampwatchItem.OPEN_DIAL = () -> net.minecraft.client.Minecraft.getInstance().setScreen(new dev.freerun.client.alien.DialScreen());
+        ClientPlayNetworking.registerGlobalReceiver(dev.freerun.alien.AlienPayloads.Sync.TYPE, (payload, context) -> context.client().execute(() -> {
+            dev.freerun.alien.Form f = payload.form();
+            if (f.transformed()) dev.freerun.alien.Transformations.CLIENT.put(payload.entityId(), f);
+            else dev.freerun.alien.Transformations.CLIENT.remove(payload.entityId());
+            if (context.client().level != null && context.client().level.getEntity(payload.entityId()) instanceof net.minecraft.world.entity.player.Player pl) {
+                pl.refreshDimensions();
+            }
+        }));
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.alien.AlienHud.render(guiGraphics));
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+                dev.freerun.alien.Transformations.CLIENT.clear());
         dev.freerun.economy.Amenities.OPEN_PHONE = () -> net.minecraft.client.Minecraft.getInstance()
                 .setScreen(new dev.freerun.client.phone.PhoneScreen());
         ClientPlayNetworking.registerGlobalReceiver(dev.freerun.net.PhonePayloads.Data.TYPE, (payload, context) ->
@@ -249,6 +269,16 @@ public final class FreerunClient implements ClientModInitializer {
             }
             dev.freerun.client.vehicle.CarEngineSound.tickAll(client);
             dev.freerun.client.phone.Blackwire.tick(client);
+            while (abilityKey.consumeClick()) {
+                if (client.screen == null && client.player != null) {
+                    if (dev.freerun.alien.Transformations.form(client.player).transformed()) {
+                        ClientPlayNetworking.send(new dev.freerun.alien.AlienPayloads.Action(
+                                net.minecraft.client.gui.screens.Screen.hasShiftDown() ? dev.freerun.alien.AlienPayloads.REVERT : dev.freerun.alien.AlienPayloads.ABILITY, 0));
+                    } else if (!dev.freerun.alien.SwampwatchItem.find(client.player).isEmpty()) {
+                        client.setScreen(new dev.freerun.client.alien.DialScreen());
+                    }
+                }
+            }
             while (hackKey.consumeClick()) {
                 if (client.screen == null) dev.freerun.client.phone.Blackwire.hack(net.minecraft.client.gui.screens.Screen.hasShiftDown());
             }
