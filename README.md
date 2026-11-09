@@ -53,6 +53,8 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Skill tree | **P** |
 | Swampwatch | **G**: open the dial / use the creature's power · **Shift + G**: turn back |
 | Skateboard | **B**: on / off the board · mouse = flick stick · **W** push · **A/D** carve and spin · mouse buttons grab |
+| Bus | Right-click a stopped bus to pay $2 and ride · sneak to get off · right-click a stop sign for the next bus |
+| Skate kits | Use on the ground to build a half pipe, quarter pipe, kicker, funbox, rail, stairs… |
 | Second-person view | **F5** a fourth time (after first person, behind, in front): you, as seen by whoever's nearest and can see you |
 
 **What can be climbed** is the block tag `freerun:climbable` (`data/freerun/tags/block/climbable.json`):
@@ -758,6 +760,51 @@ Push the mouse forward first and then pull it back for the Nollie version of any
 **Grinds.** Land on a fence, wall, iron bars or a block ledge and you lock on. Hold S (or tilt the stick back) for a 5-0, or W (forward) for a Nosegrind. Add A/D for a Smith or Crooked. Come in across the rail for a Boardslide. Flick to pop out.
 
 **Combos and bails.** Tricks chain into a line, and the multiplier is the number of different tricks in it. Roll clean for about a second and the line banks into your score. You bail if you land while the board is still flipping, land with a grab still held, land sideways, drop from too high, hit a wall fast, or ride into water. When you bail, the board shoots off, you tumble, and you get back on (Skate 3 style); the line is lost. A landed trick never causes fall damage, but a bail from high up still hurts. Other players see your board, stance and tricks, and hear the pops and grinds.
+
+## Skate parks
+
+Skate park features come as **skate kits**. Use one on the ground and it builds itself in front of you, facing away from you (it tells you if there isn't room). Buy kits at the Boardshop in the city skate park, or craft them from planks, Skate Park Concrete (four smooth stone make four) and Grind Rails (three iron ingots over two iron bars make six).
+
+| Kit | Size (w × l) | What it is |
+|---|---|---|
+| Quarter Pipe | 5 × 5 | A 3-high transition that goes vertical at the top, with a deck and coping |
+| Half Pipe | 7 × 14 | Two quarter pipes facing each other across a flat bottom |
+| Kicker Ramp | 3 × 2 | A short launch ramp |
+| Funbox | 5 × 8 | Bank up, a flat top with a rail on it, bank down |
+| Bank Ramp | 5 × 4 | A bank up to a 1-high ledge |
+| Grind Rail | 1 × 6 | A flat rail on posts |
+| Stair Set & Handrail | 5 × 10 | A 3-high platform, three steps down, and a handrail |
+| Manual Pad | 3 × 6 | A low pad for manuals and ledge tricks |
+| Grind Ledge | 2 × 8 | A long concrete ledge |
+
+**Riding ramps.** Ramps are real curves when you're on a board. Rolling up one slows you down and rolling down speeds you up; hold **W** on the way down to pump for more speed. If you run out of speed going up, you roll back down fakie.
+- **Kickers and banks:** going off the lip throws you into the air.
+- **Quarter pipes:** you launch straight up out of the top and come back down into the same wall, riding fakie unless you spin a 180. Flips, spins and grabs all work up there.
+- **Coping:** hold **W** in the air to come down on it. That gives you an Axle Stall, and holding it longer makes it a Rock to Fakie. Flick or press W/S to drop back in.
+- **Dropping in:** roll off the deck into the ramp.
+- **Grinding:** you can grind the coping, the funbox rail, ledges and the stair handrail. The handrail pulls you down the slope.
+
+**Bayou Bowl Skate Park** is in the city, just north-east of City Hall, with a stop on the Downtown Loop bus right outside. It has a half pipe, two quarter pipes facing each other across a funbox, rails, a ledge and a manual pad, a kicker, a bank, a stair set with a handrail, lights and benches, and the Boardshop, which sells boards, every kit, rails and concrete.
+
+## City buses
+
+Four bus routes loop the city, each in its own colour:
+
+| Route | Where |
+|---|---|
+| **1 Downtown Loop** (yellow) | Around downtown, past the skate park |
+| **2 Crosstown** (blue) | A big loop through the commercial ring |
+| **3 Westside** (green) | The west side and the Hood |
+| **4 Factory Express** (red) | The south-east, past the factory and the garage |
+
+**Bus stops and buses**
+- Every other block of each route has a bus stop: a shelter with a bench, a roof striped in the route colour, a painted bus box on the road, and a blue sign. Right-click the sign to see the route, the stop name and roughly when the next bus is due.
+- Buses keep to the right-hand lane and slow for corners. They stop for red lights and stop signs and wait behind traffic. A bus only pulls in at a stop if someone is waiting there or a passenger wants to get off. You get the air brakes, the doors, a bell and the engine pulling away.
+- Inside are rows of seats, a driver, lit destination signs, headlights and brake lights.
+
+**Townspeople ride them.** People going a long way across town walk to the nearest stop, wait by the sign (checking their phones) and get on when the bus pulls in. They ride to the stop nearest where they're going, get off and walk the rest of the way. Buses already have a few riders on board.
+
+**You can ride too.** Wait at a stop and the bus will stop for you. Right-click it to pay the $2 fare and take a seat. The top of the screen shows the route and the next stop, and you sneak to get off.
 
 ## Settings
 
