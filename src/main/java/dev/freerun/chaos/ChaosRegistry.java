@@ -84,6 +84,7 @@ public final class ChaosRegistry {
         MomCalls.register();
         ReverseMode.register();
         DragonDivorce.register();
+        ChaosCommand.register();
 
         // the crash: when Locked In runs out, the brain fog rolls in
         ServerTickEvents.END_SERVER_TICK.register(server -> {

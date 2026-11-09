@@ -90,7 +90,7 @@ public final class ReverseMode extends SavedData {
     }
 
     /** The Ender Dragon appears at your bed (or the world spawn), lost. */
-    private static void spawnDragon(ServerPlayer p) {
+    static void spawnDragon(ServerPlayer p) {
         ServerLevel level = p.server.overworld();
         BlockPos bed = p.getRespawnPosition();
         if (bed == null || p.getRespawnDimension() != Level.OVERWORLD) bed = level.getSharedSpawnPos();

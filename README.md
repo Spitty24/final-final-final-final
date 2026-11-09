@@ -845,6 +845,8 @@ Then you crash into **Brain Fog** for 45 seconds. Everything goes hazy, you mine
 - **Yes:** the fight is over and counts as a win (exit portal, egg and all), followed by a very awkward credits scene at a diner.
 - **No:** she takes it about as well as you'd expect, and the fight goes on.
 
+**Testing it all:** `/chaos mom` makes Mom call right now, `/chaos podcast` drops a creeper in front of you that starts an episode, `/chaos lockedin` and `/chaos crash` give you Locked In or Brain Fog without the can, and `/chaos credits` plays the awkward credits. `/chaos reverse` (Reverse Mode on or off) and `/chaos dragon` (a homesick dragon at your bed) need cheats on or operator permission.
+
 ## Settings
 
 `config/freerun.json` is created on first launch. Every move can be switched off (including

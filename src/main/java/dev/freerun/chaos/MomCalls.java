@@ -57,7 +57,10 @@ public final class MomCalls {
 
     /** For testing (and for the Backwards Clock's chaos): have Mom call now. */
     public static void callNow(ServerPlayer p) {
-        state(p).nextCall = 1;
+        State s = state(p);
+        s.ringing = -1;
+        s.dinnerLeft = -1;
+        s.nextCall = 1;
     }
 
     private static void tick(MinecraftServer server) {
