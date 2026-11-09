@@ -120,6 +120,10 @@ public class CitizenEntity extends PathfinderMob {
     private boolean ambient;
     /** Set while running from a crime or the police. */
     private int fleeing;
+    /** Taking the bus: 0 no, 1 walking to the stop, 2 waiting at it, 3 on board. */
+    private int tripStage;
+    private int tripRoute = -1, tripFrom = -1, tripTo = -1, tripWait;
+    private BlockPos tripGoal;
 
     public CitizenEntity(EntityType<? extends CitizenEntity> type, Level level) {
         super(type, level);
@@ -256,6 +260,11 @@ public class CitizenEntity extends PathfinderMob {
             return;
         }
         if (isPassenger()) return;
+        if (tripStage == 3) {   // the bus went away without us
+            tripStage = 0;
+            goal = tripGoal;
+            arrived = false;
+        }
         if (fleeing > 0) {
             fleeing--;
             return;
@@ -292,6 +301,12 @@ public class CitizenEntity extends PathfinderMob {
                 case WANDER -> null;
             };
             clearRestriction();
+            if (tripStage == 1) tripStage = 0;
+            if (tripStage == 0 && goal != null) maybeTakeBus();
+        }
+        if (tripStage == 1 || tripStage == 2) {
+            busTrip();
+            return;
         }
         if (goal == null) {
             if (!hasRestriction()) restrictTo(home, 24);
@@ -304,6 +319,99 @@ public class CitizenEntity extends PathfinderMob {
                 onArrive(server);
             }
         }
+    }
+
+    // ------------------------------------------------------------------ the bus
+
+    /** Long trip across town with a route nearby at both ends? Take the bus. */
+    private void maybeTakeBus() {
+        if (city == null || goal == null || random.nextInt(10) < 3) return;
+        double lx = getX() - city.getX(), lz = getZ() - city.getZ();
+        double gx = goal.getX() - city.getX(), gz = goal.getZ() - city.getZ();
+        double direct = Math.hypot(gx - lx, gz - lz);
+        if (direct < 110) return;
+        double best = direct * 0.55;
+        BusRoutes.Stop from = null, to = null;
+        for (BusRoutes.Route r : BusRoutes.ROUTES) {
+            BusRoutes.Stop a = null, b = null;
+            double da = Double.MAX_VALUE, db = Double.MAX_VALUE;
+            for (BusRoutes.Stop st : r.stops) {
+                double d1 = Math.hypot(st.wait.x - lx, st.wait.z - lz), d2 = Math.hypot(st.wait.x - gx, st.wait.z - gz);
+                if (d1 < da) { da = d1; a = st; }
+                if (d2 < db) { db = d2; b = st; }
+            }
+            if (a == null || b == null || a == b || da > 70) continue;
+            if (da + db < best) {
+                best = da + db;
+                from = a;
+                to = b;
+            }
+        }
+        if (from == null) return;
+        setBusTrip(from.route.id, from.index, to.index, goal);
+        tripStage = 1;
+        goal = city.offset(BlockPos.containing(from.wait.x, 1, from.wait.z));
+        arrived = false;
+    }
+
+    public void setBusTrip(int route, int from, int to, BlockPos finalGoal) {
+        tripRoute = route;
+        tripFrom = from;
+        tripTo = to;
+        tripGoal = finalGoal;
+        tripWait = 0;
+    }
+
+    public void startWaiting() {
+        tripStage = 2;
+        tripWait = 0;
+    }
+
+    public int busRoute() {
+        return tripRoute;
+    }
+
+    public int busTo() {
+        return tripTo;
+    }
+
+    public boolean waitingFor(int route, int stop) {
+        return tripStage == 2 && tripRoute == route && tripFrom == stop && !isPassenger();
+    }
+
+    public void boardBus(BusEntity bus) {
+        getNavigation().stop();
+        if (startRiding(bus, true)) tripStage = 3;
+    }
+
+    public void leaveBus(Vec3 at) {
+        stopRiding();
+        moveTo(at.x, at.y, at.z, getYRot(), 0.0f);
+        tripStage = 0;
+        goal = tripGoal;
+        tripRoute = tripFrom = tripTo = -1;
+        arrived = false;
+        stuck = 0;
+        clearRestriction();
+    }
+
+    private void busTrip() {
+        if (tripStage == 1) {
+            if (walk(goal)) {
+                tripStage = 2;
+                tripWait = 0;
+            }
+            return;
+        }
+        // waiting: stand by the sign, glance up the street, check the phone; give up after a few minutes
+        getNavigation().stop();
+        if (++tripWait > 20 * 180) {
+            tripStage = 0;
+            goal = tripGoal;
+            arrived = false;
+            return;
+        }
+        if (tripWait % 160 == 0 && random.nextInt(3) == 0) distract(60);
     }
 
     private static final CityLayout.District[] STORES = {CityLayout.District.DOUBLE_QUICK, CityLayout.District.GENERAL_STORE,

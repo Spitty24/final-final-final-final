@@ -1,0 +1,23 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  " R ",
+  "PCP"
+ ],
+ "key": {
+  "R": {
+   "item": "freerun:grind_rail"
+  },
+  "P": {
+   "tag": "minecraft:planks"
+  },
+  "C": {
+   "item": "freerun:skatepark_concrete"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_funbox",
+  "count": 1
+ }
+}

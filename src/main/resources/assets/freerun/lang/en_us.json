@@ -308,5 +308,21 @@
  "subtitles.freerun.skate_land": "Board lands",
  "subtitles.freerun.skate_grind": "Trucks grind",
  "subtitles.freerun.skate_bail": "Skater bails",
- "subtitles.freerun.skate_push": "Skater pushes"
+ "subtitles.freerun.skate_push": "Skater pushes",
+ "item.freerun.kit_quarter_pipe": "Skate Kit: Quarter Pipe",
+ "item.freerun.kit_half_pipe": "Skate Kit: Half Pipe",
+ "item.freerun.kit_kicker": "Skate Kit: Kicker Ramp",
+ "item.freerun.kit_funbox": "Skate Kit: Funbox",
+ "item.freerun.kit_bank": "Skate Kit: Bank Ramp",
+ "item.freerun.kit_rail": "Skate Kit: Grind Rail",
+ "item.freerun.kit_stair_set": "Skate Kit: Stair Set & Handrail",
+ "item.freerun.kit_manual_pad": "Skate Kit: Manual Pad",
+ "item.freerun.kit_ledge": "Skate Kit: Grind Ledge",
+ "block.freerun.skatepark_concrete": "Skate Park Concrete",
+ "block.freerun.grind_rail": "Grind Rail",
+ "block.freerun.skate_ramp": "Skate Ramp",
+ "block.freerun.bus_stop_sign": "Bus Stop Sign",
+ "entity.freerun.bus": "City Bus",
+ "subtitles.freerun.bus_brake": "Bus air brakes hiss",
+ "subtitles.freerun.bus_engine": "Bus pulls away"
 }

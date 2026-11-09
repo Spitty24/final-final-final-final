@@ -1,0 +1,18 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "  C",
+  " CC",
+  "CCC"
+ ],
+ "key": {
+  "C": {
+   "item": "freerun:skatepark_concrete"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_bank",
+  "count": 1
+ }
+}

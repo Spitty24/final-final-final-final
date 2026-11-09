@@ -357,6 +357,18 @@ public class Autopilot {
         double best = 99.0;
         List<Entity> found = car.level().getEntities(car, box, e -> e.isAlive() && !e.isPassengerOfSameVehicle(car)
                 && (e instanceof CarEntity || e instanceof LivingEntity) && e.getVehicle() == null);
+        // buses are long: check their nose, middle and tail
+        for (BusEntity bus : car.level().getEntitiesOfClass(BusEntity.class, box.inflate(5.0, 0, 5.0))) {
+            Vec3 bf = bus.forward().scale(BusRoutes.HALF_LENGTH - 0.3);
+            for (Vec3 q : new Vec3[]{bus.position(), bus.position().add(bf), bus.position().subtract(bf)}) {
+                Vec3 d = q.subtract(c);
+                double along = d.dot(f), side = Math.abs(d.x * f.z - d.z * f.x);
+                if (along <= 0.5) continue;
+                double facing = bus.forward().dot(f);
+                if (facing < -0.5 && side > 1.0) continue;   // oncoming
+                if (side < 2.3) best = Math.min(best, along - 0.8);
+            }
+        }
         for (Entity e : found) {
             Vec3 d = e.position().subtract(c);
             double along = d.dot(f);

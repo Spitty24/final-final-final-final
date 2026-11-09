@@ -1,0 +1,20 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "III",
+  "CCC"
+ ],
+ "key": {
+  "I": {
+   "item": "minecraft:iron_nugget"
+  },
+  "C": {
+   "item": "freerun:skatepark_concrete"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_ledge",
+  "count": 1
+ }
+}

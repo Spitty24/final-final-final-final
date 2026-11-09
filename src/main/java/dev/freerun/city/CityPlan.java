@@ -150,6 +150,7 @@ public final class CityPlan {
             case BAR -> out.add(new FunPiece(city, lx, lz, w, d, FunPiece.BAR));
             case FURNITURE -> out.add(new FunPiece(city, lx, lz, w, d, FunPiece.FURNITURE));
             case GARAGE -> out.add(new GaragePiece(city, lx, lz, w, d));
+            case SKATEPARK -> out.add(new SkateParkPiece(city, lx, lz, w, d));
         }
     }
 

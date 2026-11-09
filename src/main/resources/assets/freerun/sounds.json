@@ -186,5 +186,23 @@
       }
     ],
     "subtitle": "subtitles.freerun.skate_push"
+  },
+  "bus_brake": {
+    "sounds": [
+      {
+        "name": "freerun:bus_brake",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.bus_brake"
+  },
+  "bus_engine": {
+    "sounds": [
+      {
+        "name": "freerun:bus_engine",
+        "attenuation_distance": 32
+      }
+    ],
+    "subtitle": "subtitles.freerun.bus_engine"
   }
 }

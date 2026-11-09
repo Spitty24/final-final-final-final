@@ -264,6 +264,20 @@ public final class FreerunClient implements ClientModInitializer {
             }
         });
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.skate.SkateHud.render(guiGraphics));
+        // skate parks and buses
+        dev.freerun.skate.SkateRampBlock.CLIENT_SKATER = e -> e == net.minecraft.client.Minecraft.getInstance().player
+                && dev.freerun.client.skate.SkateClient.active();
+        net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin.register(plugin ->
+                plugin.registerBlockStateResolver(dev.freerun.skate.Skating.RAMP, ctx -> {
+                    dev.freerun.client.skate.RampModel model = new dev.freerun.client.skate.RampModel();
+                    for (net.minecraft.world.level.block.state.BlockState st : ctx.block().getStateDefinition().getPossibleStates()) ctx.setModel(st, model);
+                }));
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(dev.freerun.skate.Skating.RAIL_BLOCK,
+                net.minecraft.client.renderer.RenderType.cutout());
+        net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap.INSTANCE.putBlock(dev.freerun.city.CityRegistry.BUS_STOP_SIGN,
+                net.minecraft.client.renderer.RenderType.cutout());
+        EntityRendererRegistry.register(dev.freerun.city.CityRegistry.BUS, dev.freerun.client.city.BusRenderer::new);
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.city.BusHud.render(guiGraphics));
         net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
                 dev.freerun.client.skate.SkateboardModel.LAYER, dev.freerun.client.skate.SkateboardModel::layer);
         for (net.minecraft.world.item.Item board : dev.freerun.skate.Skating.BOARDS) {

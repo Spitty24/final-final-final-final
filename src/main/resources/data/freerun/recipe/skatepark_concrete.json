@@ -1,0 +1,17 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "SS",
+  "SS"
+ ],
+ "key": {
+  "S": {
+   "item": "minecraft:smooth_stone"
+  }
+ },
+ "result": {
+  "id": "freerun:skatepark_concrete",
+  "count": 4
+ }
+}

@@ -1,0 +1,25 @@
+{
+ "variants": {
+  "axis=x,slope=0": {
+   "model": "freerun:block/grind_rail_flat",
+   "y": 90
+  },
+  "axis=x,slope=1": {
+   "model": "freerun:block/grind_rail_down",
+   "y": 90
+  },
+  "axis=x,slope=2": {
+   "model": "freerun:block/grind_rail_up",
+   "y": 90
+  },
+  "axis=z,slope=0": {
+   "model": "freerun:block/grind_rail_flat"
+  },
+  "axis=z,slope=1": {
+   "model": "freerun:block/grind_rail_up"
+  },
+  "axis=z,slope=2": {
+   "model": "freerun:block/grind_rail_down"
+  }
+ }
+}

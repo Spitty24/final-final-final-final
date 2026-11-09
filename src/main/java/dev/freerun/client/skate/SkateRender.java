@@ -61,8 +61,9 @@ public final class SkateRender {
                 ps.translate(0, -SkateboardModel.HEIGHT * 0.5f, 0);
             }
             if (s.pitch() != 0) {
-                // manuals pivot on the back (or front) wheels
-                float pivot = s.pitch() > 0 ? 0.19f : -0.19f;
+                // manuals pivot on the back (or front) wheels; on a ramp the board just follows the surface
+                boolean manual = s.pose() == SkatePayloads.MANUAL || s.pose() == SkatePayloads.NOSE_MANUAL;
+                float pivot = !manual ? 0 : s.pitch() > 0 ? 0.19f : -0.19f;
                 ps.translate(0, 0, pivot);
                 ps.mulPose(Axis.XP.rotationDegrees(s.pitch()));
                 ps.translate(0, 0, -pivot);
@@ -83,7 +84,7 @@ public final class SkateRender {
         SkatePayloads.State s = state(p);
         if (s == null || s.pose() == SkatePayloads.BAIL) return;
         float y = LIFT;
-        if (s.pitch() != 0) y += 0.05f;
+        if (s.pose() == SkatePayloads.MANUAL || s.pose() == SkatePayloads.NOSE_MANUAL) y += 0.05f;
         ps.translate(0, y, 0);
     }
 
@@ -92,6 +93,10 @@ public final class SkateRender {
         SkatePayloads.State s = state(p);
         if (s == null) return;
         // setupRotations has already turned us to yBodyRot (= heading); stand side-on (regular: left foot forward)
+        // on a ramp, stand square to the surface (tilted back going up, forward going down)
+        if (s.pitch() != 0 && s.pose() != SkatePayloads.MANUAL && s.pose() != SkatePayloads.NOSE_MANUAL && s.pose() != SkatePayloads.BAIL) {
+            ps.mulPose(Axis.XP.rotationDegrees(s.pitch() * 0.85f));
+        }
         ps.mulPose(Axis.YP.rotationDegrees(-90 - s.body()));
         switch (s.pose()) {
             case SkatePayloads.CROUCH, SkatePayloads.AIR, SkatePayloads.GRAB_L, SkatePayloads.GRAB_R, SkatePayloads.GRAB_BOTH ->

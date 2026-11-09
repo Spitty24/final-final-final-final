@@ -26,8 +26,9 @@ import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceType;
 public final class CityRegistry {
     public static StructureType<CityStructure> CITY;
     public static StructurePieceType ROAD_PIECE, INTERSECTION_PIECE, LOT_PIECE, SUBURB_PIECE, OFFICE_PIECE, HOOD_PIECE, PARK_PIECE,
-            FAST_FOOD_PIECE, DESSERT_PIECE, POLICE_PIECE, MEGAMART_PIECE, DEPARTMENT_PIECE, STRIP_MALL_PIECE, FUN_PIECE, ALLEY_PIECE, GARAGE_PIECE;
-    public static Block TRAFFIC_LIGHT, STOP_SIGN, STREET_LAMP, DRIVE_THRU_SPEAKER, PICKUP_WINDOW;
+            FAST_FOOD_PIECE, DESSERT_PIECE, POLICE_PIECE, MEGAMART_PIECE, DEPARTMENT_PIECE, STRIP_MALL_PIECE, FUN_PIECE, ALLEY_PIECE, GARAGE_PIECE, SKATEPARK_PIECE;
+    public static Block TRAFFIC_LIGHT, STOP_SIGN, STREET_LAMP, DRIVE_THRU_SPEAKER, PICKUP_WINDOW, BUS_STOP_SIGN;
+    public static EntityType<BusEntity> BUS;
     public static net.minecraft.world.level.levelgen.feature.Feature<net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration> CITY_FEATURE;
     public static EntityType<PoliceOfficerEntity> POLICE_OFFICER;
     public static EntityType<CriminalEntity> CRIMINAL;
@@ -57,6 +58,7 @@ public final class CityRegistry {
         FUN_PIECE = piece("city_fun", FunPiece::new);
         ALLEY_PIECE = piece("city_alley", AlleyPiece::new);
         GARAGE_PIECE = piece("city_garage", GaragePiece::new);
+        SKATEPARK_PIECE = piece("city_skatepark", SkateParkPiece::new);
 
         // cities are generated as a decoration, chunk by chunk (they're too big for a structure)
         CITY_FEATURE = Registry.register(BuiltInRegistries.FEATURE, Freerun.id("city"), new CityFeature());
@@ -74,6 +76,11 @@ public final class CityRegistry {
                 .strength(1.5f).noOcclusion().lightLevel(s -> 9), true));
         PICKUP_WINDOW = block("pickup_window", new DriveThruBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.GLASS)
                 .strength(1.0f).noOcclusion().lightLevel(s -> 6), false));
+        BUS_STOP_SIGN = block("bus_stop_sign", new BusStopSignBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
+                .strength(1.5f).noOcclusion()));
+        BUS = Registry.register(BuiltInRegistries.ENTITY_TYPE, Freerun.id("bus"),
+                EntityType.Builder.<BusEntity>of(BusEntity::new, MobCategory.MISC).sized(2.8f, 3.0f)
+                        .clientTrackingRange(10).updateInterval(3).noSummon().fireImmune().build("bus"));
         CITY_LIGHT_BE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Freerun.id("city_light"),
                 BlockEntityType.Builder.of(CityLightBlockEntity::new, TRAFFIC_LIGHT, STREET_LAMP).build(null));
 
@@ -106,6 +113,7 @@ public final class CityRegistry {
             e.accept(STREET_LAMP);
             e.accept(DRIVE_THRU_SPEAKER);
             e.accept(PICKUP_WINDOW);
+            e.accept(BUS_STOP_SIGN);
         });
 
         PayloadTypeRegistry.playC2S().register(PhonePayloads.Request.TYPE, PhonePayloads.Request.CODEC);

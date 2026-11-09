@@ -438,6 +438,14 @@ public final class EconomyRegistry {
         buy.put(Shops.Shop.CLOTHES, offers(Apparel.CLOTHES_PRICES.toArray(new Object[0][])));
         sell.put(Shops.Shop.SHOES, List.of(Shops.of(Items.LEATHER, 2, 1)));
         sell.put(Shops.Shop.CLOTHES, List.of(Shops.of(Items.WHITE_WOOL, 4, 1), Shops.of(Items.STRING, 8, 1)));
+        List<Shops.Offer> skate = new ArrayList<>();
+        for (var board : dev.freerun.skate.Skating.BOARDS) skate.add(Shops.of(board, 1, 60));
+        int ki = 0;
+        for (var kit : dev.freerun.skate.Skating.KITS.values()) skate.add(Shops.of(kit, 1, dev.freerun.skate.Skating.KIT_PRICES[ki++]));
+        skate.add(Shops.of(dev.freerun.skate.Skating.RAIL_BLOCK.asItem(), 4, 12));
+        skate.add(Shops.of(dev.freerun.skate.Skating.PARK_CONCRETE.asItem(), 16, 4));
+        buy.put(Shops.Shop.SKATE, skate);
+        sell.put(Shops.Shop.SKATE, List.of(Shops.of(dev.freerun.skate.Skating.BOARDS[0], 1, 25)));
         buy.put(Shops.Shop.AUTO_PARTS, offers(dev.freerun.garage.GarageRegistry.PARTS_PRICES.toArray(new Object[0][])));
         sell.put(Shops.Shop.AUTO_PARTS, List.of(Shops.of(dev.freerun.factory.FactoryRegistry.STEEL_SHEET, 4, 3),
                 Shops.of(Items.IRON_INGOT, 2, 3)));

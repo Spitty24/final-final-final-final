@@ -1,7 +1,9 @@
 package dev.freerun.client.skate;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import dev.freerun.skate.GrindRailBlock;
 import dev.freerun.skate.SkatePayloads;
+import dev.freerun.skate.SkateRampBlock;
 import dev.freerun.skate.SkateboardItem;
 import dev.freerun.skate.Skating;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -124,6 +126,16 @@ public final class SkateClient {
     private static SkatePayloads.State lastSent = SkatePayloads.State.OFF;
     private static boolean wasOnGround = true;
 
+    // ramps
+    private static boolean onRamp, vertAir;
+    private static double rampSn, rampC = 1;
+    private static float rampPitch;
+
+    // stalls on the coping
+    private static boolean stalling;
+    private static Direction stallDrop;
+    private static boolean slopeRail;
+
     private SkateClient() {}
 
     // ------------------------------------------------------------------ queries for the renderers and mixins
@@ -164,7 +176,7 @@ public final class SkateClient {
     /** What the local player looks like right now (the renderers read this; others get theirs from the server). */
     public static SkatePayloads.State localState(int entityId) {
         float body = airSpin + (fakie ? 180 : 0);
-        float roll = boardRoll, spin = boardSpin + body, pitch = boardPitch;
+        float roll = boardRoll, spin = boardSpin + body, pitch = boardPitch != 0 ? boardPitch : onRamp ? rampPitch : 0;
         if (powersliding) {
             spin += 80 * Math.signum(lean == 0 ? 1 : lean);
             body += 60 * Math.signum(lean == 0 ? 1 : lean);
@@ -287,12 +299,23 @@ public final class SkateClient {
         int steer = (a ? 1 : 0) - (d ? 1 : 0);   // + = left (yaw decreases), matching vanilla A/D
 
         boolean ground = p.onGround();
+        double rh = grinding ? Double.NaN : rampHeight(p.level(), p.getX(), p.getZ(), p.getY());
+        double vy0 = p.getDeltaMovement().y;
+        boolean rampContact = !Double.isNaN(rh) && (onRamp ? Math.abs(p.getY() - rh) < 0.6
+                : p.getY() - rh < 0.15 + Math.max(0, -vy0) && p.getY() - rh > -1.2 && vy0 <= 0.02);
         if (grinding) tickGrind(p, steer, w, s);
-        else if (ground) tickGround(p, w, s, steer, shift, space, ctrl, alt);
-        else tickAir(p, steer, lmb, rmb);
+        else if (rampContact) {
+            tickRamp(p, rh, w, s, steer, space, lmb || rmb);
+            ground = onRamp;
+        } else {
+            onRamp = false;
+            if (ground) tickGround(p, w, s, steer, shift, space, ctrl, alt);
+            else tickAir(p, steer, lmb, rmb, w);
+        }
 
         // landing
-        if (!grinding && ground && !wasOnGround && airTicks > 1) land(p, lmb || rmb);
+        if (!grinding && !onRamp && ground && !wasOnGround && airTicks > 1) land(p, lmb || rmb);
+        if (ground) vertAir = false;
         wasOnGround = ground || grinding;
         if (!ground && !grinding) airTicks++;
         else if (!grinding) airTicks = 0;
@@ -437,6 +460,11 @@ public final class SkateClient {
         popCooldown = 6;
         if (fakie && !t.name().startsWith("Nollie")) t = t.named((t.name().equals("Ollie") ? "Fakie " : "Switch ") + t.name());
         double vy = 0.44 + 0.1 * Math.min(1, flickSpeed);
+        if (onRamp) {
+            vy += Math.max(0, speed * rampSn);
+            speed *= rampC;
+            onRamp = false;
+        }
         if (grinding) {
             endGrind(p, true);
             vy = 0.4;
@@ -591,7 +619,7 @@ public final class SkateClient {
 
     // ------------------------------------------------------------------ in the air
 
-    private static void tickAir(LocalPlayer p, int steer, boolean lmb, boolean rmb) {
+    private static void tickAir(LocalPlayer p, int steer, boolean lmb, boolean rmb, boolean w) {
         trickAge++;
         float k = trickProgress();
         float e = 1 - (1 - k) * (1 - k);
@@ -629,7 +657,13 @@ public final class SkateClient {
         // keep momentum; a touch of air control
         Vec3 v = p.getDeltaMovement();
         Vec3 fwd = dir(heading);
-        p.setDeltaMovement(fwd.x * speed, v.y, fwd.z * speed);
+        if (vertAir) {
+            // straight up out of the pipe: drift back over the ramp, or hold W to come down on the coping
+            double drift = w ? 0.07 : -0.035;
+            p.setDeltaMovement(fwd.x * drift, v.y, fwd.z * drift);
+        } else {
+            p.setDeltaMovement(fwd.x * speed, v.y, fwd.z * speed);
+        }
         // look for something to grind on the way down
         if (v.y <= 0.05 && airTicks > 2) tryGrind(p);
     }
@@ -687,6 +721,10 @@ public final class SkateClient {
 
     private static void bail(LocalPlayer p, String why) {
         if (grinding) grinding = false;
+        stalling = false;
+        slopeRail = false;
+        onRamp = false;
+        vertAir = false;
         bailTicks = 34;
         Vec3 v = p.getDeltaMovement();
         bailBoardPos = p.position();
@@ -731,7 +769,8 @@ public final class SkateClient {
     // ------------------------------------------------------------------ grinding
 
     private static boolean rail(BlockState s) {
-        return s.getBlock() instanceof FenceBlock || s.getBlock() instanceof WallBlock || s.getBlock() instanceof IronBarsBlock;
+        return s.getBlock() instanceof FenceBlock || s.getBlock() instanceof WallBlock || s.getBlock() instanceof IronBarsBlock
+                || s.getBlock() instanceof GrindRailBlock && s.getValue(GrindRailBlock.SLOPE) == 0;
     }
 
     /** Height of the top of whatever's at {@code pos}, or NaN. */
@@ -742,36 +781,147 @@ public final class SkateClient {
         return pos.getY() + shape.max(Direction.Axis.Y);
     }
 
+    /** A drop beside a ledge: air, or a ramp falling away (the coping of a quarter pipe). */
+    private static boolean drop(LocalPlayer p, BlockPos pos, double ledgeTop) {
+        BlockState s = p.level().getBlockState(pos);
+        if (s.getBlock() instanceof SkateRampBlock) return true;
+        double t = top(p, pos);
+        return Double.isNaN(t) || t < ledgeTop - 0.45;
+    }
+
+    /** A sloped handrail block somewhere around the feet: its top here, or NaN. */
+    private static double slopedRailTop(LocalPlayer p, double x, double z, double nearY, BlockPos[] found) {
+        int bx = Mth.floor(x), bz = Mth.floor(z);
+        for (int by = Mth.floor(nearY + 0.6); by >= Mth.floor(nearY - 1.6); by--) {
+            BlockPos bp = new BlockPos(bx, by, bz);
+            BlockState st = p.level().getBlockState(bp);
+            if (st.getBlock() instanceof GrindRailBlock && st.getValue(GrindRailBlock.SLOPE) != 0) {
+                double t = by + GrindRailBlock.top(st, x - bx, z - bz);
+                if (Math.abs(t - nearY) < 1.0) {
+                    if (found != null) found[0] = bp;
+                    return t;
+                }
+            }
+        }
+        return Double.NaN;
+    }
+
     private static void tryGrind(LocalPlayer p) {
         Vec3 feet = p.position();
         Vec3 v = p.getDeltaMovement();
+        // a handrail down some stairs
+        BlockPos[] hr = new BlockPos[1];
+        double ht = slopedRailTop(p, feet.x, feet.z, feet.y, hr);
+        if (!Double.isNaN(ht) && feet.y > ht - 0.2 && feet.y < ht + 0.5 + Math.max(0, -v.y)) {
+            BlockState st = p.level().getBlockState(hr[0]);
+            Direction.Axis ax = st.getValue(GrindRailBlock.AXIS);
+            slopeRail = true;
+            startGrind(p, ax, ax == Direction.Axis.X ? hr[0].getZ() + 0.5 : hr[0].getX() + 0.5, ht, false);
+            return;
+        }
         BlockPos below = BlockPos.containing(feet.x, feet.y - 0.6, feet.z);
         for (BlockPos bp : new BlockPos[]{below, below.above()}) {
             BlockState st = p.level().getBlockState(bp);
+            if (st.getBlock() instanceof SkateRampBlock) continue;
             double t = top(p, bp);
             if (Double.isNaN(t)) continue;
             if (feet.y < t - 0.15 || feet.y > t + 0.5 + Math.max(0, -v.y)) continue;
             if (rail(st)) {
                 Direction.Axis ax = railAxis(st);
+                slopeRail = false;
                 startGrind(p, ax, ax == Direction.Axis.X ? bp.getZ() + 0.5 : bp.getX() + 0.5, t, false);
                 return;
             }
             // a ledge: a solid top with a drop on one side, and we're over that edge
             if (t - bp.getY() < 0.45) continue;   // carpets, slabs on the floor: no
-            Direction.Axis ax = Math.abs(Mth.wrapDegrees(heading)) < 45 || Math.abs(Mth.wrapDegrees(heading)) > 135 ? Direction.Axis.Z : Direction.Axis.X;
             double fx = feet.x - bp.getX(), fz = feet.z - bp.getZ();
-            if (ax == Direction.Axis.Z) {   // travelling along Z: the edge is a line of constant X
-                if (fx < 0.35 && Double.isNaN(top(p, bp.west()))) { startGrind(p, ax, bp.getX() + 0.15, t, true); return; }
-                if (fx > 0.65 && Double.isNaN(top(p, bp.east()))) { startGrind(p, ax, bp.getX() + 0.85, t, true); return; }
-            } else {
-                if (fz < 0.35 && Double.isNaN(top(p, bp.north()))) { startGrind(p, ax, bp.getZ() + 0.15, t, true); return; }
-                if (fz > 0.65 && Double.isNaN(top(p, bp.south()))) { startGrind(p, ax, bp.getZ() + 0.85, t, true); return; }
+            Direction best = null;
+            double bestD = 0.35;
+            for (Direction side : Direction.Plane.HORIZONTAL) {
+                double d = switch (side) {
+                    case WEST -> fx;
+                    case EAST -> 1 - fx;
+                    case NORTH -> fz;
+                    default -> 1 - fz;
+                };
+                if (d < bestD && drop(p, bp.relative(side), t)) {
+                    bestD = d;
+                    best = side;
+                }
             }
+            if (best == null) continue;
+            Direction.Axis ax = best.getAxis() == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+            double lineAt = switch (best) {
+                case WEST -> bp.getX() + 0.15;
+                case EAST -> bp.getX() + 0.85;
+                case NORTH -> bp.getZ() + 0.15;
+                default -> bp.getZ() + 0.85;
+            };
+            slopeRail = false;
+            Vec3 axisVec = ax == Direction.Axis.X ? new Vec3(1, 0, 0) : new Vec3(0, 0, 1);
+            if (Math.abs(dir(heading).dot(axisVec)) < 0.4 && (vertAir || speed < 0.2)) {
+                startStall(p, ax, lineAt, t, best);
+                return;
+            }
+            startGrind(p, ax, lineAt, t, true);
+            return;
+        }
+    }
+
+    /** Came straight down on the coping: an axle stall, then drop back in. */
+    private static void startStall(LocalPlayer p, Direction.Axis axis, double lineAt, double top, Direction dropSide) {
+        if (trickProgress() < 0.8f) {
+            bail(p, "Didn't catch it");
+            return;
+        }
+        grinding = true;
+        stalling = true;
+        stallDrop = dropSide;
+        grindAxis = axis;
+        grindLine = lineAt;
+        grindTop = top;
+        grindTicks = 0;
+        grindName = "Axle Stall";
+        speed = 0;
+        vertAir = false;
+        resetTrick();
+        if (grabKind != 0) finishGrab();
+        pose = SkatePayloads.GRIND;
+        sound(p, Skating.GRIND, 0.8f, 0.7f);
+        event = SkatePayloads.EV_GRIND;
+    }
+
+    private static void tickStall(LocalPlayer p, boolean w, boolean s) {
+        grindTicks++;
+        pose = SkatePayloads.GRIND;
+        Vec3 pos = p.position();
+        double nx = grindAxis == Direction.Axis.Z ? Mth.lerp(0.5, pos.x, grindLine) : pos.x;
+        double nz = grindAxis == Direction.Axis.X ? Mth.lerp(0.5, pos.z, grindLine) : pos.z;
+        p.setPos(nx, grindTop, nz);
+        p.setDeltaMovement(0, 0, 0);
+        linePoints += 2;
+        float mag = Mth.sqrt(sx * sx + sy * sy);
+        if (grindTicks > 6 && (mag > 0.6f || w || s || grindTicks > 30)) {
+            // back in: the way we came, riding the other way round
+            addToLine(grindTicks > 20 ? "Rock to Fakie" : "Axle Stall", 150 + grindTicks * 6);
+            grinding = false;
+            stalling = false;
+            heading = stallDrop.toYRot();
+            fakie = !fakie;
+            facing = heading;
+            p.setPos(nx + stallDrop.getStepX() * 0.45, grindTop - 0.1, nz + stallDrop.getStepZ() * 0.45);
+            p.setDeltaMovement(stallDrop.getStepX() * 0.05, -0.1, stallDrop.getStepZ() * 0.05);
+            speed = 0.05;
+            pose = SkatePayloads.AIR;
+            airTicks = 1;
+            wasOnGround = false;
+            prep = 0;
         }
     }
 
     private static Direction.Axis railAxis(BlockState s) {
         boolean ns = false, ew = false;
+        if (s.getBlock() instanceof GrindRailBlock) return s.getValue(GrindRailBlock.AXIS);
         if (s.hasProperty(FenceBlock.NORTH)) {
             ns = s.getValue(FenceBlock.NORTH) || s.getValue(FenceBlock.SOUTH);
             ew = s.getValue(FenceBlock.EAST) || s.getValue(FenceBlock.WEST);
@@ -809,6 +959,10 @@ public final class SkateClient {
     }
 
     private static void tickGrind(LocalPlayer p, int steer, boolean w, boolean s) {
+        if (stalling) {
+            tickStall(p, w, s);
+            return;
+        }
         grindTicks++;
         // tilt the stick to change grinds (boardslides stay boardslides)
         if (!grindName.equals("Boardslide")) {
@@ -841,9 +995,23 @@ public final class SkateClient {
         if (p.tickCount % 6 == 0) sound(p, Skating.GRIND, 0.45f, 0.9f + (float) speed * 0.4f);
         // does the rail go on?
         Vec3 ahead = new Vec3(nx, grindTop, nz).add(axisVec.scale(grindDir * 0.45));
-        BlockPos bp = BlockPos.containing(ahead.x, grindTop - 0.3, ahead.z);
-        double t = top(p, bp);
-        boolean goes = !Double.isNaN(t) && Math.abs(t - grindTop) < 0.15;
+        boolean goes;
+        if (slopeRail) {
+            // down (or up) the handrail: follow its slope, and gravity with it
+            double here = slopedRailTop(p, nx, nz, grindTop, null);
+            if (!Double.isNaN(here)) {
+                speed += (grindTop - here) * 0.08;
+                grindTop = here;
+                p.setPos(nx, grindTop, nz);
+            }
+            double next = slopedRailTop(p, ahead.x, ahead.z, grindTop, null);
+            goes = !Double.isNaN(next) && Math.abs(next - grindTop) < 0.7;
+            speed = Math.min(speed + 0.004, MAX_SPEED);
+        } else {
+            BlockPos bp = BlockPos.containing(ahead.x, grindTop - 0.3, ahead.z);
+            double t = top(p, bp);
+            goes = !Double.isNaN(t) && Math.abs(t - grindTop) < 0.15;
+        }
         if (!goes || speed < 0.06 || p.horizontalCollision) {
             endGrind(p, false);
             return;
@@ -853,6 +1021,8 @@ public final class SkateClient {
 
     private static void endGrind(LocalPlayer p, boolean popped) {
         grinding = false;
+        stalling = false;
+        slopeRail = false;
         if (grindTicks > 2) addToLine(grindName, 80 + grindTicks * 8);
         boardPitch = 0;
         pose = SkatePayloads.AIR;
@@ -862,6 +1032,156 @@ public final class SkateClient {
             Vec3 v = p.getDeltaMovement();
             p.setDeltaMovement(v.x, 0.08, v.z);   // a little hop off the end
         }
+    }
+
+    // ------------------------------------------------------------------ ramps
+
+    /**
+     * Height of the skate ramp surface under (x, z), looking down from a little above {@code y},
+     * or NaN if there's no ramp there (or something solid sits over it).
+     */
+    static double rampHeight(net.minecraft.world.level.Level level, double x, double z, double y) {
+        int bx = Mth.floor(x), bz = Mth.floor(z);
+        int from = Mth.floor(y + 0.6);
+        for (int by = from; by >= from - 4; by--) {
+            BlockPos bp = new BlockPos(bx, by, bz);
+            BlockState st = level.getBlockState(bp);
+            if (st.getBlock() instanceof SkateRampBlock) {
+                double h = SkateRampBlock.surface(st, x - bx, z - bz);
+                if (h > 1e-4) return by + h;
+                continue;
+            }
+            if (!st.getCollisionShape(level, bp).isEmpty()) return Double.NaN;
+        }
+        return Double.NaN;
+    }
+
+    /** Rise per block of travel along {@code yaw} at (x, z). */
+    private static double rampSlope(net.minecraft.world.level.Level level, double x, double z, double h, float yaw) {
+        Vec3 f = dir(yaw);
+        double e = 0.15;
+        double a = rampHeight(level, x + f.x * e, z + f.z * e, h + 0.3), b = rampHeight(level, x - f.x * e, z - f.z * e, h + 0.3);
+        if (Double.isNaN(a) && Double.isNaN(b)) return 0;
+        if (Double.isNaN(a)) return (h - b) / e;
+        if (Double.isNaN(b)) return (a - h) / e;
+        return (a - b) / (2 * e);
+    }
+
+    /** Which way is straight down the ramp here, as a yaw. */
+    private static float downhill(net.minecraft.world.level.Level level, double x, double z, double h) {
+        double gx = rampSlope(level, x, z, h, -90), gz = rampSlope(level, x, z, h, 0);   // rise toward +x, toward +z
+        return (float) (Mth.atan2(-gz, -gx) * Mth.RAD_TO_DEG) - 90.0f;
+    }
+
+    private static void tickRamp(LocalPlayer p, double rh, boolean w, boolean s, int steer, boolean space, boolean grabHeld) {
+        var level = p.level();
+        if (!onRamp && airTicks > 1) {
+            // coming down onto the ramp: pick up the line of travel and the speed along the surface
+            Vec3 v = p.getDeltaMovement();
+            float newHeading = v.horizontalDistance() > 0.06 ? (float) (Mth.atan2(v.z, v.x) * Mth.RAD_TO_DEG) - 90.0f : downhill(level, p.getX(), p.getZ(), rh);
+            if (Math.abs(Mth.wrapDegrees(newHeading - heading)) > 90) fakie = !fakie;   // coming back the way we went up
+            heading = newHeading;
+            double sl = rampSlope(level, p.getX(), p.getZ(), rh, heading);
+            double c = 1 / Math.sqrt(1 + sl * sl), sn = sl * c;
+            double along = v.horizontalDistance() * c + v.y * sn;
+            if (sl < -0.4) lastVy = 0;   // a transition takes the drop
+            vertAir = false;
+            land(p, grabHeld);
+            if (bailTicks > 0) return;
+            speed = Math.max(0.04, along);
+        }
+        onRamp = true;
+        airTicks = 0;
+        double sl = rampSlope(level, p.getX(), p.getZ(), rh, heading);
+        double c = 1 / Math.sqrt(1 + sl * sl), sn = sl * c;
+        // gravity along the slope; pumping (W) on the way down; S drags a foot
+        speed -= 0.05 * sn;
+        if (w && sl < -0.15) speed += 0.011;
+        if (s) speed = Math.max(0, speed - 0.012);
+        speed *= 0.997;
+        if (speed < 0) {   // ran out of speed going up: roll back down fakie
+            heading += 180;
+            fakie = !fakie;
+            speed = -speed;
+            sl = -sl;
+            sn = -sn;
+        }
+        speed = Math.min(speed, 1.05);
+        heading -= steer * (float) Math.max(1.5, 4.5 - speed * 4) * (float) c;
+        lean = Mth.lerp(0.3f, lean, steer * (float) Math.min(1, speed * 3));
+        facing = heading;
+        rampSn = sn;
+        rampC = c;
+        rampPitch = (float) Mth.clamp(Math.toDegrees(Math.atan(sl)), -80, 80);
+        Vec3 fwd = dir(heading);
+        // up the wall: something solid just ahead at the top, or the ramp ends while it's steep, go straight up
+        if (sl > 1.3) {
+            BlockPos ahead = BlockPos.containing(p.getX() + fwd.x * 0.45, p.getY() + 0.6, p.getZ() + fwd.z * 0.45);
+            BlockState as = level.getBlockState(ahead);
+            boolean wall = !(as.getBlock() instanceof SkateRampBlock) && !as.getCollisionShape(level, ahead).isEmpty();
+            boolean lip = Double.isNaN(rampHeight(level, p.getX() + fwd.x * 0.45, p.getZ() + fwd.z * 0.45, p.getY() + 0.5));
+            if (wall || lip || p.horizontalCollision) {
+                launchVert(p, fwd);
+                return;
+            }
+        } else if (p.horizontalCollision && speed > 0.3) {
+            bail(p, "Slammed");
+            return;
+        }
+        // tricks off the ramp
+        boolean popped = gesture(p, true);
+        if (!popped && space && popCooldown == 0) {
+            flickSpeed = 0.5f;
+            pop(p, Trick.OLLIE);
+            popped = true;
+        }
+        if (popped) {
+            Vec3 v = p.getDeltaMovement();
+            p.setDeltaMovement(fwd.x * speed, v.y, fwd.z * speed);
+            return;
+        }
+        pose = prep != 0 ? SkatePayloads.CROUCH : sl < -0.4 ? SkatePayloads.CROUCH : SkatePayloads.RIDE;
+        manualTicks = 0;
+        // step along the surface
+        double hd = speed * c;
+        double nx = p.getX() + fwd.x * hd, nz = p.getZ() + fwd.z * hd;
+        double nh = rampHeight(level, nx, nz, rh + Math.max(0.3, speed * Math.abs(sn) + 0.3));
+        if (Double.isNaN(nh)) {
+            onRamp = false;
+            // onto flat ground at the same height (the top of a funbox), or off the lip into the air
+            double gt = top(p, BlockPos.containing(nx, rh - 0.05, nz));
+            if (!Double.isNaN(gt) && Math.abs(gt - rh) < 0.15) {
+                p.setDeltaMovement(fwd.x * hd, gt - p.getY() + 0.01, fwd.z * hd);
+                speed = hd;
+                rampPitch = 0;
+                return;
+            }
+            p.setDeltaMovement(fwd.x * hd, speed * sn, fwd.z * hd);
+            speed = hd;
+            rampPitch = 0;
+            if (sn > 0.25) {
+                airTicks = 2;
+                wasOnGround = false;
+                pose = SkatePayloads.AIR;
+            }
+            return;
+        }
+        p.setDeltaMovement(nx - p.getX(), nh - p.getY() + 0.001, nz - p.getZ());
+        if (speed > 0.08 && p.tickCount % 3 == 0 && Math.abs(sl) < 0.2) dust(p, 1);
+    }
+
+    /** Off the top of a quarter pipe: straight up, to come back down into the same wall. */
+    private static void launchVert(LocalPlayer p, Vec3 fwd) {
+        double vy = Math.min(1.25, speed * 1.25);
+        onRamp = false;
+        vertAir = true;
+        airTicks = 2;
+        wasOnGround = false;
+        pose = SkatePayloads.AIR;
+        rampPitch = 0;
+        p.setDeltaMovement(-fwd.x * 0.03, vy, -fwd.z * 0.03);
+        if (vy > 0.5) popup("§bAIR", 0x40D8FF);
+        if (vy > 0.35) addToLine("Air", (int) (vy * 200));
     }
 
     // ------------------------------------------------------------------ scoring

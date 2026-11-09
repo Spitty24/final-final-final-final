@@ -18,6 +18,7 @@ public final class ModSounds {
     public static SoundEvent CAR_CRASH;
     public static SoundEvent CASH_REGISTER;
     public static SoundEvent BREAK_BUZZER;
+    public static SoundEvent BUS_BRAKE, BUS_ENGINE;
 
     private ModSounds() {}
 
@@ -34,6 +35,8 @@ public final class ModSounds {
         CAR_CRASH = sound("car_crash");
         CASH_REGISTER = sound("cash_register");
         BREAK_BUZZER = sound("break_buzzer");
+        BUS_BRAKE = sound("bus_brake");
+        BUS_ENGINE = sound("bus_engine");
     }
 
     private static SoundEvent sound(String name) {

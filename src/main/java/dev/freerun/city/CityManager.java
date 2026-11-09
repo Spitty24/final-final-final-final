@@ -37,10 +37,16 @@ public final class CityManager {
                 for (ServerPlayer p : level.players()) {
                     if (p.isSpectator()) continue;
                     BlockPos city = CityWorld.cityAt(level, p.blockPosition());
-                    if (city != null) populate(level, city, p);
+                    if (city != null) {
+                        populate(level, city, p);
+                        BusManager.populate(level, city, p);
+                    }
                 }
             }
-            if (now % 100 == 51) tidy(level);
+            if (now % 100 == 51) {
+                tidy(level);
+                BusManager.tidy(level);
+            }
         });
     }
 

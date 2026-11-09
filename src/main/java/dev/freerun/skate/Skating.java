@@ -27,6 +27,10 @@ import java.util.UUID;
 public final class Skating {
     public static final Item[] BOARDS = new Item[4];
     public static SoundEvent ROLL, POP, LAND, GRIND, BAIL, PUSH;
+    public static net.minecraft.world.level.block.Block RAMP, PARK_CONCRETE, RAIL_BLOCK;
+    public static final java.util.Map<ParkBuilder.Kind, Item> KITS = new java.util.EnumMap<>(ParkBuilder.Kind.class);
+    /** Prices at the board shop: kit -> dollars. */
+    public static final int[] KIT_PRICES = {120, 260, 40, 90, 60, 45, 150, 30, 50};
     private static final Map<UUID, SkatePayloads.State> STATE = new HashMap<>();
     private static final Map<UUID, Long> LAST_BAIL = new HashMap<>();
     private static final String[] NAMES = {"skateboard", "skateboard_gator", "skateboard_bolt", "skateboard_crawfish"};
@@ -40,6 +44,26 @@ public final class Skating {
             BOARDS[i] = Registry.register(BuiltInRegistries.ITEM, Freerun.id(NAMES[i]),
                     new SkateboardItem(i, GRAPHICS[i], new Item.Properties().stacksTo(1)));
         }
+        RAMP = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("skate_ramp"), new SkateRampBlock(
+                net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SMOOTH_STONE)
+                        .noOcclusion().sound(net.minecraft.world.level.block.SoundType.WOOD)));
+        PARK_CONCRETE = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("skatepark_concrete"), new net.minecraft.world.level.block.Block(
+                net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.SMOOTH_STONE)));
+        RAIL_BLOCK = Registry.register(BuiltInRegistries.BLOCK, Freerun.id("grind_rail"), new GrindRailBlock(
+                net.minecraft.world.level.block.state.BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.IRON_BARS).noOcclusion()));
+        Item concreteItem = Registry.register(BuiltInRegistries.ITEM, Freerun.id("skatepark_concrete"),
+                new net.minecraft.world.item.BlockItem(PARK_CONCRETE, new Item.Properties()));
+        Item railItem = Registry.register(BuiltInRegistries.ITEM, Freerun.id("grind_rail"),
+                new net.minecraft.world.item.BlockItem(RAIL_BLOCK, new Item.Properties()));
+        for (ParkBuilder.Kind k : ParkBuilder.Kind.values()) {
+            KITS.put(k, Registry.register(BuiltInRegistries.ITEM, Freerun.id("kit_" + k.name().toLowerCase(java.util.Locale.ROOT)),
+                    new SkateKitItem(k, new Item.Properties().stacksTo(16))));
+        }
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.BUILDING_BLOCKS).register(e -> {
+            e.accept(concreteItem);
+            e.accept(railItem);
+            for (Item k : KITS.values()) e.accept(k);
+        });
         ROLL = sound("skate_roll");
         POP = sound("skate_pop");
         LAND = sound("skate_land");

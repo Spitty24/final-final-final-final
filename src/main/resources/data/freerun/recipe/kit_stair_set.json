@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "R  ",
+  "CR ",
+  "CCR"
+ ],
+ "key": {
+  "R": {
+   "item": "freerun:grind_rail"
+  },
+  "C": {
+   "item": "freerun:skatepark_concrete"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_stair_set",
+  "count": 1
+ }
+}

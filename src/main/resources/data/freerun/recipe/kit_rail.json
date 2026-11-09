@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "RRR"
+ ],
+ "key": {
+  "R": {
+   "item": "freerun:grind_rail"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_rail",
+  "count": 1
+ }
+}

@@ -1,0 +1,21 @@
+{
+ "type": "minecraft:crafting_shaped",
+ "category": "building",
+ "pattern": [
+  "P P",
+  "PCP",
+  "CCC"
+ ],
+ "key": {
+  "P": {
+   "tag": "minecraft:planks"
+  },
+  "C": {
+   "item": "freerun:skatepark_concrete"
+  }
+ },
+ "result": {
+  "id": "freerun:kit_half_pipe",
+  "count": 1
+ }
+}
