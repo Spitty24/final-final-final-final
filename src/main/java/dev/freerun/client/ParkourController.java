@@ -85,6 +85,7 @@ public final class ParkourController {
     public void tick(Minecraft mc) {
         LocalPlayer p = mc.player;
         if (p == null || mc.level == null || mc.isPaused()) return;
+        if (dev.freerun.client.skate.SkateClient.active()) return;   // the board has the controls
         FreerunConfig cfg = FreerunConfig.get();
         Options o = mc.options;
 

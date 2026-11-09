@@ -24,6 +24,7 @@ public abstract class CameraMixin {
     private void freerun$secondPerson(BlockGetter level, Entity entity, boolean detached, boolean mirrored, float partial,
                                       CallbackInfo ci) {
         double[] c = SecondPerson.camera(Minecraft.getInstance(), partial);
+        if (c == null) c = dev.freerun.client.skate.SkateRender.camera(Minecraft.getInstance(), partial);
         if (c == null) return;
         setRotation((float) c[3], (float) c[4]);
         setPosition(c[0], c[1], c[2]);

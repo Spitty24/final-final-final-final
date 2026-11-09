@@ -297,5 +297,16 @@
  "block.freerun.runway": "Runway",
  "block.freerun.hawksight_aligner": "Hunterra HawkSight Aligner",
  "entity.freerun.four_post_lift": "Four-Post Lift",
- "entity.freerun.ability_fx": "Swampwatch Effect"
+ "entity.freerun.ability_fx": "Swampwatch Effect",
+ "item.freerun.skateboard": "Skateboard (Bayou)",
+ "item.freerun.skateboard_gator": "Skateboard (Gator)",
+ "item.freerun.skateboard_bolt": "Skateboard (Bolt)",
+ "item.freerun.skateboard_crawfish": "Skateboard (Crawfish)",
+ "key.freerun.skate": "Skateboard on / off",
+ "subtitles.freerun.skate_roll": "Wheels roll",
+ "subtitles.freerun.skate_pop": "Board pops",
+ "subtitles.freerun.skate_land": "Board lands",
+ "subtitles.freerun.skate_grind": "Trucks grind",
+ "subtitles.freerun.skate_bail": "Skater bails",
+ "subtitles.freerun.skate_push": "Skater pushes"
 }

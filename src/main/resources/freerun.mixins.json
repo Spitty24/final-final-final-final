@@ -3,13 +3,24 @@
   "minVersion": "0.8",
   "package": "dev.freerun.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": ["PlayerMixin", "CraftingTableBlockMixin", "AbstractFurnaceBlockEntityMixin", "PlacedFeatureMixin", "PlayerFormMixin"],
+  "mixins": [
+    "PlayerMixin",
+    "CraftingTableBlockMixin",
+    "AbstractFurnaceBlockEntityMixin",
+    "PlacedFeatureMixin",
+    "PlayerFormMixin"
+  ],
   "client": [
     "client.CameraMixin",
     "client.GameRendererMixin",
     "client.ItemInHandRendererMixin",
     "client.PlayerModelMixin",
-    "client.PlayerRendererMixin"
+    "client.PlayerRendererMixin",
+    "client.KeyboardInputMixin",
+    "client.EntityTurnMixin",
+    "client.MinecraftSkateMixin"
   ],
-  "injectors": { "defaultRequire": 1 }
+  "injectors": {
+    "defaultRequire": 1
+  }
 }

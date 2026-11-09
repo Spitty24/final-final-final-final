@@ -39,6 +39,34 @@ public abstract class PlayerRendererMixin {
             at = @At("TAIL"))
     private void freerun$bodyMotion(AbstractClientPlayer player, PoseStack poseStack, float bob, float yBodyRot,
                                     float partialTick, float scale, CallbackInfo ci) {
+        if (dev.freerun.client.skate.SkateRender.state(player) != null) {
+            dev.freerun.client.skate.SkateRender.body(player, poseStack, scale);
+            return;
+        }
         ThirdPersonAnimator.applyBody(player, poseStack, partialTick, scale);
+    }
+
+    @org.spongepowered.asm.mixin.Unique
+    private boolean freerun$skatePushed;
+
+    /** A skater: the board under the feet, and the rider stood on it. */
+    @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+            at = @At("HEAD"))
+    private void freerun$skateBoard(AbstractClientPlayer player, float entityYaw, float partialTick, PoseStack poseStack,
+                                    MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
+        freerun$skatePushed = false;
+        if (AlienRenderers.formOf(player) != null) return;
+        if (!dev.freerun.client.skate.SkateRender.renderBoard(player, partialTick, poseStack, buffer, packedLight)) return;
+        poseStack.pushPose();
+        dev.freerun.client.skate.SkateRender.lift(player, poseStack);
+        freerun$skatePushed = true;
+    }
+
+    @Inject(method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
+            at = @At("RETURN"))
+    private void freerun$skateBoardEnd(AbstractClientPlayer player, float entityYaw, float partialTick, PoseStack poseStack,
+                                       MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
+        if (freerun$skatePushed) poseStack.popPose();
+        freerun$skatePushed = false;
     }
 }

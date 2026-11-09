@@ -333,6 +333,7 @@ public final class EconomyRegistry {
         gsSell.add(Shops.of(dev.freerun.laser.LaserRegistry.LASER_PART, 1, 6));
         gs.add(Shops.of(dev.freerun.laser.LaserRegistry.WORK_PHONE, 1, 1));
         gs.add(Shops.of(dev.freerun.alien.AlienRegistry.SWAMPWATCH, 1, 900));
+        for (var board : dev.freerun.skate.Skating.BOARDS) gs.add(Shops.of(board, 1, 60));
         java.util.Map<Shops.Shop, List<Shops.Offer>> buy = new java.util.EnumMap<>(Shops.Shop.class);
         java.util.Map<Shops.Shop, List<Shops.Offer>> sell = new java.util.EnumMap<>(Shops.Shop.class);
         buy.put(Shops.Shop.DOUBLE_QUICK, dq);

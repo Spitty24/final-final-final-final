@@ -33,6 +33,7 @@ public final class FreerunClient implements ClientModInitializer {
     private static boolean hornWasDown;
     private static KeyMapping hackKey;
     public static KeyMapping abilityKey;
+    private static KeyMapping skateKey;
     private static boolean pickerPending;
 
     /** Whether a key event is the skill tree key (used to close the screen with the same key). */
@@ -253,6 +254,32 @@ public final class FreerunClient implements ClientModInitializer {
 
         // Runs before the player ticks, so velocities we set are used for this tick's movement.
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
+        // skateboarding
+        ClientTickEvents.START_CLIENT_TICK.register(dev.freerun.client.skate.SkateClient::tick);
+        skateKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.skate", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_B, "key.categories.freerun"));
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (skateKey.consumeClick()) {
+                if (client.screen == null) dev.freerun.client.skate.SkateClient.toggle();
+            }
+        });
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.skate.SkateHud.render(guiGraphics));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry.registerModelLayer(
+                dev.freerun.client.skate.SkateboardModel.LAYER, dev.freerun.client.skate.SkateboardModel::layer);
+        for (net.minecraft.world.item.Item board : dev.freerun.skate.Skating.BOARDS) {
+            net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry.INSTANCE.register(board,
+                    new dev.freerun.client.skate.SkateboardItemRenderer());
+        }
+        ClientPlayNetworking.registerGlobalReceiver(dev.freerun.skate.SkatePayloads.State.TYPE, (payload, context) -> context.client().execute(() -> {
+            if (payload.on()) dev.freerun.client.skate.SkateRender.REMOTE.put(payload.entityId(), payload);
+            else dev.freerun.client.skate.SkateRender.REMOTE.remove(payload.entityId());
+            if (payload.event() != dev.freerun.skate.SkatePayloads.EV_NONE && context.client().level != null
+                    && context.client().level.getEntity(payload.entityId()) == null) {
+                dev.freerun.client.skate.SkateRender.REMOTE.remove(payload.entityId());
+            }
+        }));
+        net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+                dev.freerun.client.skate.SkateRender.REMOTE.clear());
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.level != null && !client.isPaused()) ClientClock.tick();

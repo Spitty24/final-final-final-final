@@ -1,0 +1,16 @@
+{
+ "type": "minecraft:crafting_shapeless",
+ "category": "misc",
+ "ingredients": [
+  {
+   "tag": "freerun:skateboards"
+  },
+  {
+   "item": "minecraft:purple_dye"
+  }
+ ],
+ "result": {
+  "id": "freerun:skateboard_bolt",
+  "count": 1
+ }
+}

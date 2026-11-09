@@ -132,5 +132,59 @@
       }
     ],
     "subtitle": "subtitles.freerun.teams_ping"
+  },
+  "skate_roll": {
+    "sounds": [
+      {
+        "name": "freerun:skate_roll",
+        "attenuation_distance": 16
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_roll"
+  },
+  "skate_pop": {
+    "sounds": [
+      {
+        "name": "freerun:skate_pop",
+        "attenuation_distance": 20
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_pop"
+  },
+  "skate_land": {
+    "sounds": [
+      {
+        "name": "freerun:skate_land",
+        "attenuation_distance": 20
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_land"
+  },
+  "skate_grind": {
+    "sounds": [
+      {
+        "name": "freerun:skate_grind",
+        "attenuation_distance": 24
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_grind"
+  },
+  "skate_bail": {
+    "sounds": [
+      {
+        "name": "freerun:skate_bail",
+        "attenuation_distance": 20
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_bail"
+  },
+  "skate_push": {
+    "sounds": [
+      {
+        "name": "freerun:skate_push",
+        "attenuation_distance": 12
+      }
+    ],
+    "subtitle": "subtitles.freerun.skate_push"
   }
 }
