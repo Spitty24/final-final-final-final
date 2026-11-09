@@ -788,6 +788,7 @@ public final class SkateClient {
         sound(p, Skating.BAIL, 1.0f, 1.0f);
         event = SkatePayloads.EV_BAIL;
         popup("§c§lBAILED §r§7" + why, 0xFF4040);
+        dev.freerun.client.StreamChat.skateBailed();
         speed *= 0.3;
     }
 
@@ -1254,6 +1255,7 @@ public final class SkateClient {
     private static void bankLine(LocalPlayer p) {
         int total = linePoints * Math.max(1, lineMult);
         totalScore += total;
+        dev.freerun.client.StreamChat.skateLanded(total);
         String text = line.size() == 1 ? line.get(0) : line.size() + " tricks";
         popup("§a§l+" + String.format("%,d", total) + " §r§f" + text, 0x60F080);
         if (total > 4000) sound(p, net.minecraft.sounds.SoundEvents.PLAYER_LEVELUP, 0.4f, 1.6f);

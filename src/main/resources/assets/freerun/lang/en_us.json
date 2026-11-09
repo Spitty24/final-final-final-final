@@ -324,5 +324,8 @@
  "block.freerun.bus_stop_sign": "Bus Stop Sign",
  "entity.freerun.bus": "City Bus",
  "subtitles.freerun.bus_brake": "Bus air brakes hiss",
- "subtitles.freerun.bus_engine": "Bus pulls away"
+ "subtitles.freerun.bus_engine": "Bus pulls away",
+ "key.freerun.stream_chat": "Show / hide stream chat",
+ "freerun.options.stream_chat": "Stream Chat",
+ "freerun.options.stream_chat_size": "Stream Chat Size"
 }

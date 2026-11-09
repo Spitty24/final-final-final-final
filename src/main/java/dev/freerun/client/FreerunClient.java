@@ -33,7 +33,7 @@ public final class FreerunClient implements ClientModInitializer {
     private static boolean hornWasDown;
     private static KeyMapping hackKey;
     public static KeyMapping abilityKey;
-    private static KeyMapping skateKey;
+    private static KeyMapping skateKey, streamChatKey;
     private static boolean pickerPending;
 
     /** Whether a key event is the skill tree key (used to close the screen with the same key). */
@@ -264,6 +264,15 @@ public final class FreerunClient implements ClientModInitializer {
             }
         });
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.skate.SkateHud.render(guiGraphics));
+        // the fake stream chat
+        streamChatKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+                "key.freerun.stream_chat", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.freerun"));
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (streamChatKey.consumeClick()) StreamChat.toggle();
+            StreamChat.tick(client);
+        });
+        HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> StreamChat.render(guiGraphics));
+        net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents.CHAT.register(message -> StreamChat.playerTyped());
         // skate parks and buses
         dev.freerun.skate.SkateRampBlock.CLIENT_SKATER = e -> e == net.minecraft.client.Minecraft.getInstance().player
                 && dev.freerun.client.skate.SkateClient.active();

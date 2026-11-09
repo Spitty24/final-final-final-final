@@ -49,6 +49,10 @@ public final class FreerunConfig {
     public float cameraTilt = 8.0f;
     /** Camera does a forward flip during landing rolls. */
     public boolean cameraRollFlip = true;
+    /** The fake stream chat overlay (toggle with J; also in Video Settings). */
+    public boolean streamChat = true;
+    /** Its size in percent, 50 to 200. */
+    public int streamChatScale = 100;
 
     public static FreerunConfig get() {
         if (instance == null) load();

@@ -18,7 +18,8 @@
     "client.PlayerRendererMixin",
     "client.KeyboardInputMixin",
     "client.EntityTurnMixin",
-    "client.MinecraftSkateMixin"
+    "client.MinecraftSkateMixin",
+    "client.VideoSettingsScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
