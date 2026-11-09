@@ -817,6 +817,34 @@ Chat also reacts to what you're doing: getting hurt, dropping low on health, dyi
 - **J** shows or hides it.
 - **Options → Video Settings** has *Stream Chat* (on/off) and *Stream Chat Size* (50% to 200%).
 
+## Chaos
+
+**Locked In mode.** Drink a can of **LOCKD Energy** ($4 at the General Store, or craft it from two sugar, glowstone dust and an empty can; two empty cans are three iron nuggets in a V). You get 45 seconds of **Locked In**:
+- tunnel vision (a narrower view and a dark vignette that pulses on the beat)
+- 2.5× mining speed and a bit of extra speed
+- a lo-fi beat playing just for you
+
+Then you crash into **Brain Fog** for 45 seconds. Everything goes hazy, you mine and move slower, and stray thoughts drift past ("why did I come in here"). Another can cures it, which is probably how it starts.
+
+**The Creeper has a podcast.** Creepers don't explode any more. When one would, it sits you down for an episode of *The Creeper Cast*, wearing headphones and a boom mic.
+- It asks three invasive questions ("so why'd you punch that tree?", "what's in the chest you labelled 'misc'?"), each with three answers.
+- Answer well and it thanks you, drops gunpowder and a music disc, and wanders off for good.
+- Answer badly, close the screen, walk away or leave it hanging, and it has an emotional meltdown ("your skin is the default one and EVERYONE noticed") and then explodes anyway.
+- A creeper you light with flint and steel still just explodes.
+
+**Steve's mom calls.** Every 15 to 40 minutes the screen goes black and a phone rings.
+- **Answer it:** Mom tells you to come home for dinner and you get five minutes to reach your bed (or the world spawn). Make it and there's **Mom's Meatloaf**, which gives a lot of food, Regeneration and Absorption. Miss it and she's not mad, she's *disappointed*.
+- **Ignore it:** for a full minute every mob nearby stops what it's doing and turns to stare at you, disapprovingly.
+
+**Reverse Mode.** The **Backwards Clock** (craft a clock, an ender pearl and an amethyst shard) switches it on and off for the whole world.
+- Saplings grow upside down. The leaves appear first, up in the air, then the trunk grows down to the ground.
+- A bucket of water or a small pool runs *up* into a fountain a few blocks high, then spills over. Lakes and the sea are left alone.
+- The Ender Dragon turns up at your bed, lost and homesick. She follows you slowly and says sad things quietly while a sad piano plays and the world takes on a blue tint. She can't be hurt and she doesn't break anything. Walk her to an End portal, or step through one with her close by, and she's home. It's sad and you don't know why.
+
+**The Ender Dragon is going through a divorce.** In the real End fight she's tired, and she talks about her ex, the Wither ("he got the Nether in the divorce. I got... an island"). Halfway through she asks if you'd rather just grab a drink instead.
+- **Yes:** the fight is over and counts as a win (exit portal, egg and all), followed by a very awkward credits scene at a diner.
+- **No:** she takes it about as well as you'd expect, and the fight goes on.
+
 ## Settings
 
 `config/freerun.json` is created on first launch. Every move can be switched off (including
