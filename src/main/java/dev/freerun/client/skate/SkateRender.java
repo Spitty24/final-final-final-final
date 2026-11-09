@@ -52,7 +52,16 @@ public final class SkateRender {
             ps.mulPose(Axis.ZP.rotationDegrees(SkateClient.bailTicks() * 23 % 360 > 180 ? 180 : 0));
         } else if (!bail) {
             float roll = s.roll(), spin = s.spin();
-            ps.mulPose(Axis.YP.rotationDegrees(180 - s.heading() - spin));
+            // pitch with the rider first (ramps, flips), in the direction of travel, around the rider's middle in the air
+            ps.mulPose(Axis.YP.rotationDegrees(180 - s.heading()));
+            float t = tilt(p, s, partial);
+            if (t != 0) {
+                float pivot = airborne(s) ? PIVOT : 0;
+                ps.translate(0, pivot, 0);
+                ps.mulPose(Axis.XP.rotationDegrees(t));
+                ps.translate(0, -pivot, 0);
+            }
+            ps.mulPose(Axis.YP.rotationDegrees(-spin));
             // a flipping board rises up to the feet and spins on its long axis around its middle
             if (roll != 0) {
                 ps.translate(0, 0.3f * Mth.sin(Math.abs(roll) % 360 / 360f * Mth.PI), 0);
@@ -89,13 +98,30 @@ public final class SkateRender {
     }
 
     /** After PlayerRenderer#setupRotations: turn sideways on the board, and with any air spin. */
-    public static void body(Player p, PoseStack ps, float scale) {
+    /** Rider and board turn about this point (above the board) when flipping in the air. */
+    static final float PIVOT = 0.9f;
+
+    static boolean airborne(SkatePayloads.State s) {
+        int k = s.pose();
+        return k == SkatePayloads.AIR || k == SkatePayloads.GRAB_L || k == SkatePayloads.GRAB_R || k == SkatePayloads.GRAB_BOTH;
+    }
+
+    static float tilt(Player p, SkatePayloads.State s, float partial) {
+        if (s.pose() == SkatePayloads.BAIL) return 0;
+        return p == Minecraft.getInstance().player ? SkateClient.tiltLerp(partial) : s.tilt();
+    }
+
+    public static void body(Player p, PoseStack ps, float scale, float partial) {
         SkatePayloads.State s = state(p);
         if (s == null) return;
-        // setupRotations has already turned us to yBodyRot (= heading); stand side-on (regular: left foot forward)
-        // on a ramp, stand square to the surface (tilted back going up, forward going down)
-        if (s.pitch() != 0 && s.pose() != SkatePayloads.MANUAL && s.pose() != SkatePayloads.NOSE_MANUAL && s.pose() != SkatePayloads.BAIL) {
-            ps.mulPose(Axis.XP.rotationDegrees(s.pitch() * 0.85f));
+        // setupRotations has already turned us to yBodyRot (= heading). Square to the ramp, or flipping,
+        // pitched in the direction of travel (+ leans back); then stand side-on (regular: left foot forward)
+        float t = tilt(p, s, partial);
+        if (t != 0) {
+            float pivot = airborne(s) ? (PIVOT - LIFT) * scale : 0;
+            ps.translate(0, pivot, 0);
+            ps.mulPose(Axis.XP.rotationDegrees(t));
+            ps.translate(0, -pivot, 0);
         }
         ps.mulPose(Axis.YP.rotationDegrees(-90 - s.body()));
         switch (s.pose()) {

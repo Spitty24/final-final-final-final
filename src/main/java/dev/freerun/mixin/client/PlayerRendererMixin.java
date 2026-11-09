@@ -40,7 +40,7 @@ public abstract class PlayerRendererMixin {
     private void freerun$bodyMotion(AbstractClientPlayer player, PoseStack poseStack, float bob, float yBodyRot,
                                     float partialTick, float scale, CallbackInfo ci) {
         if (dev.freerun.client.skate.SkateRender.state(player) != null) {
-            dev.freerun.client.skate.SkateRender.body(player, poseStack, scale);
+            dev.freerun.client.skate.SkateRender.body(player, poseStack, scale, partialTick);
             return;
         }
         ThirdPersonAnimator.applyBody(player, poseStack, partialTick, scale);

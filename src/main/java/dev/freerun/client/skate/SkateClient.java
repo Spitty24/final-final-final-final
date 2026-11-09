@@ -130,6 +130,15 @@ public final class SkateClient {
     private static boolean onRamp, vertAir;
     private static double rampSn, rampC = 1;
     private static float rampPitch;
+    /**
+     * How far the rider and board are pitched, relative to the direction of travel: + leaning back
+     * (going up a ramp, or a backflip), - leaning forward. It eases to match the ground or the ramp,
+     * stays put through the air (so you come off a quarter pipe the way you went up it), and W / S
+     * rotate it in the air for front and back flips.
+     */
+    private static float tilt, tiltO, flipTotal;
+    /** W / S have been let go since we left the ground (so holding W to push doesn't flip you). */
+    private static boolean flipKeysFree;
 
     // stalls on the coping
     private static boolean stalling;
@@ -176,7 +185,7 @@ public final class SkateClient {
     /** What the local player looks like right now (the renderers read this; others get theirs from the server). */
     public static SkatePayloads.State localState(int entityId) {
         float body = airSpin + (fakie ? 180 : 0);
-        float roll = boardRoll, spin = boardSpin + body, pitch = boardPitch != 0 ? boardPitch : onRamp ? rampPitch : 0;
+        float roll = boardRoll, spin = boardSpin + body, pitch = boardPitch;
         if (powersliding) {
             spin += 80 * Math.signum(lean == 0 ? 1 : lean);
             body += 60 * Math.signum(lean == 0 ? 1 : lean);
@@ -185,7 +194,7 @@ public final class SkateClient {
             spin += 90;
             body += 90;
         }
-        return new SkatePayloads.State(entityId, active, deck, heading, roll, spin, body, pitch, pose, lean, 0);
+        return new SkatePayloads.State(entityId, active, deck, heading, roll, spin, body, pitch, tilt, pose, lean, 0);
     }
 
     public static Vec3 bailBoard(float partial) {
@@ -278,6 +287,7 @@ public final class SkateClient {
             return;
         }
         leanO = lean;
+        tiltO = tilt;
         event = SkatePayloads.EV_NONE;
         if (popCooldown > 0) popCooldown--;
         updateStick();
@@ -310,12 +320,16 @@ public final class SkateClient {
         } else {
             onRamp = false;
             if (ground) tickGround(p, w, s, steer, shift, space, ctrl, alt);
-            else tickAir(p, steer, lmb, rmb, w);
+            else tickAir(p, steer, lmb, rmb, w, s, shift);
+            if (ground) tilt = ease(tilt, 0, 0.3f);
         }
 
         // landing
         if (!grinding && !onRamp && ground && !wasOnGround && airTicks > 1) land(p, lmb || rmb);
-        if (ground) vertAir = false;
+        if (ground || grinding) {
+            vertAir = false;
+            flipKeysFree = false;
+        }
         wasOnGround = ground || grinding;
         if (!ground && !grinding) airTicks++;
         else if (!grinding) airTicks = 0;
@@ -619,7 +633,7 @@ public final class SkateClient {
 
     // ------------------------------------------------------------------ in the air
 
-    private static void tickAir(LocalPlayer p, int steer, boolean lmb, boolean rmb, boolean w) {
+    private static void tickAir(LocalPlayer p, int steer, boolean lmb, boolean rmb, boolean w, boolean s, boolean shift) {
         trickAge++;
         float k = trickProgress();
         float e = 1 - (1 - k) * (1 - k);
@@ -657,9 +671,18 @@ public final class SkateClient {
         // keep momentum; a touch of air control
         Vec3 v = p.getDeltaMovement();
         Vec3 fwd = dir(heading);
+        // flips: W rolls you forward, S back; let go and you hold that angle (a flat air slowly levels out)
+        if (!w && !s) flipKeysFree = true;
+        if (w != s && flipKeysFree) {
+            float d = w ? -11f : 11f;
+            tilt += d;
+            flipTotal += d;
+        } else if (!vertAir && Math.abs(Mth.wrapDegrees(tilt)) < 70) {
+            tilt = ease(tilt, 0, 0.06f);
+        }
         if (vertAir) {
-            // straight up out of the pipe: drift back over the ramp, or hold W to come down on the coping
-            double drift = w ? 0.07 : -0.035;
+            // straight up out of the pipe: drift back over the ramp, or hold Shift to come down on the coping
+            double drift = shift ? 0.07 : -0.035;
             p.setDeltaMovement(fwd.x * drift, v.y, fwd.z * drift);
         } else {
             p.setDeltaMovement(fwd.x * speed, v.y, fwd.z * speed);
@@ -681,7 +704,31 @@ public final class SkateClient {
 
     // ------------------------------------------------------------------ landing and bailing
 
+    /** The tilt the surface we're landing on wants (set just before a ramp landing; 0 for flat ground). */
+    private static float landTilt;
+
+    private static float ease(float from, float to, float k) {
+        return from + Mth.wrapDegrees(to - from) * k;
+    }
+
     private static void land(LocalPlayer p, boolean grabHeld) {
+        float want = landTilt;
+        landTilt = 0;
+        float off = Math.abs(Mth.wrapDegrees(tilt - want));
+        int flips = Math.round(Math.abs(flipTotal) / 360f);
+        boolean back = flipTotal > 0;
+        flipTotal = 0;
+        if (off > 55) {
+            String why = Mth.wrapDegrees(tilt - want) > 0 ? "Over-rotated" : "Under-rotated";
+            tilt = 0;
+            bail(p, why);
+            return;
+        }
+        tilt = Mth.wrapDegrees(tilt);
+        if (flips > 0) {
+            String n = (flips == 2 ? "Double " : flips >= 3 ? "Triple " : "") + (back ? "Backflip" : "Frontflip");
+            addToLine(n, 900 * flips + 300 * (flips - 1));
+        }
         float k = trickProgress();
         if (k < 0.8f) {
             bail(p, "Didn't catch it");
@@ -725,6 +772,7 @@ public final class SkateClient {
         slopeRail = false;
         onRamp = false;
         vertAir = false;
+        tilt = tiltO = flipTotal = 0;
         bailTicks = 34;
         Vec3 v = p.getDeltaMovement();
         bailBoardPos = p.position();
@@ -908,6 +956,7 @@ public final class SkateClient {
             stalling = false;
             heading = stallDrop.toYRot();
             fakie = !fakie;
+            tilt = -tilt;
             facing = heading;
             p.setPos(nx + stallDrop.getStepX() * 0.45, grindTop - 0.1, nz + stallDrop.getStepZ() * 0.45);
             p.setDeltaMovement(stallDrop.getStepX() * 0.05, -0.1, stallDrop.getStepZ() * 0.05);
@@ -978,6 +1027,7 @@ public final class SkateClient {
             boardPitch = n.equals("5-0") || n.equals("Smith") ? 10 : n.equals("Nosegrind") || n.equals("Crooked") ? -10 : 0;
         }
         pose = grindName.equals("Boardslide") ? SkatePayloads.BOARDSLIDE : SkatePayloads.GRIND;
+        if (!slopeRail) tilt = ease(tilt, 0, 0.4f);
         speed *= 0.995;
         linePoints += 2;
         // ride along the rail
@@ -1000,6 +1050,7 @@ public final class SkateClient {
             // down (or up) the handrail: follow its slope, and gravity with it
             double here = slopedRailTop(p, nx, nz, grindTop, null);
             if (!Double.isNaN(here)) {
+                tilt = ease(tilt, here < grindTop - 0.005 ? -45 : here > grindTop + 0.005 ? 45 : tilt, 0.4f);
                 speed += (grindTop - here) * 0.08;
                 grindTop = here;
                 p.setPos(nx, grindTop, nz);
@@ -1079,9 +1130,14 @@ public final class SkateClient {
             // coming down onto the ramp: pick up the line of travel and the speed along the surface
             Vec3 v = p.getDeltaMovement();
             float newHeading = v.horizontalDistance() > 0.06 ? (float) (Mth.atan2(v.z, v.x) * Mth.RAD_TO_DEG) - 90.0f : downhill(level, p.getX(), p.getZ(), rh);
-            if (Math.abs(Mth.wrapDegrees(newHeading - heading)) > 90) fakie = !fakie;   // coming back the way we went up
+            if (Math.abs(Mth.wrapDegrees(newHeading - heading)) > 90) {   // coming back the way we went up
+                fakie = !fakie;
+                tilt = -tilt;
+                flipTotal = -flipTotal;
+            }
             heading = newHeading;
             double sl = rampSlope(level, p.getX(), p.getZ(), rh, heading);
+            landTilt = (float) Math.toDegrees(Math.atan(sl));
             double c = 1 / Math.sqrt(1 + sl * sl), sn = sl * c;
             double along = v.horizontalDistance() * c + v.y * sn;
             if (sl < -0.4) lastVy = 0;   // a transition takes the drop
@@ -1102,6 +1158,7 @@ public final class SkateClient {
         if (speed < 0) {   // ran out of speed going up: roll back down fakie
             heading += 180;
             fakie = !fakie;
+            tilt = -tilt;
             speed = -speed;
             sl = -sl;
             sn = -sn;
@@ -1113,6 +1170,7 @@ public final class SkateClient {
         rampSn = sn;
         rampC = c;
         rampPitch = (float) Mth.clamp(Math.toDegrees(Math.atan(sl)), -80, 80);
+        tilt = ease(tilt, rampPitch, 0.5f);
         Vec3 fwd = dir(heading);
         // up the wall: something solid just ahead at the top, or the ramp ends while it's steep, go straight up
         if (sl > 1.3) {
@@ -1230,13 +1288,18 @@ public final class SkateClient {
     private static void send(LocalPlayer p, boolean force) {
         if (p == null || !ClientPlayNetworking.canSend(SkatePayloads.State.TYPE)) return;
         SkatePayloads.State s = localState(p.getId());
-        s = new SkatePayloads.State(s.entityId(), active, s.deck(), s.heading(), s.roll(), s.spin(), s.body(), s.pitch(), s.pose(), s.lean(), event);
+        s = new SkatePayloads.State(s.entityId(), active, s.deck(), s.heading(), s.roll(), s.spin(), s.body(), s.pitch(), s.tilt(), s.pose(), s.lean(), event);
         boolean changed = s.on() != lastSent.on() || s.pose() != lastSent.pose() || event != 0
                 || Math.abs(s.roll() - lastSent.roll()) > 1 || Math.abs(s.spin() - lastSent.spin()) > 1
-                || Math.abs(s.heading() - lastSent.heading()) > 2 || Math.abs(s.pitch() - lastSent.pitch()) > 1;
+                || Math.abs(s.heading() - lastSent.heading()) > 2 || Math.abs(s.pitch() - lastSent.pitch()) > 1
+                || Math.abs(s.tilt() - lastSent.tilt()) > 1.5;
         if (!force && !changed && p.tickCount % 10 != 0) return;
         ClientPlayNetworking.send(s);
         lastSent = s;
+    }
+
+    public static float tiltLerp(float partial) {
+        return tiltO + Mth.wrapDegrees(tilt - tiltO) * partial;
     }
 
     public static float leanLerp(float partial) {

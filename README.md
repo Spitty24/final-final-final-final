@@ -751,6 +751,7 @@ Push the mouse forward first and then pull it back for the Nollie version of any
 | W | push |
 | S | foot brake |
 | A / D | carve; in the air, spin (FS/BS 180, 360, …) |
+| W / S (in the air) | front flip / back flip. Press them after you leave the ground; let go to hold the angle. Land within about 55° of the surface or you bail |
 | Shift + A / D | powerslide |
 | Shift (alone) | tuck for speed |
 | Left / right mouse (in the air) | Indy / Melon grab; both together is a Crossbone |
@@ -777,10 +778,10 @@ Skate park features come as **skate kits**. Use one on the ground and it builds 
 | Manual Pad | 3 × 6 | A low pad for manuals and ledge tricks |
 | Grind Ledge | 2 × 8 | A long concrete ledge |
 
-**Riding ramps.** Ramps are real curves when you're on a board. Rolling up one slows you down and rolling down speeds you up; hold **W** on the way down to pump for more speed. If you run out of speed going up, you roll back down fakie.
+**Riding ramps.** Ramps are real curves when you're on a board. Rolling up one slows you down and rolling down speeds you up; hold **W** on the way down to pump for more speed. If you run out of speed going up, you roll back down fakie. You and the board tilt with the ramp, and stay tilted through a quarter pipe air, so you come back down into the wall the way you went up it. You only straighten up once you're on flat ground again.
 - **Kickers and banks:** going off the lip throws you into the air.
 - **Quarter pipes:** you launch straight up out of the top and come back down into the same wall, riding fakie unless you spin a 180. Flips, spins and grabs all work up there.
-- **Coping:** hold **W** in the air to come down on it. That gives you an Axle Stall, and holding it longer makes it a Rock to Fakie. Flick or press W/S to drop back in.
+- **Coping:** hold **Shift** in the air to come down on it. That gives you an Axle Stall, and holding it longer makes it a Rock to Fakie. Flick or press W/S to drop back in.
 - **Dropping in:** roll off the deck into the ramp.
 - **Grinding:** you can grind the coping, the funbox rail, ledges and the stair handrail. The handrail pulls you down the slope.
 
