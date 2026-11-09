@@ -727,6 +727,37 @@ The pointless ore that looks exactly like stone now has a 1 in 10 chance, when y
 come alive instead of dropping. It follows you everywhere (teleporting to catch up) and calls you
 a chud in chat. It's harmless; kill it and you get the stone back.
 
+## Skateboarding
+
+Skate 3-style skating, played on mouse and keyboard. Buy a board at the General Store ($60), or craft one: three planks on top, iron nuggets in the corners of the middle row, slime balls in the corners of the bottom row. Add a green, purple or red dye to change the deck graphic. With a board anywhere in your inventory, press **B** to drop in, and **B** again to step off.
+
+**The mouse is the flick stick.** On the board, the mouse moves a virtual right stick that springs back to centre, and the camera becomes a low chase cam. Pull the mouse toward you to load the pop, then flick it. The direction you flick picks the trick:
+
+| Flick (after pulling back) | Trick |
+|---|---|
+| straight up | Ollie |
+| up-left / up-right | Kickflip / Heelflip (flick hard for a Double) |
+| left / right | Pop Shove-it / FS Pop Shove-it |
+| out to the side, staying low | Varial Kickflip / Varial Heelflip |
+| a half circle through the left / right | 360 Flip / Laser Flip |
+
+Push the mouse forward first and then pull it back for the Nollie version of any trick. After a plain ollie, a sideways flick gives a late flip.
+
+| Key | What it does |
+|---|---|
+| W | push |
+| S | foot brake |
+| A / D | carve; in the air, spin (FS/BS 180, 360, …) |
+| Shift + A / D | powerslide |
+| Shift (alone) | tuck for speed |
+| Left / right mouse (in the air) | Indy / Melon grab; both together is a Crossbone |
+| Left Ctrl / Left Alt | Manual / Nose Manual; the mouse also works, held halfway back or forward. Steer left and right with the mouse to keep the balance bar centred |
+| Space | a plain ollie |
+
+**Grinds.** Land on a fence, wall, iron bars or a block ledge and you lock on. Hold S (or tilt the stick back) for a 5-0, or W (forward) for a Nosegrind. Add A/D for a Smith or Crooked. Come in across the rail for a Boardslide. Flick to pop out.
+
+**Combos and bails.** Tricks chain into a line, and the multiplier is the number of different tricks in it. Roll clean for about a second and the line banks into your score. You bail if you land while the board is still flipping, land with a grab still held, land sideways, drop from too high, hit a wall fast, or ride into water. When you bail, the board shoots off, you tumble, and you get back on (Skate 3 style); the line is lost. A landed trick never causes fall damage, but a bail from high up still hurts. Other players see your board, stance and tricks, and hear the pops and grinds.
+
 ## Settings
 
 `config/freerun.json` is created on first launch. Every move can be switched off (including
