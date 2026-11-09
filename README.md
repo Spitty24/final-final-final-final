@@ -52,6 +52,7 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Blackwire hack | **H** / **Shift+H** while holding your phone |
 | Skill tree | **P** |
 | Swampwatch | **G**: open the dial / use the creature's power · **Shift + G**: turn back |
+| Skateboard | **B**: on / off the board · mouse = flick stick · **W** push · **A/D** carve and spin · mouse buttons grab |
 | Second-person view | **F5** a fourth time (after first person, behind, in front): you, as seen by whoever's nearest and can see you |
 
 **What can be climbed** is the block tag `freerun:climbable` (`data/freerun/tags/block/climbable.json`):
