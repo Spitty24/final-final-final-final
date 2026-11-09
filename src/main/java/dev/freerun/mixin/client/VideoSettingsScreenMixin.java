@@ -18,7 +18,7 @@ public abstract class VideoSettingsScreenMixin extends OptionsSubScreen {
         super(last, options, title);
     }
 
-    @Inject(method = "addOptions", at = @At("TAIL"))
+    @Inject(method = "addOptions", at = @At("TAIL"), require = 0)
     private void freerun$streamChat(CallbackInfo ci) {
         if (this.list != null) this.list.addSmall(StreamChat.options());
     }

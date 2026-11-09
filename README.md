@@ -54,6 +54,7 @@ Uses your normal keys — **Jump** is "up", **Sneak** is "down". Sprint first.
 | Swampwatch | **G**: open the dial / use the creature's power · **Shift + G**: turn back |
 | Skateboard | **B**: on / off the board · mouse = flick stick · **W** push · **A/D** carve and spin · mouse buttons grab |
 | Bus | Right-click a stopped bus to pay $2 and ride · sneak to get off · right-click a stop sign for the next bus |
+| Stream chat | **J** to show / hide · size in Video Settings |
 | Skate kits | Use on the ground to build a half pipe, quarter pipe, kicker, funbox, rail, stairs… |
 | Second-person view | **F5** a fourth time (after first person, behind, in front): you, as seen by whoever's nearest and can see you |
 
@@ -806,6 +807,15 @@ Four bus routes loop the city, each in its own colour:
 **Townspeople ride them.** People going a long way across town walk to the nearest stop, wait by the sign (checking their phones) and get on when the bus pulls in. They ride to the stop nearest where they're going, get off and walk the rest of the way. Buses already have a few riders on board.
 
 **You can ride too.** Wait at a stop and the bus will stop for you. Right-click it to pay the $2 fare and take a seat. The top of the screen shows the route and the next stop, and you sneak to get off.
+
+## Stream chat
+
+A fake live-stream chat sits in the bottom-right corner, full of Gen Alpha and Gen Z brainrot ("aura +1000", "bro is cooked 💀", "only in ohio 🗿", "6 7", "chat is this real"). Someone new posts every 2 to 10 seconds, with the odd follow, sub, gifted subs or tip. There's a blinking LIVE badge and a viewer count that drifts and climbs when chat gets hyped. It has its own emotes: skull, crying, fire, stone face, clown and heart.
+
+Chat also reacts to what you're doing: getting hurt, dropping low on health, dying (F in chat), long falls, landing or bailing a skate line, getting on a bus, transforming with the Swampwatch, falling in water, nightfall, standing still too long ("is he AFK"), and typing in the real chat ("who asked 💀").
+
+- **J** shows or hides it.
+- **Options → Video Settings** has *Stream Chat* (on/off) and *Stream Chat Size* (50% to 200%).
 
 ## Settings
 
