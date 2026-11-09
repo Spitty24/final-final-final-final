@@ -116,11 +116,11 @@ public final class SkateRender {
         if (s == null) return;
         // setupRotations has already turned us to yBodyRot (= heading). Square to the ramp, or flipping,
         // pitched in the direction of travel (+ leans back); then stand side-on (regular: left foot forward)
-        float t = tilt(p, s, partial);
-        if (t != 0) {
+        float tl = tilt(p, s, partial);
+        if (tl != 0) {
             float pivot = airborne(s) ? (PIVOT - LIFT) * scale : 0;
             ps.translate(0, pivot, 0);
-            ps.mulPose(Axis.XP.rotationDegrees(t));
+            ps.mulPose(Axis.XP.rotationDegrees(tl));
             ps.translate(0, -pivot, 0);
         }
         ps.mulPose(Axis.YP.rotationDegrees(-90 - s.body()));

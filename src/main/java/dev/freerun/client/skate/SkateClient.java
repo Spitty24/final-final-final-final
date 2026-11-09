@@ -714,11 +714,11 @@ public final class SkateClient {
     private static void land(LocalPlayer p, boolean grabHeld) {
         float want = landTilt;
         landTilt = 0;
-        float off = Math.abs(Mth.wrapDegrees(tilt - want));
+        float tiltOff = Math.abs(Mth.wrapDegrees(tilt - want));
         int flips = Math.round(Math.abs(flipTotal) / 360f);
         boolean back = flipTotal > 0;
         flipTotal = 0;
-        if (off > 55) {
+        if (tiltOff > 55) {
             String why = Mth.wrapDegrees(tilt - want) > 0 ? "Over-rotated" : "Under-rotated";
             tilt = 0;
             bail(p, why);
