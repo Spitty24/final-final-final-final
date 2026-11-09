@@ -264,6 +264,7 @@ public final class FreerunClient implements ClientModInitializer {
             }
         });
         HudRenderCallback.EVENT.register((guiGraphics, tickDelta) -> dev.freerun.client.skate.SkateHud.render(guiGraphics));
+        dev.freerun.client.chaos.ChaosClient.init();
         // the fake stream chat
         streamChatKey = KeyBindingHelper.registerKeyBinding(new KeyMapping(
                 "key.freerun.stream_chat", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.categories.freerun"));

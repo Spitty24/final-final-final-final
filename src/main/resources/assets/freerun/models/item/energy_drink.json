@@ -1,6 +1,6 @@
 {
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "freerun:item/energy_drink"
-  }
+ "parent": "minecraft:item/generated",
+ "textures": {
+  "layer0": "freerun:item/energy_drink"
+ }
 }

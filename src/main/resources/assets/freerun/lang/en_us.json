@@ -114,7 +114,7 @@
  "item.freerun.fizz_cola": "Fizz Cola",
  "item.freerun.lemon_lime_soda": "Lemon-Lime Soda",
  "item.freerun.root_beer": "Root Beer",
- "item.freerun.energy_drink": "Voltage Energy Drink",
+ "item.freerun.energy_drink": "LOCKD Energy",
  "item.freerun.sports_drink": "Sports Drink",
  "item.freerun.bottled_water": "Bottled Water",
  "item.freerun.sweet_tea": "Sweet Tea",
@@ -327,5 +327,15 @@
  "subtitles.freerun.bus_engine": "Bus pulls away",
  "key.freerun.stream_chat": "Show / hide stream chat",
  "freerun.options.stream_chat": "Stream Chat",
- "freerun.options.stream_chat_size": "Stream Chat Size"
+ "freerun.options.stream_chat_size": "Stream Chat Size",
+ "item.freerun.moms_meatloaf": "Mom's Meatloaf",
+ "item.freerun.backwards_clock": "Backwards Clock",
+ "effect.freerun.locked_in": "Locked In",
+ "effect.freerun.brain_fog": "Brain Fog",
+ "entity.freerun.homesick_dragon": "The Ender Dragon (homesick)",
+ "subtitles.freerun.lofi_beat": "Lo-fi beat plays",
+ "subtitles.freerun.phone_ring": "Phone rings",
+ "subtitles.freerun.sad_piano": "Sad piano",
+ "subtitles.freerun.podcast_jingle": "Podcast intro",
+ "subtitles.freerun.energy_crash": "You crash"
 }

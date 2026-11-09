@@ -204,5 +204,47 @@
       }
     ],
     "subtitle": "subtitles.freerun.bus_engine"
+  },
+  "lofi_beat": {
+    "sounds": [
+      {
+        "name": "freerun:lofi_beat",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.freerun.lofi_beat"
+  },
+  "phone_ring": {
+    "sounds": [
+      {
+        "name": "freerun:phone_ring"
+      }
+    ],
+    "subtitle": "subtitles.freerun.phone_ring"
+  },
+  "sad_piano": {
+    "sounds": [
+      {
+        "name": "freerun:sad_piano",
+        "stream": true
+      }
+    ],
+    "subtitle": "subtitles.freerun.sad_piano"
+  },
+  "podcast_jingle": {
+    "sounds": [
+      {
+        "name": "freerun:podcast_jingle"
+      }
+    ],
+    "subtitle": "subtitles.freerun.podcast_jingle"
+  },
+  "energy_crash": {
+    "sounds": [
+      {
+        "name": "freerun:energy_crash"
+      }
+    ],
+    "subtitle": "subtitles.freerun.energy_crash"
   }
 }

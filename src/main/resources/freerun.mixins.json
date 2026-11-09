@@ -8,7 +8,12 @@
     "CraftingTableBlockMixin",
     "AbstractFurnaceBlockEntityMixin",
     "PlacedFeatureMixin",
-    "PlayerFormMixin"
+    "PlayerFormMixin",
+    "CreeperAccessor",
+    "CreeperMixin",
+    "EnderDragonAccessor",
+    "FlowingFluidMixin",
+    "SaplingBlockMixin"
   ],
   "client": [
     "client.CameraMixin",
@@ -19,7 +24,8 @@
     "client.KeyboardInputMixin",
     "client.EntityTurnMixin",
     "client.MinecraftSkateMixin",
-    "client.VideoSettingsScreenMixin"
+    "client.VideoSettingsScreenMixin",
+    "client.FovMixin"
   ],
   "injectors": {
     "defaultRequire": 1
